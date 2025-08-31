@@ -130,6 +130,13 @@ function resetFilters() {
     .forEach((checkbox) => {
       setCheckboxState(checkbox, "any", true);
     });
+  
+  const moreFiltersBtn = document.getElementById('more-filters-btn');
+  const poseFiltersContainer = document.getElementById('pose-filters-container');
+  moreFiltersBtn.classList.remove('active');
+  moreFiltersBtn.textContent = 'More filters';
+  poseFiltersContainer.style.maxHeight = null;
+
   applyFilters({ search: "", status: "all", poseFilters: [], page: 1, sort: "date", order: "desc" });
 }
 
@@ -357,6 +364,14 @@ document.addEventListener("DOMContentLoaded", () => {
   updateSortIndicators(filters.sort, filters.order);
   toggleClearButton();
 
+  if (filters.pose.length > 0) {
+    const moreFiltersBtn = document.getElementById('more-filters-btn');
+    const poseFiltersContainer = document.getElementById('pose-filters-container');
+    moreFiltersBtn.classList.add('active');
+    moreFiltersBtn.textContent = 'Less filters';
+    poseFiltersContainer.style.maxHeight = poseFiltersContainer.scrollHeight + "px";
+  }
+
   document.body.addEventListener('click', (event) => {
     const sortLink = event.target.closest('.sort-link');
     if (sortLink) {
@@ -368,6 +383,18 @@ document.addEventListener("DOMContentLoaded", () => {
     if (downloadBtn) {
       event.preventDefault();
       downloadSinglePhoto(downloadBtn.dataset.photoId);
+    }
+  });
+
+  document.getElementById('more-filters-btn').addEventListener('click', function() {
+    this.classList.toggle('active');
+    const content = document.getElementById('pose-filters-container');
+    if (content.style.maxHeight){
+      content.style.maxHeight = null;
+      this.textContent = 'More filters';
+    } else {
+      content.style.maxHeight = content.scrollHeight + "px";
+      this.textContent = 'Less filters';
     }
   });
 

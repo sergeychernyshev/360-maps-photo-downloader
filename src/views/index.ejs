@@ -138,139 +138,147 @@
       </div>
       <% } %>
 
-      <form
-        action="javascript:searchPhotos()"
-        style="margin-top: 1em; display: flex; align-items: center"
-      >
-        <div class="search-container">
-          <input
-            type="text"
-            id="search-input"
-            name="search"
-            placeholder="Search by place name..."
-            value="<%= locals.search || '' %>"
-            onkeyup="toggleClearButton()"
-          />
-          <button
-            type="button"
-            onclick="clearSearch()"
-            class="cancel button"
-            id="clear-search-btn"
-            style="display: none"
+      <fieldset>
+        <legend>Search and filters</legend>
+        <form
+          action="javascript:searchPhotos()"
+          style="margin-top: 1em; display: flex; align-items: center"
+        >
+          <div class="search-container">
+            <input
+              type="text"
+              id="search-input"
+              name="search"
+              placeholder="Search by place name..."
+              value="<%= locals.search || '' %>"
+              onkeyup="toggleClearButton()"
+            />
+            <button
+              type="button"
+              onclick="clearSearch()"
+              class="cancel button"
+              id="clear-search-btn"
+              style="display: none"
+            >
+              Clear
+            </button>
+          </div>
+          <button type="submit">Search</button>
+          <button type="button" onclick="resetFilters()" class="button">
+            Reset Filters
+          </button>
+        </form>
+
+        <% if (isLoggedIn) { %>
+        <div class="status-filter">
+          <span>Filter by status:</span>
+          <a
+            id="filter-all"
+            href="javascript:filterPhotos('all')"
+            class="<%= status === 'all' ? 'active' : '' %> has-count"
+            >All (<span id="all-count"><%= totalPhotosCount %></span>)</a
           >
-            Clear
+          <a
+            id="filter-downloaded"
+            href="javascript:filterPhotos('downloaded')"
+            class="<%= status === 'downloaded' ? 'active' : '' %> has-count"
+            >Downloaded (<span id="downloaded-count"
+              ><%= downloadedCount %></span
+            >)</a
+          >
+          <a
+            id="filter-not-downloaded"
+            href="javascript:filterPhotos('not-downloaded')"
+            class="<%= status === 'not-downloaded' ? 'active' : '' %> has-count"
+            >Not Downloaded (<span id="not-downloaded-count"
+              ><%= notDownloadedCount %></span
+            >)</a
+          >
+          <button
+            id="more-filters-btn"
+            class="button"
+            style="font-size: 12px; padding: 5px 10px; margin-left: 10px"
+          >
+            More filters
           </button>
         </div>
-        <button type="submit">Search</button>
-        <button type="button" onclick="resetFilters()" class="button">
-          Reset Filters
-        </button>
-      </form>
-
-      <% if (isLoggedIn) { %>
-      <div class="status-filter">
-        <span>Filter by status:</span>
-        <a
-          id="filter-all"
-          href="javascript:filterPhotos('all')"
-          class="<%= status === 'all' ? 'active' : '' %> has-count"
-          >All (<span id="all-count"><%= totalPhotosCount %></span>)</a
-        >
-        <a
-          id="filter-downloaded"
-          href="javascript:filterPhotos('downloaded')"
-          class="<%= status === 'downloaded' ? 'active' : '' %> has-count"
-          >Downloaded (<span id="downloaded-count"><%= downloadedCount %></span
-          >)</a
-        >
-        <a
-          id="filter-not-downloaded"
-          href="javascript:filterPhotos('not-downloaded')"
-          class="<%= status === 'not-downloaded' ? 'active' : '' %> has-count"
-          >Not Downloaded (<span id="not-downloaded-count"
-            ><%= notDownloadedCount %></span
-          >)</a
-        >
-      </div>
-      <span>Filter by pose properties:</span>
-      <div class="pose-filter">
-        <div class="pose-filter-group">
-          <div>
-            <strong class="pose-filter-label">Heading</strong>
-            <span class="pose-filter-count"></span>
+        <div id="pose-filters-container" class="panel">
+          <span>Filter by pose properties:</span>
+          <div class="pose-filter">
+            <div class="pose-filter-group" onclick="cycleCheckboxState(this.querySelector('input[type=checkbox]'))">
+              <div>
+                <strong class="pose-filter-label">Heading</strong>
+                <span class="pose-filter-count"></span>
+              </div>
+              <label
+                ><input
+                  type="checkbox"
+                  name="heading"
+                  data-state="any"
+                />
+                <span class="pose-filter-value">Any</span></label
+              >
+            </div>
+            <div class="pose-filter-group" onclick="cycleCheckboxState(this.querySelector('input[type=checkbox]'))">
+              <div>
+                <strong class="pose-filter-label">Pitch</strong>
+                <span class="pose-filter-count"></span>
+              </div>
+              <label
+                ><input
+                  type="checkbox"
+                  name="pitch"
+                  data-state="any"
+                />
+                <span class="pose-filter-value">Any</span></label
+              >
+            </div>
+            <div class="pose-filter-group" onclick="cycleCheckboxState(this.querySelector('input[type=checkbox]'))">
+              <div>
+                <strong class="pose-filter-label">Roll</strong>
+                <span class="pose-filter-count"></span>
+              </div>
+              <label
+                ><input
+                  type="checkbox"
+                  name="roll"
+                  data-state="any"
+                />
+                <span class="pose-filter-value">Any</span></label
+              >
+            </div>
+            <div class="pose-filter-group" onclick="cycleCheckboxState(this.querySelector('input[type=checkbox]'))">
+              <div>
+                <strong class="pose-filter-label">Altitude</strong>
+                <span class="pose-filter-count"></span>
+              </div>
+              <label
+                ><input
+                  type="checkbox"
+                  name="altitude"
+                  data-state="any"
+                />
+                <span class="pose-filter-value">Any</span></label
+              >
+            </div>
+            <div class="pose-filter-group" onclick="cycleCheckboxState(this.querySelector('input[type=checkbox]'))">
+              <div>
+                <strong class="pose-filter-label">GPS Record</strong>
+                <span class="pose-filter-count"></span>
+              </div>
+              <label
+                ><input
+                  type="checkbox"
+                  name="latLngPair"
+                  data-state="any"
+                />
+                <span class="pose-filter-value">Any</span></label
+              >
+            </div>
           </div>
-          <label
-            ><input
-              type="checkbox"
-              name="heading"
-              data-state="any"
-              onclick="cycleCheckboxState(this)"
-            />
-            <span class="pose-filter-value">Any</span></label
-          >
         </div>
-        <div class="pose-filter-group">
-          <div>
-            <strong class="pose-filter-label">Pitch</strong>
-            <span class="pose-filter-count"></span>
-          </div>
-          <label
-            ><input
-              type="checkbox"
-              name="pitch"
-              data-state="any"
-              onclick="cycleCheckboxState(this)"
-            />
-            <span class="pose-filter-value">Any</span></label
-          >
-        </div>
-        <div class="pose-filter-group">
-          <div>
-            <strong class="pose-filter-label">Roll</strong>
-            <span class="pose-filter-count"></span>
-          </div>
-          <label
-            ><input
-              type="checkbox"
-              name="roll"
-              data-state="any"
-              onclick="cycleCheckboxState(this)"
-            />
-            <span class="pose-filter-value">Any</span></label
-          >
-        </div>
-        <div class="pose-filter-group">
-          <div>
-            <strong class="pose-filter-label">Altitude</strong>
-            <span class="pose-filter-count"></span>
-          </div>
-          <label
-            ><input
-              type="checkbox"
-              name="altitude"
-              data-state="any"
-              onclick="cycleCheckboxState(this)"
-            />
-            <span class="pose-filter-value">Any</span></label
-          >
-        </div>
-        <div class="pose-filter-group">
-          <div>
-            <strong class="pose-filter-label">GPS Record</strong>
-            <span class="pose-filter-count"></span>
-          </div>
-          <label
-            ><input
-              type="checkbox"
-              name="latLngPair"
-              data-state="any"
-              onclick="cycleCheckboxState(this)"
-            />
-            <span class="pose-filter-value">Any</span></label
-          >
-        </div>
-      </div>
-      <% } %>
+        <% } %>
+      </fieldset>
 
       <div id="photo-counter" style="margin-top: 1em">
         <% if (filteredTotal > 0) { %> Showing photos <%= startIndex %>-<%=

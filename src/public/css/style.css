@@ -259,17 +259,15 @@ form input[type="text"] {
   transition: 0.4s;
 }
 
-.active,
-.accordion:hover {
-  background-color: #ccc;
-}
-
 .panel {
   padding: 0 18px;
   background-color: white;
   max-height: 0;
   overflow: hidden;
   transition: max-height 0.2s ease-out;
+}
+#pose-filters-container.panel {
+  padding: 0;
 }
 .pose-filter {
   display: flex;
@@ -284,6 +282,11 @@ form input[type="text"] {
   border: 1px solid #eee;
   padding: 0.5em;
   border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.2s ease-out;
+}
+.pose-filter-group:hover {
+  background-color: #f5f5f5;
 }
 .pose-filter-label {
   font-weight: bold;
@@ -299,4 +302,18 @@ input[type="checkbox"][data-state="exists"] {
 }
 input[type="checkbox"][data-state="missing"] {
   accent-color: red;
+}
+#photo-counter {
+  text-align: center;
+}
+fieldset {
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  padding: 1em;
+  margin-top: 1.5em;
+}
+legend {
+  font-weight: bold;
+  padding: 0 0.5em;
+  margin-left: 0.5em;
 }
