@@ -40,23 +40,28 @@ router.get("/", async (req, res, next) => {
       folderId = folder.id;
       folderName = folder.name;
 
-      let photoListFile = await getPhotoListFile(drive, folderId);
-
-      if (photoListFile) {
-        photos = await readFileContent(drive, photoListFile.id);
+      if (req.session.allPhotos) {
+        photos = req.session.allPhotos;
       } else {
-        photos = await listAllPhotos(oAuth2Client);
-        const newFile = await drive.files.create({
-          resource: {
-            name: PHOTO_LIST_FILE_NAME,
-            parents: [folderId],
-          },
-          media: {
-            mimeType: "application/json",
-            body: JSON.stringify(photos, null, 2),
-          },
-          fields: "id",
-        });
+        let photoListFile = await getPhotoListFile(drive, folderId);
+
+        if (photoListFile) {
+          photos = await readFileContent(drive, photoListFile.id);
+        } else {
+          photos = await listAllPhotos(oAuth2Client);
+          const newFile = await drive.files.create({
+            resource: {
+              name: PHOTO_LIST_FILE_NAME,
+              parents: [folderId],
+            },
+            media: {
+              mimeType: "application/json",
+              body: JSON.stringify(photos, null, 2),
+            },
+            fields: "id",
+          });
+        }
+        req.session.allPhotos = photos;
       }
     }
 
@@ -164,7 +169,6 @@ router.get("/", async (req, res, next) => {
     );
 
     if (loggedIn) {
-      req.session.allPhotos = photos;
       const allDownloadedPhotos = photos.filter((p) => downloadedFiles.has(`${p.photoId.id}.jpg`));
       const allMissingPhotos = photos.filter((p) => !downloadedFiles.has(`${p.photoId.id}.jpg`));
       req.session.downloadedPhotos = allDownloadedPhotos;
