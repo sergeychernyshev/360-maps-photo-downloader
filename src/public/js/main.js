@@ -371,6 +371,18 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   });
 
+  document.getElementById('more-filters-btn').addEventListener('click', function() {
+    this.classList.toggle('active');
+    const content = document.getElementById('pose-filters-container');
+    if (content.style.maxHeight){
+      content.style.maxHeight = null;
+      this.textContent = 'More filters';
+    } else {
+      content.style.maxHeight = content.scrollHeight + "px";
+      this.textContent = 'Less filters';
+    }
+  });
+
   if (downloadState.inProgress) {
     document.getElementById("download-progress").style.display = "block";
     connectWebSocket();
