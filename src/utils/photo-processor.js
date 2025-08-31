@@ -88,7 +88,7 @@ async function processPhoto(
       stream,
       newJpeg.length,
       (percentage) => {
-        progressCallback({ uploadProgress: percentage });
+        progressCallback({ uploadProgress: percentage, uploadComplete: percentage === 100 });
       }
     );
   } else {
@@ -100,7 +100,7 @@ async function processPhoto(
       folderId,
       newJpeg.length,
       (percentage) => {
-        progressCallback({ uploadProgress: percentage });
+        progressCallback({ uploadProgress: percentage, uploadComplete: percentage === 100 });
       }
     );
   }

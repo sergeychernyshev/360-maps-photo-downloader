@@ -301,6 +301,9 @@ function connectWebSocket() {
         uploadBar.style.width = `${uploadProgress}%`;
         uploadBar.textContent = `${uploadProgress}%`;
       }
+      if (data.payload.uploadComplete) {
+        document.getElementById("cancel-btn").style.display = "none";
+      }
       if (fileComplete) {
         document.getElementById("downloaded-count").textContent = downloadedCount;
         document.getElementById("not-downloaded-count").textContent = notDownloadedCount;
