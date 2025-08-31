@@ -357,6 +357,14 @@ document.addEventListener("DOMContentLoaded", () => {
   updateSortIndicators(filters.sort, filters.order);
   toggleClearButton();
 
+  if (filters.pose.length > 0) {
+    const moreFiltersBtn = document.getElementById('more-filters-btn');
+    const poseFiltersContainer = document.getElementById('pose-filters-container');
+    moreFiltersBtn.classList.add('active');
+    moreFiltersBtn.textContent = 'Less filters';
+    poseFiltersContainer.style.maxHeight = poseFiltersContainer.scrollHeight + "px";
+  }
+
   document.body.addEventListener('click', (event) => {
     const sortLink = event.target.closest('.sort-link');
     if (sortLink) {
