@@ -91,6 +91,7 @@ async function processPhoto(
         progressCallback({ uploadProgress: percentage });
       }
     );
+    console.log(`File updated on Google Drive: ${fileName}`);
   } else {
     await createFile(
       drive,
@@ -103,6 +104,7 @@ async function processPhoto(
         progressCallback({ uploadProgress: percentage });
       }
     );
+    console.log(`File created on Google Drive: ${fileName}`);
   }
 
   return photo;
