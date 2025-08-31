@@ -271,6 +271,9 @@ form input[type="text"] {
   overflow: hidden;
   transition: max-height 0.2s ease-out;
 }
+#pose-filters-container.panel {
+  padding: 0 18px 1em 18px;
+}
 .pose-filter {
   display: flex;
   flex-wrap: wrap;
