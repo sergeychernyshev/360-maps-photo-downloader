@@ -18,20 +18,11 @@ function getState() {
 }
 
 function updateState(newState) {
-  const oldState = { ...getState() };
   Object.assign(state, newState);
-
   if (state.socket) {
-    const changes = {};
-    for (const key in newState) {
-      if (newState[key] !== oldState[key]) {
-        changes[key] = newState[key];
-      }
-    }
-
-    if (Object.keys(changes).length > 0) {
-      state.socket.send(JSON.stringify(changes));
-    }
+    state.socket.send(
+      JSON.stringify({ type: "progress", payload: { ...getState(), ...newState } })
+    );
   }
 }
 

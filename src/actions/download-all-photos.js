@@ -130,7 +130,7 @@ async function downloadAllPhotos(
       }
     }
 
-    delete req.session.photos;
+    delete req.session.allPhotos;
     progressCallback({
       message: "All photos downloaded successfully to Google Drive!",
       complete: true,
