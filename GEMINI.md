@@ -12,3 +12,4 @@
 - The GitHub project ID for the '360-maps-photo-downloader' repository is 3.
 - At the start of every session, I will check the current git branch. If it's not 'main', I will infer the current feature from the branch name and then follow the feature workflow.
 - when making UI changes, avoid creating layout shift
+- never restart the server unless I ask you to
