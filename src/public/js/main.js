@@ -358,13 +358,16 @@ document.addEventListener("DOMContentLoaded", () => {
   toggleClearButton();
 
   document.body.addEventListener('click', (event) => {
-    if (event.target.matches('.sort-link')) {
+    const sortLink = event.target.closest('.sort-link');
+    if (sortLink) {
       event.preventDefault();
-      sortPhotos(event.target.dataset.sortby);
+      sortPhotos(sortLink.dataset.sortby);
     }
-    if (event.target.matches('.download-single-btn')) {
+    
+    const downloadBtn = event.target.closest('.download-single-btn');
+    if (downloadBtn) {
       event.preventDefault();
-      downloadSinglePhoto(event.target.dataset.photoId);
+      downloadSinglePhoto(downloadBtn.dataset.photoId);
     }
   });
 
