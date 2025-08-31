@@ -306,11 +306,31 @@ function connectWebSocket() {
         document.getElementById("not-downloaded-count").textContent = notDownloadedCount;
       }
       if (complete) {
-        document.getElementById("download-fieldset").style.display = "none";
+        setTimeout(() => {
+          const fieldset = document.getElementById("download-fieldset");
+          fieldset.style.maxHeight = fieldset.scrollHeight + 'px'; // Ensure initial height is set for transition
+          requestAnimationFrame(() => {
+            fieldset.classList.add('collapsing');
+          });
+          fieldset.addEventListener('transitionend', () => {
+            fieldset.style.display = 'none';
+            fieldset.classList.remove('collapsing');
+          }, { once: true });
+        }, 2000);
       }
       if (error) {
         document.getElementById("progress-text").textContent = `Error: ${error}`;
-        document.getElementById("download-fieldset").style.display = "none";
+        setTimeout(() => {
+          const fieldset = document.getElementById("download-fieldset");
+          fieldset.style.maxHeight = fieldset.scrollHeight + 'px'; // Ensure initial height is set for transition
+          requestAnimationFrame(() => {
+            fieldset.classList.add('collapsing');
+          });
+          fieldset.addEventListener('transitionend', () => {
+            fieldset.style.display = 'none';
+            fieldset.classList.remove('collapsing');
+          }, { once: true });
+        }, 2000);
       }
     }
     // ...
