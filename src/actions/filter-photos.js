@@ -11,6 +11,7 @@ async function filterPhotos(req, ws, payload) {
   const folder = await findOrCreateFolder(drive, FOLDER_NAME);
   const driveFiles = await listFiles(drive, folder.id);
   const downloadedFiles = new Set(driveFiles.map((f) => f.name));
+  const driveFileLinks = new Map(driveFiles.map(f => [f.name, f.webViewLink]));
 
   // Calculate unfiltered counts
   const totalPhotosCount = allPhotos.length;
@@ -76,7 +77,7 @@ async function filterPhotos(req, ws, payload) {
   const endIndex = startIndex + pageSize;
   const paginatedPhotos = photos.slice(startIndex, endIndex);
 
-  const photoListHtml = buildPhotoListHtml(paginatedPhotos, downloadedFiles);
+  const photoListHtml = buildPhotoListHtml(paginatedPhotos, downloadedFiles, driveFileLinks);
   const paginationHtmlTop = buildPaginationHtml(totalPages, currentPage, 'changePage', 'top');
   const paginationHtmlBottom = buildPaginationHtml(totalPages, currentPage, 'changePage', 'bottom');
   const poseCounts = calculatePoseCounts(allPhotos);

@@ -39,7 +39,7 @@ function calculatePoseCounts(photos) {
     return poseCounts;
 }
 
-function buildPhotoListHtml(photos, downloadedFiles) {
+function buildPhotoListHtml(photos, downloadedFiles, driveFileLinks) {
   return photos
     .map((photo) => {
       const poseParts = [];
@@ -57,23 +57,25 @@ function buildPhotoListHtml(photos, downloadedFiles) {
       const coordinates = `<small><span title="Latitude: ${lat.toFixed(4)}, Longitude: ${lon.toFixed(4)}">${lat.toFixed(4)}, ${lon.toFixed(4)}</span></small>`;
       const locationHtml = locationName ? `${locationName}<br>${coordinates}` : coordinates;
 
+      const isDownloaded = downloadedFiles.has(`${photo.photoId.id}.jpg`);
+      const driveLink = isDownloaded ? driveFileLinks.get(`${photo.photoId.id}.jpg`) : null;
+      const statusHtml = isDownloaded
+        ? `<a href="${driveLink}" target="_blank" class="status downloaded" title="View on Google Drive"><span class="status-text">Downloaded</span><span class="status-icon">&#10004;</span></a>`
+        : '<span class="status not-downloaded" title="Not Downloaded"><span class="status-text">Not Downloaded</span><span class="status-icon">&#10006;</span></span>';
+
       return `
     <tr>
       <td><a href="${photo.shareLink}" target="_blank">${photo.photoId.id}</a></td>
       <td>${locationHtml}${poseString}</td>
       <td>${new Date(photo.captureTime).toLocaleDateString()}</td>
       <td>${photo.viewCount || 0}</td>
-      <td>${
-        downloadedFiles.has(`${photo.photoId.id}.jpg`)
-          ? '<span class="status downloaded" title="Downloaded"><span class="status-text">Downloaded</span><span class="status-icon">&#10004;</span></span>'
-          : '<span class="status not-downloaded" title="Not Downloaded"><span class="status-text">Not Downloaded</span><span class="status-icon">&#10006;</span></span>'
-      }</td>
+      <td>${statusHtml}</td>
       <td>
         <button data-photo-id="${photo.photoId.id}" class="button download-single-btn ${
-          downloadedFiles.has(`${photo.photoId.id}.jpg`) ? 'redownload-btn' : 'download-btn'
-        }" style="font-size: 12px; padding: 5px 10px;" title="${downloadedFiles.has(`${photo.photoId.id}.jpg`) ? 'Re-download' : 'Download'}">
-          <span class="button-text">${downloadedFiles.has(`${photo.photoId.id}.jpg`) ? 'Re-download' : 'Download'}</span>
-          <span class="button-icon">${downloadedFiles.has(`${photo.photoId.id}.jpg`) ? '&#10227;' : '&#11015;'}</span>
+          isDownloaded ? 'redownload-btn' : 'download-btn'
+        }" style="font-size: 12px; padding: 5px 10px;" title="${isDownloaded ? 'Re-download' : 'Download'}">
+          <span class="button-text">${isDownloaded ? 'Re-download' : 'Download'}</span>
+          <span class="button-icon">${isDownloaded ? '&#10227;' : '&#11015;'}</span>
         </button>
       </td>
     </tr>
