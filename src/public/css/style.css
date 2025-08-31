@@ -317,3 +317,13 @@ legend {
   padding: 0 0.5em;
   margin-left: 0.5em;
 }
+.spinner-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 2em;
+}
+.spinner {
+  border-color: rgba(0, 0, 0, 0.1);
+  border-top-color: #4285f4;
+}
