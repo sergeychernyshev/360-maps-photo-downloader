@@ -301,14 +301,12 @@ function connectWebSocket() {
         uploadBar.style.width = `${uploadProgress}%`;
         uploadBar.textContent = `${uploadProgress}%`;
       }
-      if (data.payload.uploadComplete) {
-        document.getElementById("cancel-btn").style.display = "none";
-      }
       if (fileComplete) {
         document.getElementById("downloaded-count").textContent = downloadedCount;
         document.getElementById("not-downloaded-count").textContent = notDownloadedCount;
       }
       if (complete) {
+        document.getElementById("cancel-btn").style.display = "none";
         setTimeout(() => {
           const fieldset = document.getElementById("download-fieldset");
           fieldset.style.maxHeight = fieldset.scrollHeight + 'px'; // Ensure initial height is set for transition
@@ -323,6 +321,7 @@ function connectWebSocket() {
       }
       if (error) {
         document.getElementById("progress-text").textContent = `Error: ${error}`;
+        document.getElementById("cancel-btn").style.display = "none";
         setTimeout(() => {
           const fieldset = document.getElementById("download-fieldset");
           fieldset.style.maxHeight = fieldset.scrollHeight + 'px'; // Ensure initial height is set for transition
