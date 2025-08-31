@@ -317,13 +317,25 @@ legend {
   padding: 0 0.5em;
   margin-left: 0.5em;
 }
-.spinner-container {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  padding: 2em;
+.progress-line-container {
+  height: 4px;
+  background-color: #e0e0e0;
+  margin: 1.5em 0;
+  position: relative;
+  overflow: hidden;
 }
-.spinner {
-  border-color: rgba(0, 0, 0, 0.1);
-  border-top-color: #4285f4;
+.progress-line {
+  width: 100%;
+  height: 100%;
+  background-color: #4285f4;
+  position: absolute;
+  animation: progress-animation 1s infinite linear;
+}
+@keyframes progress-animation {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(100%);
+  }
 }

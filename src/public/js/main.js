@@ -69,7 +69,7 @@ function applyFilters(newFilters = {}) {
     isPopState: newFilters.isPopState, // Flag for history handling
   };
 
-  document.getElementById('filter-progress-indicator').style.display = 'flex';
+  document.getElementById('filter-progress-indicator').style.display = 'block';
   document.querySelector('tbody').style.display = 'none';
 
   connectWebSocket();
