@@ -50,6 +50,7 @@ async function getPhotoListFile(drive, folderId) {
 }
 
 async function readFileContent(drive, fileId) {
+  console.log(`Downloading file from Google Drive: ${fileId}`);
   const res = await drive.files.get({ fileId, alt: "media" });
   return res.data;
 }
