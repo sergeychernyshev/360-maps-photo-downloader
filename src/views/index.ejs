@@ -103,36 +103,38 @@
       </button>
       <a href="/logout" class="logout button">Logout</a>
 
-      <div id="download-progress" style="display: none">
-        <h2>Downloading Photos</h2>
-        <p id="progress-text">Starting...</p>
-        <p>Total Progress:</p>
-        <div class="progress-bar-container">
-          <div id="total-progress-bar" class="progress-bar">0%</div>
-        </div>
-        <div style="display: flex; gap: 1em">
-          <div style="flex-grow: 1">
-            <p>Downloading 360 photos from Google Maps:</p>
-            <div class="progress-bar-container">
-              <div id="download-bar" class="progress-bar">0%</div>
+      <fieldset id="download-fieldset" style="display: none;">
+        <legend>Download Progress</legend>
+        <div id="download-progress">
+          <h2>Downloading Photos</h2>
+          <p id="progress-text">Starting...</p>
+          <p>Total Progress:</p>
+          <div class="progress-bar-container">
+            <div id="total-progress-bar" class="progress-bar">0%</div>
+          </div>
+          <div style="display: flex; gap: 1em">
+            <div style="flex-grow: 1">
+              <p>Downloading 360 photos from Google Maps:</p>
+              <div class="progress-bar-container">
+                <div id="download-bar" class="progress-bar">0%</div>
+              </div>
+            </div>
+            <div style="flex-grow: 1">
+              <p>Uploading to Google Drive:</p>
+              <div class="progress-bar-container">
+                <div id="upload-bar" class="progress-bar">0%</div>
+              </div>
             </div>
           </div>
-          <div style="flex-grow: 1">
-            <p>Uploading to Google Drive:</p>
-            <div class="progress-bar-container">
-              <div id="upload-bar" class="progress-bar">0%</div>
-            </div>
-          </div>
         </div>
-      </div>
-      <button
-        id="cancel-btn"
-        onclick="cancelDownload()"
-        class="button cancel"
-        style="display: none;"
-      >
-        Cancel
-      </button>
+        <button
+          id="cancel-btn"
+          onclick="cancelDownload()"
+          class="button cancel"
+        >
+          Cancel
+        </button>
+      </fieldset>
       <% } %>
 
       <fieldset>

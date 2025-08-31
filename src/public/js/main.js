@@ -155,9 +155,7 @@ function confirmDownload() {
       return;
     }
   }
-  document.getElementById("download-progress").style.display = "block";
-  document.querySelector(".progress-bar-container").style.display = "block";
-  document.getElementById("progress-text").style.display = "block";
+  document.getElementById("download-fieldset").style.display = "block";
   connectWebSocket();
   if (ws && ws.readyState === WebSocket.OPEN) {
     ws.send(JSON.stringify({ type: "download" }));
@@ -282,7 +280,7 @@ function connectWebSocket() {
         error,
       } = data.payload;
 
-      document.getElementById("download-progress").style.display = "block";
+      document.getElementById("download-fieldset").style.display = "block";
       document.getElementById("cancel-btn").style.display = "block";
 
       if (message) {
@@ -308,11 +306,11 @@ function connectWebSocket() {
         document.getElementById("not-downloaded-count").textContent = notDownloadedCount;
       }
       if (complete) {
-        document.getElementById("cancel-btn").style.display = "none";
+        document.getElementById("download-fieldset").style.display = "none";
       }
       if (error) {
         document.getElementById("progress-text").textContent = `Error: ${error}`;
-        document.getElementById("cancel-btn").style.display = "none";
+        document.getElementById("download-fieldset").style.display = "none";
       }
     }
     // ...
@@ -366,9 +364,7 @@ function cycleCheckboxState(checkbox, silent = false) {
 
 function downloadSinglePhoto(photoId) {
   if (!isLoggedIn) return;
-  document.getElementById("download-progress").style.display = "block";
-  document.querySelector(".progress-bar-container").style.display = "block";
-  document.getElementById("progress-text").style.display = "block";
+  document.getElementById("download-fieldset").style.display = "block";
   connectWebSocket();
   if (ws && ws.readyState === WebSocket.OPEN) {
     ws.send(JSON.stringify({ type: "download-photo", payload: { photoId } }));
