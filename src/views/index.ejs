@@ -103,10 +103,9 @@
       </button>
       <a href="/logout" class="logout button">Logout</a>
 
-      <fieldset id="download-fieldset" style="display: none;">
-        <legend>Download Progress</legend>
+      <fieldset id="download-fieldset" style="display: none">
+        <legend>Downloading Photos...</legend>
         <div id="download-progress">
-          <h2>Downloading Photos</h2>
           <p id="progress-text">Starting...</p>
           <p>Total Progress:</p>
           <div class="progress-bar-container">
@@ -204,73 +203,68 @@
         <div id="pose-filters-container" class="panel">
           <span>Filter by pose properties:</span>
           <div class="pose-filter">
-            <div class="pose-filter-group" onclick="cycleCheckboxState(this.querySelector('input[type=checkbox]'))">
+            <div
+              class="pose-filter-group"
+              onclick="cycleCheckboxState(this.querySelector('input[type=checkbox]'))"
+            >
               <div>
                 <strong class="pose-filter-label">Heading</strong>
                 <span class="pose-filter-count"></span>
               </div>
               <label
-                ><input
-                  type="checkbox"
-                  name="heading"
-                  data-state="any"
-                />
+                ><input type="checkbox" name="heading" data-state="any" />
                 <span class="pose-filter-value">Any</span></label
               >
             </div>
-            <div class="pose-filter-group" onclick="cycleCheckboxState(this.querySelector('input[type=checkbox]'))">
+            <div
+              class="pose-filter-group"
+              onclick="cycleCheckboxState(this.querySelector('input[type=checkbox]'))"
+            >
               <div>
                 <strong class="pose-filter-label">Pitch</strong>
                 <span class="pose-filter-count"></span>
               </div>
               <label
-                ><input
-                  type="checkbox"
-                  name="pitch"
-                  data-state="any"
-                />
+                ><input type="checkbox" name="pitch" data-state="any" />
                 <span class="pose-filter-value">Any</span></label
               >
             </div>
-            <div class="pose-filter-group" onclick="cycleCheckboxState(this.querySelector('input[type=checkbox]'))">
+            <div
+              class="pose-filter-group"
+              onclick="cycleCheckboxState(this.querySelector('input[type=checkbox]'))"
+            >
               <div>
                 <strong class="pose-filter-label">Roll</strong>
                 <span class="pose-filter-count"></span>
               </div>
               <label
-                ><input
-                  type="checkbox"
-                  name="roll"
-                  data-state="any"
-                />
+                ><input type="checkbox" name="roll" data-state="any" />
                 <span class="pose-filter-value">Any</span></label
               >
             </div>
-            <div class="pose-filter-group" onclick="cycleCheckboxState(this.querySelector('input[type=checkbox]'))">
+            <div
+              class="pose-filter-group"
+              onclick="cycleCheckboxState(this.querySelector('input[type=checkbox]'))"
+            >
               <div>
                 <strong class="pose-filter-label">Altitude</strong>
                 <span class="pose-filter-count"></span>
               </div>
               <label
-                ><input
-                  type="checkbox"
-                  name="altitude"
-                  data-state="any"
-                />
+                ><input type="checkbox" name="altitude" data-state="any" />
                 <span class="pose-filter-value">Any</span></label
               >
             </div>
-            <div class="pose-filter-group" onclick="cycleCheckboxState(this.querySelector('input[type=checkbox]'))">
+            <div
+              class="pose-filter-group"
+              onclick="cycleCheckboxState(this.querySelector('input[type=checkbox]'))"
+            >
               <div>
                 <strong class="pose-filter-label">GPS Record</strong>
                 <span class="pose-filter-count"></span>
               </div>
               <label
-                ><input
-                  type="checkbox"
-                  name="latLngPair"
-                  data-state="any"
-                />
+                ><input type="checkbox" name="latLngPair" data-state="any" />
                 <span class="pose-filter-value">Any</span></label
               >
             </div>

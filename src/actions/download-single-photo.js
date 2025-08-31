@@ -60,7 +60,7 @@ async function downloadSinglePhoto(req, photo) {
       });
 
       progressCallback({
-        message: "Photo downloaded successfully to Google Drive!",
+        message: `Photo ${photo.photoId.id}.jpg downloaded successfully to Google Drive!`,
         complete: true,
         inProgress: false,
       });
