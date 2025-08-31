@@ -267,6 +267,54 @@ function connectWebSocket() {
     }
 
     // Handle other WebSocket messages (download progress, etc.)
+    if (data.type === "progress") {
+      const {
+        message,
+        total,
+        current,
+        totalProgress,
+        downloadProgress,
+        uploadProgress,
+        fileComplete,
+        downloadedCount,
+        notDownloadedCount,
+        complete,
+        error,
+      } = data.payload;
+
+      document.getElementById("download-progress").style.display = "block";
+      document.getElementById("cancel-btn").style.display = "block";
+
+      if (message) {
+        document.getElementById("progress-text").textContent = message;
+      }
+      if (totalProgress !== undefined) {
+        const progressBar = document.getElementById("total-progress-bar");
+        progressBar.style.width = `${totalProgress}%`;
+        progressBar.textContent = `${totalProgress}%`;
+      }
+      if (downloadProgress !== undefined) {
+        const downloadBar = document.getElementById("download-bar");
+        downloadBar.style.width = `${downloadProgress}%`;
+        downloadBar.textContent = `${downloadProgress}%`;
+      }
+      if (uploadProgress !== undefined) {
+        const uploadBar = document.getElementById("upload-bar");
+        uploadBar.style.width = `${uploadProgress}%`;
+        uploadBar.textContent = `${uploadProgress}%`;
+      }
+      if (fileComplete) {
+        document.getElementById("downloaded-count").textContent = downloadedCount;
+        document.getElementById("not-downloaded-count").textContent = notDownloadedCount;
+      }
+      if (complete) {
+        document.getElementById("cancel-btn").style.display = "none";
+      }
+      if (error) {
+        document.getElementById("progress-text").textContent = `Error: ${error}`;
+        document.getElementById("cancel-btn").style.display = "none";
+      }
+    }
     // ...
   };
 }
@@ -328,6 +376,12 @@ function downloadSinglePhoto(photoId) {
     ws.onopen = () => {
       ws.send(JSON.stringify({ type: "download-photo", payload: { photoId } }));
     };
+  }
+}
+
+function cancelDownload() {
+  if (ws && ws.readyState === WebSocket.OPEN) {
+    ws.send(JSON.stringify({ type: "cancel-download" }));
   }
 }
 
