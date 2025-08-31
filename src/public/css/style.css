@@ -303,3 +303,14 @@ input[type="checkbox"][data-state="missing"] {
 #photo-counter {
   text-align: center;
 }
+fieldset {
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  padding: 1em;
+  margin-top: 1.5em;
+}
+legend {
+  font-weight: bold;
+  padding: 0 0.5em;
+  margin-left: 0.5em;
+}
