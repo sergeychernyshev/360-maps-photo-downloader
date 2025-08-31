@@ -259,11 +259,6 @@ form input[type="text"] {
   transition: 0.4s;
 }
 
-.active,
-.accordion:hover {
-  background-color: #ccc;
-}
-
 .panel {
   padding: 0 18px;
   background-color: white;
@@ -272,7 +267,7 @@ form input[type="text"] {
   transition: max-height 0.2s ease-out;
 }
 #pose-filters-container.panel {
-  padding: 0 18px 1em 18px;
+  padding: 0;
 }
 .pose-filter {
   display: flex;
@@ -287,6 +282,7 @@ form input[type="text"] {
   border: 1px solid #eee;
   padding: 0.5em;
   border-radius: 5px;
+  cursor: pointer;
 }
 .pose-filter-label {
   font-weight: bold;

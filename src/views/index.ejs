@@ -205,7 +205,7 @@
         <div id="pose-filters-container" class="panel">
           <span>Filter by pose properties:</span>
           <div class="pose-filter">
-            <div class="pose-filter-group">
+            <div class="pose-filter-group" onclick="cycleCheckboxState(this.querySelector('input[type=checkbox]'))">
               <div>
                 <strong class="pose-filter-label">Heading</strong>
                 <span class="pose-filter-count"></span>
@@ -215,12 +215,11 @@
                   type="checkbox"
                   name="heading"
                   data-state="any"
-                  onclick="cycleCheckboxState(this)"
                 />
                 <span class="pose-filter-value">Any</span></label
               >
             </div>
-            <div class="pose-filter-group">
+            <div class="pose-filter-group" onclick="cycleCheckboxState(this.querySelector('input[type=checkbox]'))">
               <div>
                 <strong class="pose-filter-label">Pitch</strong>
                 <span class="pose-filter-count"></span>
@@ -230,12 +229,11 @@
                   type="checkbox"
                   name="pitch"
                   data-state="any"
-                  onclick="cycleCheckboxState(this)"
                 />
                 <span class="pose-filter-value">Any</span></label
               >
             </div>
-            <div class="pose-filter-group">
+            <div class="pose-filter-group" onclick="cycleCheckboxState(this.querySelector('input[type=checkbox]'))">
               <div>
                 <strong class="pose-filter-label">Roll</strong>
                 <span class="pose-filter-count"></span>
@@ -245,12 +243,11 @@
                   type="checkbox"
                   name="roll"
                   data-state="any"
-                  onclick="cycleCheckboxState(this)"
                 />
                 <span class="pose-filter-value">Any</span></label
               >
             </div>
-            <div class="pose-filter-group">
+            <div class="pose-filter-group" onclick="cycleCheckboxState(this.querySelector('input[type=checkbox]'))">
               <div>
                 <strong class="pose-filter-label">Altitude</strong>
                 <span class="pose-filter-count"></span>
@@ -260,12 +257,11 @@
                   type="checkbox"
                   name="altitude"
                   data-state="any"
-                  onclick="cycleCheckboxState(this)"
                 />
                 <span class="pose-filter-value">Any</span></label
               >
             </div>
-            <div class="pose-filter-group">
+            <div class="pose-filter-group" onclick="cycleCheckboxState(this.querySelector('input[type=checkbox]'))">
               <div>
                 <strong class="pose-filter-label">GPS Record</strong>
                 <span class="pose-filter-count"></span>
@@ -275,7 +271,6 @@
                   type="checkbox"
                   name="latLngPair"
                   data-state="any"
-                  onclick="cycleCheckboxState(this)"
                 />
                 <span class="pose-filter-value">Any</span></label
               >
