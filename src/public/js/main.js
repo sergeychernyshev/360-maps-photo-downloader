@@ -69,7 +69,7 @@ function applyFilters(newFilters = {}) {
     isPopState: newFilters.isPopState, // Flag for history handling
   };
 
-  document.getElementById('filter-progress-indicator').style.display = 'block';
+  document.getElementById('filter-progress-indicator').classList.add('visible');
   document.querySelector('tbody').classList.add('filtering');
 
   connectWebSocket();
@@ -214,7 +214,7 @@ function connectWebSocket() {
       } = data.payload;
 
       // 1. Update DOM
-      document.getElementById('filter-progress-indicator').style.display = 'none';
+      document.getElementById('filter-progress-indicator').classList.remove('visible');
       document.querySelector('tbody').classList.remove('filtering');
       document.querySelector("tbody").innerHTML = photoListHtml;
       document.querySelectorAll(".pagination").forEach((el, i) => {

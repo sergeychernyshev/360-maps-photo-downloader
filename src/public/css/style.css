@@ -324,6 +324,10 @@ legend {
   background-color: #e0e0e0;
   position: relative;
   overflow: hidden;
+  visibility: hidden;
+}
+.progress-line-container.visible {
+  visibility: visible;
 }
 .progress-line {
   width: 100%;
