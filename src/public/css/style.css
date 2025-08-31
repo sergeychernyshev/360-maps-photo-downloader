@@ -300,3 +300,6 @@ input[type="checkbox"][data-state="exists"] {
 input[type="checkbox"][data-state="missing"] {
   accent-color: red;
 }
+#photo-counter {
+  text-align: center;
+}
