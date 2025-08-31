@@ -130,6 +130,13 @@ function resetFilters() {
     .forEach((checkbox) => {
       setCheckboxState(checkbox, "any", true);
     });
+  
+  const moreFiltersBtn = document.getElementById('more-filters-btn');
+  const poseFiltersContainer = document.getElementById('pose-filters-container');
+  moreFiltersBtn.classList.remove('active');
+  moreFiltersBtn.textContent = 'More filters';
+  poseFiltersContainer.style.maxHeight = null;
+
   applyFilters({ search: "", status: "all", poseFilters: [], page: 1, sort: "date", order: "desc" });
 }
 
