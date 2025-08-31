@@ -81,6 +81,7 @@ router.get("/", async (req, res, next) => {
     const driveFiles = loggedIn ? await listFiles(drive, folderId) : [];
     const drivePhotoCount = driveFiles.filter(f => f.name !== PHOTO_LIST_FILE_NAME).length;
     const downloadedFiles = new Set(driveFiles.map((f) => f.name));
+    const driveFileLinks = new Map(driveFiles.map(f => [f.name, f.webViewLink]));
 
     const statusFilteredPhotos = searchedPhotos.filter(photo => {
       if (status === 'all') {
@@ -201,7 +202,7 @@ router.get("/", async (req, res, next) => {
       duplicateFiles: loggedIn ? duplicateFiles : {},
       duplicateFilesCount: loggedIn ? duplicateFilesCount : 0,
       folderName: folderName,
-      photoListHtml: buildPhotoListHtml(paginatedPhotos, downloadedFiles),
+      photoListHtml: buildPhotoListHtml(paginatedPhotos, downloadedFiles, driveFileLinks),
       paginationHtmlTop,
       paginationHtmlBottom,
       buildSortLink,
