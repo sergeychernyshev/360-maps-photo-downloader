@@ -320,7 +320,6 @@ legend {
 .progress-line-container {
   height: 4px;
   background-color: #e0e0e0;
-  margin: 1.5em 0;
   position: relative;
   overflow: hidden;
 }
