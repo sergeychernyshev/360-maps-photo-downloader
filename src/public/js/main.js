@@ -145,7 +145,7 @@ function resetFilters() {
 
 function confirmDownload() {
   if (!isLoggedIn) return;
-  const missingPhotosCount = missingPhotosCount;
+  const missingPhotosCount = parseInt(document.getElementById("not-downloaded-count").textContent, 10);
   if (missingPhotosCount > 10) {
     if (
       !confirm(
