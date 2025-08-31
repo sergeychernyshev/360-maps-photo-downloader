@@ -70,7 +70,7 @@ function applyFilters(newFilters = {}) {
   };
 
   document.getElementById('filter-progress-indicator').style.display = 'block';
-  document.querySelector('tbody').style.display = 'none';
+  document.querySelector('tbody').classList.add('filtering');
 
   connectWebSocket();
   if (ws && ws.readyState === WebSocket.OPEN) {
@@ -215,7 +215,7 @@ function connectWebSocket() {
 
       // 1. Update DOM
       document.getElementById('filter-progress-indicator').style.display = 'none';
-      document.querySelector('tbody').style.display = '';
+      document.querySelector('tbody').classList.remove('filtering');
       document.querySelector("tbody").innerHTML = photoListHtml;
       document.querySelectorAll(".pagination").forEach((el, i) => {
         el.innerHTML = i === 0 ? paginationHtmlTop : paginationHtmlBottom;

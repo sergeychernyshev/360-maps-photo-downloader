@@ -75,9 +75,11 @@ a.cancel {
 table {
   width: 100%;
   border-collapse: collapse;
-  margin-top: 1.5em;
   margin-bottom: 1.5em;
   table-layout: fixed;
+}
+tbody.filtering {
+  opacity: 0.5;
 }
 th,
 td {
@@ -129,7 +131,7 @@ td:first-child {
   background-color: #ea4335;
 }
 .pagination {
-  margin-top: 1em;
+  margin: 1em 0;
   text-align: center;
 }
 .pagination a,
