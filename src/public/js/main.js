@@ -313,8 +313,10 @@ function connectWebSocket() {
             }
           }
           
-          if (uploadProgress !== undefined || (downloadProgress === 100 && !statusCell.querySelector('.spinner'))) {
-            statusCell.innerHTML = '<div class="spinner" style="margin: 0 auto;"></div><span style="margin-left: 10px;">Uploading...</span>';
+          if (uploadProgress !== undefined) {
+            if (!statusCell.querySelector('.spinner')) {
+              statusCell.innerHTML = '<div class="spinner" style="margin: 0 auto;"></div><span style="margin-left: 10px;">Uploading...</span>';
+            }
           }
 
           if (complete || error) {
