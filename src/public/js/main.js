@@ -186,7 +186,7 @@ function updatePhotoList() {
   if (!isLoggedIn) return;
   const updateBtn = document.getElementById("update-btn");
   updateBtn.disabled = true;
-  updateBtn.innerHTML = '<div class="spinner"></div><span>Starting...</span>';
+  updateBtn.innerHTML = '<div class="spinner spinner-light"></div><span>Starting...</span>';
 
   connectWebSocket();
 
