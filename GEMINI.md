@@ -13,3 +13,4 @@
 - At the start of every session, I will check the current git branch. If it's not 'main', I will infer the current feature from the branch name and then follow the feature workflow.
 - when making UI changes, avoid creating layout shift
 - never restart the server unless I ask you to
+- never use onclick attributes, attach event listeners instead
