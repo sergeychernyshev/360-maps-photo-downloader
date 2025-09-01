@@ -304,11 +304,19 @@ function connectWebSocket() {
       if (photoId) {
         const row = document.querySelector(`tr[data-photo-id="${photoId}"]`);
         if (row) {
-          const progressBar = row.querySelector('.progress-bar');
-          if (progressBar) {
-            const overallProgress = Math.round(((downloadProgress || 0) + (uploadProgress || 0)) / 2);
-            progressBar.style.width = `${overallProgress}%`;
-            progressBar.textContent = `${overallProgress}%`;
+          if (downloadProgress !== undefined) {
+            const downloadBar = row.querySelector('.download-bar');
+            if (downloadBar) {
+              downloadBar.style.width = `${downloadProgress}%`;
+              downloadBar.textContent = `${downloadProgress}%`;
+            }
+          }
+          if (uploadProgress !== undefined) {
+            const uploadBar = row.querySelector('.upload-bar');
+            if (uploadBar) {
+              uploadBar.style.width = `${uploadProgress}%`;
+              uploadBar.textContent = `${uploadProgress}%`;
+            }
           }
 
           if (complete || error) {
@@ -457,18 +465,29 @@ function downloadSinglePhoto(photoId) {
   const originalStatusHtml = statusCell.innerHTML;
   const originalActionsHtml = actionsCell.innerHTML;
 
-  const progressContainer = document.createElement('div');
-  progressContainer.className = 'progress-bar-container';
-  progressContainer.style.marginBottom = '0';
-  const progressBar = document.createElement('div');
-  progressBar.className = 'progress-bar';
-  progressBar.style.width = '0%';
-  progressBar.textContent = '0%';
-  progressContainer.appendChild(progressBar);
+  const downloadProgressContainer = document.createElement('div');
+  downloadProgressContainer.className = 'progress-bar-container';
+  downloadProgressContainer.style.marginBottom = '5px';
+  const downloadProgressBar = document.createElement('div');
+  downloadProgressBar.className = 'progress-bar download-bar';
+  downloadProgressBar.style.width = '0%';
+  downloadProgressBar.textContent = '0%';
+  downloadProgressContainer.appendChild(downloadProgressBar);
 
-  statusCell.innerHTML = '';
-  statusCell.appendChild(progressContainer);
+  const uploadProgressContainer = document.createElement('div');
+  uploadProgressContainer.className = 'progress-bar-container';
+  uploadProgressContainer.style.marginBottom = '0';
+  const uploadProgressBar = document.createElement('div');
+  uploadProgressBar.className = 'progress-bar upload-bar';
+  uploadProgressBar.style.width = '0%';
+  uploadProgressBar.textContent = '0%';
+  uploadProgressContainer.appendChild(uploadProgressBar);
+
+  statusCell.innerHTML = 'Downloading...';
   actionsCell.innerHTML = '';
+  actionsCell.appendChild(downloadProgressContainer);
+  actionsCell.appendChild(uploadProgressContainer);
+
 
   row.dataset.originalStatus = originalStatusHtml;
   row.dataset.originalActions = originalActionsHtml;
