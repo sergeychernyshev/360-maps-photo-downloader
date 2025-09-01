@@ -451,7 +451,7 @@ function cycleCheckboxState(checkbox, silent = false) {
 function downloadSinglePhoto(photoId) {
   if (!isLoggedIn) return;
 
-  const row = document.querySelector(`button[data-photo-id="${photoId}"]`).closest('tr');
+  const row = document.querySelector(`tr[data-photo-id="${photoId}"]`);
   const statusCell = row.cells[4];
   const actionsCell = row.cells[5];
   const originalStatusHtml = statusCell.innerHTML;
