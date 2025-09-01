@@ -4,7 +4,7 @@ const { cancelDownload } = require("./actions/cancel-download");
 const { deleteDuplicates } = require("./actions/delete-duplicates");
 const { updatePhotoList } = require("./actions/update-photo-list");
 const { filterPhotos } = require("./actions/filter-photos");
-const { updateState } = require("./download-state");
+const { updateState, getState } = require("./download-state");
 
 
 /**
@@ -18,6 +18,9 @@ async function handleMessage(req, ws, message) {
   const { type, payload } = data;
 
   switch (type) {
+    case "get-state":
+      ws.send(JSON.stringify({ type: "progress", payload: getState() }));
+      break;
     case "download":
       await downloadAllPhotos(
         req,

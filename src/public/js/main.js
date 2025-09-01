@@ -204,7 +204,12 @@ function connectWebSocket() {
   if (ws && ws.readyState === WebSocket.OPEN) return;
 
   ws = new WebSocket(`ws://${window.location.host}`);
-  ws.onopen = () => console.log("WebSocket connection established.");
+  ws.onopen = () => {
+    console.log("WebSocket connection established.");
+    if (downloadState.inProgress) {
+      ws.send(JSON.stringify({ type: "get-state" }));
+    }
+  };
   ws.onclose = () => console.log("WebSocket connection closed");
   ws.onerror = (error) => console.error("WebSocket error:", error);
 
