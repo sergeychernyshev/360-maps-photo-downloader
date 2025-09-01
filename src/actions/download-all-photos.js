@@ -52,6 +52,8 @@ async function downloadAllPhotos(
       if (getState().cancelled) {
         progressCallback({
           message: "Cancelling...",
+          complete: true,
+          inProgress: false,
         });
         break;
       }
