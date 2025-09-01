@@ -14,3 +14,4 @@
 - when making UI changes, avoid creating layout shift
 - never restart the server unless I ask you to
 - never use onclick attributes, attach event listeners instead
+- format code with Prettier before commiting
