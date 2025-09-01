@@ -30,7 +30,7 @@ async function downloadSinglePhoto(req, photo) {
       totalProgress: 0,
     });
 
-    const downloadedPhoto = await processPhoto(
+    const { photo: downloadedPhoto, file: downloadedFile } = await processPhoto(
       drive,
       oAuth2Client,
       photo,
@@ -63,6 +63,7 @@ async function downloadSinglePhoto(req, photo) {
         message: `Photo ${photo.photoId.id}.jpg downloaded successfully to Google Drive!`,
         complete: true,
         inProgress: false,
+        driveLink: downloadedFile.webViewLink,
       });
     }
   } catch (error) {

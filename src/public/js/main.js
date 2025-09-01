@@ -312,8 +312,18 @@ function connectWebSocket() {
           }
 
           if (complete || error) {
-            row.cells[4].innerHTML = row.dataset.originalStatus;
-            row.cells[5].innerHTML = row.dataset.originalActions;
+            if (error) {
+              row.cells[4].innerHTML = row.dataset.originalStatus;
+              row.cells[5].innerHTML = row.dataset.originalActions;
+            } else {
+              const statusHtml = `<a href="${data.payload.driveLink}" target="_blank" class="status downloaded" title="View on Google Drive"><span class="status-text">Downloaded</span><span class="status-icon">✔</span></a>`;
+              const actionHtml = `<button data-photo-id="${photoId}" class="button download-single-btn redownload-btn" style="font-size: 12px; padding: 5px 10px;" title="Re-download">
+                  <span class="button-text">Re-download</span>
+                  <span class="button-icon">↻</span>
+                </button>`;
+              row.cells[4].innerHTML = statusHtml;
+              row.cells[5].innerHTML = actionHtml;
+            }
             delete row.dataset.originalStatus;
             delete row.dataset.originalActions;
           }

@@ -79,9 +79,9 @@ async function processPhoto(
   const stream = Readable.from(newJpeg);
 
   const existingFile = await findFile(drive, fileName, folderId);
-
+  let file;
   if (existingFile) {
-    await updateFile(
+    file = await updateFile(
       drive,
       existingFile.id,
       "image/jpeg",
@@ -92,7 +92,7 @@ async function processPhoto(
       }
     );
   } else {
-    await createFile(
+    file = await createFile(
       drive,
       fileName,
       "image/jpeg",
@@ -105,7 +105,7 @@ async function processPhoto(
     );
   }
 
-  return photo;
+  return { photo, file };
 }
 
 module.exports = { processPhoto };
