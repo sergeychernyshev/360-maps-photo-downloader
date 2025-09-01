@@ -18,11 +18,21 @@ function getState() {
 }
 
 function updateState(newState) {
-  Object.assign(state, newState);
-  if (state.socket) {
-    state.socket.send(
-      JSON.stringify({ type: "progress", payload: { ...getState(), ...newState } })
-    );
+  if (newState.photoId) {
+    // Single photo progress update
+    if (state.socket) {
+      state.socket.send(
+        JSON.stringify({ type: "progress", payload: newState })
+      );
+    }
+  } else {
+    // Global progress update
+    Object.assign(state, newState);
+    if (state.socket) {
+      state.socket.send(
+        JSON.stringify({ type: "progress", payload: { ...getState(), ...newState } })
+      );
+    }
   }
 }
 
