@@ -323,6 +323,12 @@ function connectWebSocket() {
           const actionsCell = row.querySelector(".actions-cell");
           const progressCell = row.querySelector(".progress-cell");
 
+          if (progressCell.classList.contains('hidden')) {
+            statusCell.classList.add('hidden');
+            actionsCell.classList.add('hidden');
+            progressCell.classList.remove('hidden');
+          }
+
           if (downloadProgress !== undefined) {
             const progressBar = progressCell.querySelector(".progress-bar");
             if (progressBar) {
