@@ -78,6 +78,11 @@ function buildPhotoListHtml(photos, downloadedFiles, driveFileLinks) {
           <span class="button-icon">${isDownloaded ? '&#10227;' : '&#11015;'}</span>
         </button>
       </td>
+      <td class="progress-cell hidden" colspan="2">
+        <div class="progress-bar-container" style="margin-bottom: 0;">
+          <div class="progress-bar" style="width: 0%;">Starting...</div>
+        </div>
+      </td>
     </tr>
   `;
     })

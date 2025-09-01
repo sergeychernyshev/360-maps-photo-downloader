@@ -363,3 +363,7 @@ legend {
   margin-bottom: 0;
   border: none;
 }
+
+.hidden {
+  display: none;
+}

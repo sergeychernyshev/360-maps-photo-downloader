@@ -320,8 +320,11 @@ function connectWebSocket() {
         const row = document.querySelector(`tr[data-photo-id="${photoId}"]`);
         if (row) {
           const statusCell = row.querySelector(".status-cell");
+          const actionsCell = row.querySelector(".actions-cell");
+          const progressCell = row.querySelector(".progress-cell");
+
           if (downloadProgress !== undefined) {
-            const progressBar = statusCell.querySelector(".progress-bar");
+            const progressBar = progressCell.querySelector(".progress-bar");
             if (progressBar) {
               progressBar.style.width = `${downloadProgress}%`;
               progressBar.textContent = `Downloading: ${downloadProgress}%`;
@@ -329,21 +332,18 @@ function connectWebSocket() {
           }
 
           if (uploadProgress !== undefined) {
-            if (!statusCell.querySelector(".spinner")) {
-              statusCell.innerHTML =
+            if (!progressCell.querySelector(".spinner")) {
+              progressCell.innerHTML =
                 '<div class="spinner" style="margin: 0 auto;"></div><span style="margin-left: 10px;">Uploading...</span>';
             }
           }
 
           if (complete || error) {
-            const actionsCell = row.querySelector(".actions-cell");
-            statusCell.colSpan = 1;
-            actionsCell.style.display = "";
+            progressCell.classList.add('hidden');
+            statusCell.classList.remove('hidden');
+            actionsCell.classList.remove('hidden');
 
-            if (error) {
-              statusCell.innerHTML = row.dataset.originalStatus;
-              actionsCell.innerHTML = row.dataset.originalActions;
-            } else {
+            if (!error) {
               const statusHtml = `<a href="${data.payload.driveLink}" target="_blank" class="status downloaded" title="View on Google Drive"><span class="status-text">Downloaded</span><span class="status-icon">✔</span></a>`;
               const actionHtml = `<button data-photo-id="${photoId}" class="button download-single-btn redownload-btn" style="font-size: 12px; padding: 5px 10px;" title="Re-download">
                   <span class="button-text">Re-download</span>
@@ -352,8 +352,6 @@ function connectWebSocket() {
               statusCell.innerHTML = statusHtml;
               actionsCell.innerHTML = actionHtml;
             }
-            delete row.dataset.originalStatus;
-            delete row.dataset.originalActions;
           }
         }
         return;
@@ -493,27 +491,13 @@ function downloadSinglePhoto(photoId) {
   if (!isLoggedIn) return;
 
   const row = document.querySelector(`tr[data-photo-id="${photoId}"]`);
-  const statusCell = row.querySelector(".status-cell");
-  const actionsCell = row.querySelector(".actions-cell");
-  const originalStatusHtml = statusCell.innerHTML;
-  const originalActionsHtml = actionsCell.innerHTML;
+  const statusCell = row.querySelector('.status-cell');
+  const actionsCell = row.querySelector('.actions-cell');
+  const progressCell = row.querySelector('.progress-cell');
 
-  const progressContainer = document.createElement("div");
-  progressContainer.className = "progress-bar-container";
-  progressContainer.style.marginBottom = "0";
-  const progressBar = document.createElement("div");
-  progressBar.className = "progress-bar";
-  progressBar.style.width = "0%";
-  progressBar.textContent = "Starting...";
-  progressContainer.appendChild(progressBar);
-
-  statusCell.innerHTML = "";
-  statusCell.colSpan = 2;
-  statusCell.appendChild(progressContainer);
-  actionsCell.style.display = "none";
-
-  row.dataset.originalStatus = originalStatusHtml;
-  row.dataset.originalActions = originalActionsHtml;
+  statusCell.classList.add('hidden');
+  actionsCell.classList.add('hidden');
+  progressCell.classList.remove('hidden');
 
   connectWebSocket();
   if (ws && ws.readyState === WebSocket.OPEN) {
