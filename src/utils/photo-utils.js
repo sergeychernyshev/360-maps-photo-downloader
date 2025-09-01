@@ -64,7 +64,7 @@ function buildPhotoListHtml(photos, downloadedFiles, driveFileLinks) {
         : '<span class="status not-downloaded" title="Not Downloaded"><span class="status-text">Not Downloaded</span><span class="status-icon">&#10006;</span></span>';
 
       return `
-    <tr>
+    <tr data-photo-id="${photo.photoId.id}">
       <td><a href="${photo.shareLink}" target="_blank">${photo.photoId.id}</a></td>
       <td>${locationHtml}${poseString}</td>
       <td>${new Date(photo.captureTime).toLocaleDateString()}</td>

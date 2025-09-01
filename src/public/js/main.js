@@ -302,7 +302,7 @@ function connectWebSocket() {
       } = data.payload;
 
       if (photoId) {
-        const row = document.querySelector(`button[data-photo-id="${photoId}"]`).closest('tr');
+        const row = document.querySelector(`tr[data-photo-id="${photoId}"]`);
         if (row) {
           const progressBar = row.querySelector('.progress-bar');
           if (progressBar) {
