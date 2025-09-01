@@ -64,19 +64,24 @@ function buildPhotoListHtml(photos, downloadedFiles, driveFileLinks) {
         : '<span class="status not-downloaded" title="Not Downloaded"><span class="status-text">Not Downloaded</span><span class="status-icon">&#10006;</span></span>';
 
       return `
-    <tr>
+    <tr data-photo-id="${photo.photoId.id}">
       <td><a href="${photo.shareLink}" target="_blank">${photo.photoId.id}</a></td>
       <td>${locationHtml}${poseString}</td>
       <td>${new Date(photo.captureTime).toLocaleDateString()}</td>
       <td>${photo.viewCount || 0}</td>
-      <td>${statusHtml}</td>
-      <td>
+      <td class="status-cell">${statusHtml}</td>
+      <td class="actions-cell">
         <button data-photo-id="${photo.photoId.id}" class="button download-single-btn ${
           isDownloaded ? 'redownload-btn' : 'download-btn'
         }" style="font-size: 12px; padding: 5px 10px;" title="${isDownloaded ? 'Re-download' : 'Download'}">
           <span class="button-text">${isDownloaded ? 'Re-download' : 'Download'}</span>
           <span class="button-icon">${isDownloaded ? '&#10227;' : '&#11015;'}</span>
         </button>
+      </td>
+      <td class="progress-cell hidden" colspan="2">
+        <div class="progress-bar-container" style="margin-bottom: 0;">
+          <div class="progress-bar" style="width: 0%;">Starting...</div>
+        </div>
       </td>
     </tr>
   `;
@@ -88,7 +93,7 @@ function buildPaginationHtml(totalPages, currentPage, action, location) {
   let paginationHtml = "";
   if (totalPages > 1) {
     const buildPageClick = (page) => {
-      return `onclick="${action}(${page}, '${location}')"`;
+      return `data-page="${page}"`;
     };
 
     paginationHtml += `<div class="pagination" data-location="${location}">`;

@@ -14,7 +14,7 @@ const { processPhoto } = require("../utils/photo-processor");
  */
 async function downloadSinglePhoto(req, photo) {
   const progressCallback = (progress) => {
-    updateState(progress);
+    updateState({ ...progress, photoId: photo.photoId.id });
   };
 
   try {
@@ -24,13 +24,17 @@ async function downloadSinglePhoto(req, photo) {
     const folderId = folder.id;
 
     progressCallback({
+      folderLink: folder.webViewLink,
+    });
+
+    progressCallback({
       message: `Starting download of 1 photo to Google Drive...`,
       total: 1,
       current: 0,
       totalProgress: 0,
     });
 
-    const downloadedPhoto = await processPhoto(
+    const { photo: downloadedPhoto, file: downloadedFile } = await processPhoto(
       drive,
       oAuth2Client,
       photo,
@@ -40,16 +44,24 @@ async function downloadSinglePhoto(req, photo) {
 
     if (downloadedPhoto) {
       if (req.session.missingPhotos && req.session.downloadedPhotos) {
-        const downloadedPhotoIndex = req.session.missingPhotos.findIndex(
+        // Remove from missingPhotos if it exists
+        const missingIndex = req.session.missingPhotos.findIndex(
           (p) => p.photoId.id === photo.photoId.id
         );
-        if (downloadedPhotoIndex > -1) {
-          const [downloadedPhoto] = req.session.missingPhotos.splice(
-            downloadedPhotoIndex,
-            1
-          );
-          req.session.downloadedPhotos.push(downloadedPhoto);
+        if (missingIndex > -1) {
+          req.session.missingPhotos.splice(missingIndex, 1);
         }
+
+        // Remove from downloadedPhotos if it exists (for re-downloads)
+        const downloadedIndex = req.session.downloadedPhotos.findIndex(
+          (p) => p.photoId.id === photo.photoId.id
+        );
+        if (downloadedIndex > -1) {
+          req.session.downloadedPhotos.splice(downloadedIndex, 1);
+        }
+
+        // Add the photo to downloadedPhotos
+        req.session.downloadedPhotos.push(downloadedPhoto);
       }
 
       progressCallback({
@@ -60,9 +72,10 @@ async function downloadSinglePhoto(req, photo) {
       });
 
       progressCallback({
-        message: "Photo downloaded successfully to Google Drive!",
+        message: `Photo ${photo.photoId.id}.jpg downloaded successfully to Google Drive!`,
         complete: true,
         inProgress: false,
+        driveLink: downloadedFile.webViewLink,
       });
     }
   } catch (error) {

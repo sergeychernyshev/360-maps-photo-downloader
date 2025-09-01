@@ -23,7 +23,7 @@
       <p>
         This is a list of your 360 photos on Google Maps. It indicates which
         ones have already been backed up to the
-        <code
+        <code id="folder-link-container"
           ><% if (locals.folderLink) { %>
           <a href="<%= folderLink %>" target="_blank"><%= folderName %></a>
           <% } else {%> <%= folderName %> <% } %>
@@ -97,45 +97,42 @@
         </ul>
       </div>
       <% } %>
-      <button onclick="confirmDownload()">Download All Missing Photos</button>
-      <button id="update-btn" onclick="updatePhotoList()" class="update-btn">
+      <button id="download-all-btn">Download All Missing Photos</button>
+      <button id="update-btn" class="update-btn">
         Update the List of Photos
       </button>
       <a href="/logout" class="logout button">Logout</a>
 
-      <div id="download-progress" style="display: none">
-        <h2>Downloading Photos</h2>
-        <p id="progress-text">Starting...</p>
-        <p>Total Progress:</p>
-        <div style="display: flex; align-items: center; gap: 1em">
-          <div style="flex-grow: 1">
-            <div class="progress-bar-container">
-              <div id="total-progress-bar" class="progress-bar">0%</div>
-            </div>
+      <fieldset id="download-fieldset" style="display: none">
+        <legend>Downloading Photos...</legend>
+        <div id="download-progress">
+          <p id="progress-text">Starting...</p>
+          <p>Total Progress:</p>
+          <div class="progress-bar-container">
+            <div id="total-progress-bar" class="progress-bar">0%</div>
           </div>
-          <button
-            id="cancel-btn"
-            onclick="cancelDownload()"
-            class="button cancel"
-          >
-            Cancel
-          </button>
-        </div>
-        <div style="display: flex; gap: 1em">
-          <div style="flex-grow: 1">
-            <p>Downloading 360 photos from Google Maps:</p>
-            <div class="progress-bar-container">
-              <div id="download-bar" class="progress-bar">0%</div>
+          <div style="display: flex; gap: 1em">
+            <div style="flex-grow: 1">
+              <p>Downloading 360 photos from Google Maps:</p>
+              <div class="progress-bar-container">
+                <div id="download-bar" class="progress-bar">0%</div>
+              </div>
             </div>
-          </div>
-          <div style="flex-grow: 1">
-            <p>Uploading to Google Drive:</p>
-            <div class="progress-bar-container">
-              <div id="upload-bar" class="progress-bar">0%</div>
+            <div style="flex-grow: 1" id="upload-container">
+              <p>Uploading to Google Drive:</p>
+              <div class="progress-bar-container">
+                <div id="upload-bar" class="progress-bar">0%</div>
+              </div>
             </div>
           </div>
         </div>
-      </div>
+        <button
+          id="cancel-btn"
+          class="button cancel"
+        >
+          Cancel
+        </button>
+      </fieldset>
       <% } %>
 
       <fieldset>
@@ -155,7 +152,6 @@
             />
             <button
               type="button"
-              onclick="clearSearch()"
               class="cancel button"
               id="clear-search-btn"
               style="display: none"
@@ -164,7 +160,7 @@
             </button>
           </div>
           <button type="submit">Search</button>
-          <button type="button" onclick="resetFilters()" class="button">
+          <button type="button" id="reset-filters-btn" class="button">
             Reset Filters
           </button>
         </form>
@@ -205,73 +201,63 @@
         <div id="pose-filters-container" class="panel">
           <span>Filter by pose properties:</span>
           <div class="pose-filter">
-            <div class="pose-filter-group" onclick="cycleCheckboxState(this.querySelector('input[type=checkbox]'))">
+            <div
+              class="pose-filter-group"
+            >
               <div>
                 <strong class="pose-filter-label">Heading</strong>
                 <span class="pose-filter-count"></span>
               </div>
               <label
-                ><input
-                  type="checkbox"
-                  name="heading"
-                  data-state="any"
-                />
+                ><input type="checkbox" name="heading" data-state="any" />
                 <span class="pose-filter-value">Any</span></label
               >
             </div>
-            <div class="pose-filter-group" onclick="cycleCheckboxState(this.querySelector('input[type=checkbox]'))">
+            <div
+              class="pose-filter-group"
+            >
               <div>
                 <strong class="pose-filter-label">Pitch</strong>
                 <span class="pose-filter-count"></span>
               </div>
               <label
-                ><input
-                  type="checkbox"
-                  name="pitch"
-                  data-state="any"
-                />
+                ><input type="checkbox" name="pitch" data-state="any" />
                 <span class="pose-filter-value">Any</span></label
               >
             </div>
-            <div class="pose-filter-group" onclick="cycleCheckboxState(this.querySelector('input[type=checkbox]'))">
+            <div
+              class="pose-filter-group"
+            >
               <div>
                 <strong class="pose-filter-label">Roll</strong>
                 <span class="pose-filter-count"></span>
               </div>
               <label
-                ><input
-                  type="checkbox"
-                  name="roll"
-                  data-state="any"
-                />
+                ><input type="checkbox" name="roll" data-state="any" />
                 <span class="pose-filter-value">Any</span></label
               >
             </div>
-            <div class="pose-filter-group" onclick="cycleCheckboxState(this.querySelector('input[type=checkbox]'))">
+            <div
+              class="pose-filter-group"
+            >
               <div>
                 <strong class="pose-filter-label">Altitude</strong>
                 <span class="pose-filter-count"></span>
               </div>
               <label
-                ><input
-                  type="checkbox"
-                  name="altitude"
-                  data-state="any"
-                />
+                ><input type="checkbox" name="altitude" data-state="any" />
                 <span class="pose-filter-value">Any</span></label
               >
             </div>
-            <div class="pose-filter-group" onclick="cycleCheckboxState(this.querySelector('input[type=checkbox]'))">
+            <div
+              class="pose-filter-group"
+            >
               <div>
                 <strong class="pose-filter-label">GPS Record</strong>
                 <span class="pose-filter-count"></span>
               </div>
               <label
-                ><input
-                  type="checkbox"
-                  name="latLngPair"
-                  data-state="any"
-                />
+                ><input type="checkbox" name="latLngPair" data-state="any" />
                 <span class="pose-filter-value">Any</span></label
               >
             </div>
@@ -307,7 +293,7 @@
       </table>
       <%- paginationHtmlBottom %> <% } else if (isLoggedIn) { %>
       <p>You do not have any photos uploaded 360 photos to Google Maps.</p>
-      <button id="update-btn" onclick="updatePhotoList()" class="update-btn">
+      <button id="update-btn" class="update-btn">
         Check for new photos
       </button>
       <a href="/logout" class="logout button">Logout</a>
@@ -319,6 +305,7 @@
       const downloadState = <%- JSON.stringify(downloadState || { inProgress: false }) %>;
       const isLoggedIn = <%- !!isLoggedIn %>;
       const missingPhotosCount = <%- notDownloadedCount %>;
+      const folderName = "<%= folderName %>";
     </script>
     <script src="/js/main.js" defer></script>
   </body>

@@ -1,24 +1,24 @@
 let ws;
 
 function updateSortIndicators(sort, order) {
-  document.querySelectorAll('.sort-link').forEach(link => {
+  document.querySelectorAll(".sort-link").forEach((link) => {
     const sortBy = link.dataset.sortby;
     // Clear existing arrows
-    const arrow = link.querySelector('.sort-arrow');
+    const arrow = link.querySelector(".sort-arrow");
     if (arrow) {
       arrow.remove();
     }
 
     if (sortBy === sort) {
-      link.classList.add('active');
+      link.classList.add("active");
       link.dataset.order = order;
-      const arrowSpan = document.createElement('span');
-      arrowSpan.className = 'sort-arrow';
-      arrowSpan.innerHTML = order === 'asc' ? ' &uarr;' : ' &darr;';
+      const arrowSpan = document.createElement("span");
+      arrowSpan.className = "sort-arrow";
+      arrowSpan.innerHTML = order === "asc" ? " &uarr;" : " &darr;";
       link.appendChild(arrowSpan);
     } else {
-      link.classList.remove('active');
-      link.dataset.order = 'desc'; // Default for non-active links
+      link.classList.remove("active");
+      link.dataset.order = "desc"; // Default for non-active links
     }
   });
 }
@@ -49,8 +49,10 @@ function getCurrentFilters() {
     new URLSearchParams(window.location.search).get("page") || "1",
     10
   );
-  const sort = new URLSearchParams(window.location.search).get("sort") || "date";
-  const order = new URLSearchParams(window.location.search).get("order") || "desc";
+  const sort =
+    new URLSearchParams(window.location.search).get("sort") || "date";
+  const order =
+    new URLSearchParams(window.location.search).get("order") || "desc";
   return { search, status, poseFilters, page, sort, order };
 }
 
@@ -69,8 +71,8 @@ function applyFilters(newFilters = {}) {
     isPopState: newFilters.isPopState, // Flag for history handling
   };
 
-  document.getElementById('filter-progress-indicator').classList.add('visible');
-  document.querySelector('tbody').classList.add('filtering');
+  document.getElementById("filter-progress-indicator").classList.add("visible");
+  document.querySelector("tbody").classList.add("filtering");
 
   connectWebSocket();
   if (ws && ws.readyState === WebSocket.OPEN) {
@@ -83,8 +85,10 @@ function applyFilters(newFilters = {}) {
 }
 
 function sortPhotos(sort) {
-  const currentOrder = new URLSearchParams(window.location.search).get("order") || "desc";
-  const currentSort = new URLSearchParams(window.location.search).get("sort") || "date";
+  const currentOrder =
+    new URLSearchParams(window.location.search).get("order") || "desc";
+  const currentSort =
+    new URLSearchParams(window.location.search).get("sort") || "date";
   let order = "asc";
   if (currentSort === sort) {
     order = currentOrder === "asc" ? "desc" : "asc";
@@ -133,19 +137,31 @@ function resetFilters() {
     .forEach((checkbox) => {
       setCheckboxState(checkbox, "any", true);
     });
-  
-  const moreFiltersBtn = document.getElementById('more-filters-btn');
-  const poseFiltersContainer = document.getElementById('pose-filters-container');
-  moreFiltersBtn.classList.remove('active');
-  moreFiltersBtn.textContent = 'More filters';
+
+  const moreFiltersBtn = document.getElementById("more-filters-btn");
+  const poseFiltersContainer = document.getElementById(
+    "pose-filters-container"
+  );
+  moreFiltersBtn.classList.remove("active");
+  moreFiltersBtn.textContent = "More filters";
   poseFiltersContainer.style.maxHeight = null;
 
-  applyFilters({ search: "", status: "all", poseFilters: [], page: 1, sort: "date", order: "desc" });
+  applyFilters({
+    search: "",
+    status: "all",
+    poseFilters: [],
+    page: 1,
+    sort: "date",
+    order: "desc",
+  });
 }
 
 function confirmDownload() {
   if (!isLoggedIn) return;
-  const missingPhotosCount = missingPhotosCount;
+  const missingPhotosCount = parseInt(
+    document.getElementById("not-downloaded-count").textContent,
+    10
+  );
   if (missingPhotosCount > 10) {
     if (
       !confirm(
@@ -155,9 +171,7 @@ function confirmDownload() {
       return;
     }
   }
-  document.getElementById("download-progress").style.display = "block";
-  document.querySelector(".progress-bar-container").style.display = "block";
-  document.getElementById("progress-text").style.display = "block";
+  document.getElementById("download-fieldset").style.display = "block";
   connectWebSocket();
   if (ws && ws.readyState === WebSocket.OPEN) {
     ws.send(JSON.stringify({ type: "download" }));
@@ -172,7 +186,8 @@ function updatePhotoList() {
   if (!isLoggedIn) return;
   const updateBtn = document.getElementById("update-btn");
   updateBtn.disabled = true;
-  updateBtn.innerHTML = '<div class="spinner"></div><span>Starting...</span>';
+  updateBtn.innerHTML =
+    '<div class="spinner spinner-light"></div><span>Starting...</span>';
 
   connectWebSocket();
 
@@ -189,7 +204,12 @@ function connectWebSocket() {
   if (ws && ws.readyState === WebSocket.OPEN) return;
 
   ws = new WebSocket(`ws://${window.location.host}`);
-  ws.onopen = () => console.log("WebSocket connection established.");
+  ws.onopen = () => {
+    console.log("WebSocket connection established.");
+    if (downloadState.inProgress) {
+      ws.send(JSON.stringify({ type: "get-state" }));
+    }
+  };
   ws.onclose = () => console.log("WebSocket connection closed");
   ws.onerror = (error) => console.error("WebSocket error:", error);
 
@@ -214,8 +234,16 @@ function connectWebSocket() {
       } = data.payload;
 
       // 1. Update DOM
-      document.getElementById('filter-progress-indicator').classList.remove('visible');
-      document.querySelector('tbody').classList.remove('filtering');
+      const updateBtn = document.getElementById("update-btn");
+      if (updateBtn && updateBtn.disabled) {
+        updateBtn.disabled = false;
+        updateBtn.innerHTML = totalPhotosCount > 0 ? 'Update the List of Photos' : 'Check for new photos';
+      }
+
+      document
+        .getElementById("filter-progress-indicator")
+        .classList.remove("visible");
+      document.querySelector("tbody").classList.remove("filtering");
       document.querySelector("tbody").innerHTML = photoListHtml;
       document.querySelectorAll(".pagination").forEach((el, i) => {
         el.innerHTML = i === 0 ? paginationHtmlTop : paginationHtmlBottom;
@@ -245,8 +273,10 @@ function connectWebSocket() {
           .join(",");
         if (poseQuery) params.set("pose", poseQuery);
         if (requestPayload.page > 1) params.set("page", requestPayload.page);
-        if (requestPayload.sort && requestPayload.sort !== 'date') params.set("sort", requestPayload.sort);
-        if (requestPayload.order && requestPayload.order !== 'desc') params.set("order", requestPayload.order);
+        if (requestPayload.sort && requestPayload.sort !== "date")
+          params.set("sort", requestPayload.sort);
+        if (requestPayload.order && requestPayload.order !== "desc")
+          params.set("order", requestPayload.order);
 
         const newQueryString = params.toString()
           ? `?${params.toString()}`
@@ -267,6 +297,158 @@ function connectWebSocket() {
     }
 
     // Handle other WebSocket messages (download progress, etc.)
+    if (data.type === "progress") {
+      const {
+        message,
+        total,
+        current,
+        totalProgress,
+        downloadProgress,
+        uploadProgress,
+        fileComplete,
+        downloadedCount,
+        notDownloadedCount,
+        complete,
+        error,
+        photoId,
+        folderLink,
+      } = data.payload;
+
+      if (folderLink) {
+        const folderLinkContainer = document.getElementById('folder-link-container');
+        if (folderLinkContainer && !folderLinkContainer.querySelector('a')) {
+          folderLinkContainer.innerHTML = `<a href="${folderLink}" target="_blank">${folderName}</a>`;
+        }
+      }
+
+      if (photoId) {
+        const row = document.querySelector(`tr[data-photo-id="${photoId}"]`);
+        if (row) {
+          const statusCell = row.querySelector(".status-cell");
+          const actionsCell = row.querySelector(".actions-cell");
+          const progressCell = row.querySelector(".progress-cell");
+
+          if (progressCell.classList.contains('hidden')) {
+            statusCell.classList.add('hidden');
+            actionsCell.classList.add('hidden');
+            progressCell.classList.remove('hidden');
+          }
+
+          if (downloadProgress !== undefined) {
+            const progressBar = progressCell.querySelector(".progress-bar");
+            if (progressBar) {
+              progressBar.style.width = `${downloadProgress}%`;
+              progressBar.textContent = `Downloading: ${downloadProgress}%`;
+            }
+          }
+
+          if (uploadStarted || uploadProgress !== undefined) {
+            if (!progressCell.querySelector(".spinner")) {
+              progressCell.innerHTML =
+                '<div class="spinner" style="margin: 0 auto;"></div><span style="margin-left: 10px;">Uploading...</span>';
+            }
+          }
+
+          if (complete || error) {
+            progressCell.classList.add('hidden');
+            statusCell.classList.remove('hidden');
+            actionsCell.classList.remove('hidden');
+
+            if (!error) {
+              const statusHtml = `<a href="${data.payload.driveLink}" target="_blank" class="status downloaded" title="View on Google Drive"><span class="status-text">Downloaded</span><span class="status-icon">✔</span></a>`;
+              const actionHtml = `<button data-photo-id="${photoId}" class="button download-single-btn redownload-btn" style="font-size: 12px; padding: 5px 10px;" title="Re-download">
+                  <span class="button-text">Re-download</span>
+                  <span class="button-icon">↻</span>
+                </button>`;
+              statusCell.innerHTML = statusHtml;
+              actionsCell.innerHTML = actionHtml;
+            }
+          }
+        }
+        return;
+      }
+
+      document.getElementById("download-fieldset").style.display = "block";
+      document.getElementById("cancel-btn").style.display = "block";
+
+      if (message) {
+        document.getElementById("progress-text").textContent = message;
+      }
+
+      if (totalProgress !== undefined) {
+        const progressBar = document.getElementById("total-progress-bar");
+        progressBar.style.width = `${totalProgress}%`;
+        progressBar.textContent = `${totalProgress}%`;
+      }
+      if (downloadProgress !== undefined) {
+        const downloadBar = document.getElementById("download-bar");
+        downloadBar.style.width = `${downloadProgress}%`;
+        downloadBar.textContent = `${downloadProgress}%`;
+
+        // Restore upload bar when a new download starts
+        const uploadContainer = document.getElementById('upload-container');
+        if (uploadContainer && uploadContainer.querySelector('.spinner')) {
+          uploadContainer.innerHTML = `
+            <p>Uploading to Google Drive:</p>
+            <div class="progress-bar-container">
+              <div id="upload-bar" class="progress-bar" style="width: 0%;">0%</div>
+            </div>`;
+        }
+      }
+      if (uploadStarted || uploadProgress !== undefined) {
+        const uploadContainer = document.getElementById('upload-container');
+        if (uploadContainer && !uploadContainer.querySelector('.spinner')) {
+          uploadContainer.innerHTML = `
+            <p>Uploading to Google Drive:</p>
+            <div class="spinner" style="margin: 0 auto;"></div>`;
+        }
+      }
+      if (fileComplete) {
+        document.getElementById("downloaded-count").textContent =
+          downloadedCount;
+        document.getElementById("not-downloaded-count").textContent =
+          notDownloadedCount;
+      }
+      if (complete) {
+        document.getElementById("cancel-btn").style.display = "none";
+        setTimeout(() => {
+          const fieldset = document.getElementById("download-fieldset");
+          fieldset.style.maxHeight = fieldset.scrollHeight + "px"; // Ensure initial height is set for transition
+          requestAnimationFrame(() => {
+            fieldset.classList.add("collapsing");
+          });
+          fieldset.addEventListener(
+            "transitionend",
+            () => {
+              fieldset.style.display = "none";
+              fieldset.classList.remove("collapsing");
+            },
+            { once: true }
+          );
+        }, 2000);
+      }
+      if (error) {
+        document.getElementById(
+          "progress-text"
+        ).textContent = `Error: ${error}`;
+        document.getElementById("cancel-btn").style.display = "none";
+        setTimeout(() => {
+          const fieldset = document.getElementById("download-fieldset");
+          fieldset.style.maxHeight = fieldset.scrollHeight + "px"; // Ensure initial height is set for transition
+          requestAnimationFrame(() => {
+            fieldset.classList.add("collapsing");
+          });
+          fieldset.addEventListener(
+            "transitionend",
+            () => {
+              fieldset.style.display = "none";
+              fieldset.classList.remove("collapsing");
+            },
+            { once: true }
+          );
+        }, 2000);
+      }
+    }
     // ...
   };
 }
@@ -318,9 +500,16 @@ function cycleCheckboxState(checkbox, silent = false) {
 
 function downloadSinglePhoto(photoId) {
   if (!isLoggedIn) return;
-  document.getElementById("download-progress").style.display = "block";
-  document.querySelector(".progress-bar-container").style.display = "block";
-  document.getElementById("progress-text").style.display = "block";
+
+  const row = document.querySelector(`tr[data-photo-id="${photoId}"]`);
+  const statusCell = row.querySelector('.status-cell');
+  const actionsCell = row.querySelector('.actions-cell');
+  const progressCell = row.querySelector('.progress-cell');
+
+  statusCell.classList.add('hidden');
+  actionsCell.classList.add('hidden');
+  progressCell.classList.remove('hidden');
+
   connectWebSocket();
   if (ws && ws.readyState === WebSocket.OPEN) {
     ws.send(JSON.stringify({ type: "download-photo", payload: { photoId } }));
@@ -331,7 +520,15 @@ function downloadSinglePhoto(photoId) {
   }
 }
 
+function cancelDownload() {
+  if (ws && ws.readyState === WebSocket.OPEN) {
+    ws.send(JSON.stringify({ type: "cancel-download" }));
+  }
+}
+
 document.addEventListener("DOMContentLoaded", () => {
+  connectWebSocket();
+
   window.addEventListener("popstate", (event) => {
     const filters = getFiltersFromQuery();
     document.getElementById("search-input").value = filters.search;
@@ -370,41 +567,101 @@ document.addEventListener("DOMContentLoaded", () => {
   toggleClearButton();
 
   if (filters.pose.length > 0) {
-    const moreFiltersBtn = document.getElementById('more-filters-btn');
-    const poseFiltersContainer = document.getElementById('pose-filters-container');
-    moreFiltersBtn.classList.add('active');
-    moreFiltersBtn.textContent = 'Less filters';
-    poseFiltersContainer.style.maxHeight = poseFiltersContainer.scrollHeight + "px";
+    const moreFiltersBtn = document.getElementById("more-filters-btn");
+    const poseFiltersContainer = document.getElementById(
+      "pose-filters-container"
+    );
+    moreFiltersBtn.classList.add("active");
+    moreFiltersBtn.textContent = "Less filters";
+    poseFiltersContainer.style.maxHeight =
+      poseFiltersContainer.scrollHeight + "px";
   }
 
-  document.body.addEventListener('click', (event) => {
-    const sortLink = event.target.closest('.sort-link');
+  document.body.addEventListener("click", (event) => {
+    const sortLink = event.target.closest(".sort-link");
     if (sortLink) {
       event.preventDefault();
       sortPhotos(sortLink.dataset.sortby);
     }
-    
-    const downloadBtn = event.target.closest('.download-single-btn');
+
+    const downloadBtn = event.target.closest(".download-single-btn");
     if (downloadBtn) {
       event.preventDefault();
       downloadSinglePhoto(downloadBtn.dataset.photoId);
     }
-  });
 
-  document.getElementById('more-filters-btn').addEventListener('click', function() {
-    this.classList.toggle('active');
-    const content = document.getElementById('pose-filters-container');
-    if (content.style.maxHeight){
-      content.style.maxHeight = null;
-      this.textContent = 'More filters';
-    } else {
-      content.style.maxHeight = content.scrollHeight + "px";
-      this.textContent = 'Less filters';
+    const pageBtn = event.target.closest(".pagination button[data-page]");
+    if (pageBtn) {
+      event.preventDefault();
+      const page = parseInt(pageBtn.dataset.page, 10);
+      const location = pageBtn.closest(".pagination").dataset.location;
+      changePage(page, location);
     }
   });
 
+  document
+    .getElementById("download-all-btn")
+    .addEventListener("click", confirmDownload);
+  document
+    .getElementById("update-btn")
+    .addEventListener("click", updatePhotoList);
+  document
+    .getElementById("cancel-btn")
+    .addEventListener("click", cancelDownload);
+  document
+    .getElementById("clear-search-btn")
+    .addEventListener("click", clearSearch);
+  document
+    .getElementById("reset-filters-btn")
+    .addEventListener("click", resetFilters);
+
+  document.querySelectorAll(".pose-filter-group").forEach((group) => {
+    group.addEventListener("click", () => {
+      const checkbox = group.querySelector('input[type="checkbox"]');
+      cycleCheckboxState(checkbox);
+    });
+  });
+
+  document
+    .getElementById("more-filters-btn")
+    .addEventListener("click", function () {
+      this.classList.toggle("active");
+      const content = document.getElementById("pose-filters-container");
+      if (content.style.maxHeight) {
+        content.style.maxHeight = null;
+        this.textContent = "More filters";
+      } else {
+        content.style.maxHeight = content.scrollHeight + "px";
+        this.textContent = "Less filters";
+      }
+    });
+
   if (downloadState.inProgress) {
-    document.getElementById("download-progress").style.display = "block";
-    connectWebSocket();
+    document.getElementById("download-fieldset").style.display = "block";
+
+    const { message, totalProgress, downloadProgress, uploadProgress, uploadStarted } =
+      downloadState;
+
+    if (message) {
+      document.getElementById("progress-text").textContent = message;
+    }
+    if (totalProgress !== undefined) {
+      const progressBar = document.getElementById("total-progress-bar");
+      progressBar.style.width = `${totalProgress}%`;
+      progressBar.textContent = `${totalProgress}%`;
+    }
+    if (downloadProgress !== undefined) {
+      const downloadBar = document.getElementById("download-bar");
+      downloadBar.style.width = `${downloadProgress}%`;
+      downloadBar.textContent = `${downloadProgress}%`;
+    }
+    if (uploadStarted || uploadProgress !== undefined) {
+      const uploadContainer = document.getElementById("upload-container");
+      if (uploadContainer && !uploadContainer.querySelector(".spinner")) {
+        uploadContainer.innerHTML = `
+            <p>Uploading to Google Drive:</p>
+            <div class="spinner" style="margin: 0 auto;"></div>`;
+      }
+    }
   }
 });

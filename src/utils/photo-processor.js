@@ -18,14 +18,13 @@ async function processPhoto(
     message: `Processing photo ${fileName}...`,
     photoId: photo.photoId.id,
     downloadProgress: 0,
-    uploadProgress: 0,
   });
 
   const { data } = await downloadPhoto(
     photo.downloadUrl,
     oAuth2Client,
     (percentage) => {
-      progressCallback({ downloadProgress: percentage });
+      progressCallback({ downloadProgress: percentage, photoId: photo.photoId.id });
     }
   );
 
@@ -79,20 +78,21 @@ async function processPhoto(
   const stream = Readable.from(newJpeg);
 
   const existingFile = await findFile(drive, fileName, folderId);
-
+  let file;
+  progressCallback({ uploadStarted: true, photoId: photo.photoId.id });
   if (existingFile) {
-    await updateFile(
+    file = await updateFile(
       drive,
       existingFile.id,
       "image/jpeg",
       stream,
       newJpeg.length,
       (percentage) => {
-        progressCallback({ uploadProgress: percentage });
+        progressCallback({ uploadProgress: percentage, photoId: photo.photoId.id });
       }
     );
   } else {
-    await createFile(
+    file = await createFile(
       drive,
       fileName,
       "image/jpeg",
@@ -100,12 +100,12 @@ async function processPhoto(
       folderId,
       newJpeg.length,
       (percentage) => {
-        progressCallback({ uploadProgress: percentage });
+        progressCallback({ uploadProgress: percentage, photoId: photo.photoId.id });
       }
     );
   }
 
-  return photo;
+  return { photo, file };
 }
 
 module.exports = { processPhoto };

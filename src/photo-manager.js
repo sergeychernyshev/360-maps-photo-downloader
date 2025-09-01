@@ -1,5 +1,9 @@
 const { google } = require("googleapis");
 const axios = require("axios");
+const fs = require("fs").promises;
+const path = require("path");
+
+const CREDENTIALS_PATH = path.join(process.cwd(), "credentials.json");
 
 /**
  * Lists all photos for the authenticated user, handling pagination.
@@ -7,9 +11,12 @@ const axios = require("axios");
  * @param {(message: string) => void} [log=() => {}] An optional function to log progress messages.
  */
 async function listAllPhotos(authClient, progressCallback = () => {}) {
+  const credsContent = await fs.readFile(CREDENTIALS_PATH);
+  const { api_key } = JSON.parse(credsContent).web;
   const streetviewpublish = google.streetviewpublish({
     version: "v1",
     auth: authClient,
+    key: api_key,
   });
   const allPhotos = [];
   let nextPageToken = null;

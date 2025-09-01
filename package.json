@@ -4,7 +4,8 @@
   "description": "A script to download 360 photos from Google Street View.",
   "main": "src/webapp.js",
   "scripts": {
-    "start": "nodemon"
+    "start": "nodemon",
+    "stop": "pkill -f nodemon"
   },
   "keywords": [],
   "author": "",

@@ -5,6 +5,7 @@ let state = {
   message: "",
   downloadProgress: 0,
   uploadProgress: 0,
+  uploadStarted: false,
   totalProgress: 0,
   complete: false,
   cancelled: false,
@@ -18,19 +19,20 @@ function getState() {
 }
 
 function updateState(newState) {
-  const oldState = { ...getState() };
-  Object.assign(state, newState);
-
-  if (state.socket) {
-    const changes = {};
-    for (const key in newState) {
-      if (newState[key] !== oldState[key]) {
-        changes[key] = newState[key];
-      }
+  if (newState.photoId) {
+    // Single photo progress update
+    if (state.socket) {
+      state.socket.send(
+        JSON.stringify({ type: "progress", payload: newState })
+      );
     }
-
-    if (Object.keys(changes).length > 0) {
-      state.socket.send(JSON.stringify(changes));
+  } else {
+    // Global progress update
+    Object.assign(state, newState);
+    if (state.socket) {
+      state.socket.send(
+        JSON.stringify({ type: "progress", payload: { ...getState(), ...newState } })
+      );
     }
   }
 }
@@ -38,7 +40,9 @@ function updateState(newState) {
 function setSocket(socket) {
   state.socket = socket;
   if (state.socket && state.inProgress) {
-    state.socket.send(JSON.stringify(getState()));
+    state.socket.send(
+      JSON.stringify({ type: "progress", payload: getState() })
+    );
   }
 }
 
@@ -49,6 +53,7 @@ function resetState() {
   state.message = "";
   state.downloadProgress = 0;
   state.uploadProgress = 0;
+  state.uploadStarted = false;
   state.totalProgress = 0;
   state.complete = false;
   state.cancelled = false;
