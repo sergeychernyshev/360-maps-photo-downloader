@@ -18,7 +18,6 @@ async function processPhoto(
     message: `Processing photo ${fileName}...`,
     photoId: photo.photoId.id,
     downloadProgress: 0,
-    uploadProgress: 0,
   });
 
   const { data } = await downloadPhoto(
