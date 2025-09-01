@@ -40,16 +40,24 @@ async function downloadSinglePhoto(req, photo) {
 
     if (downloadedPhoto) {
       if (req.session.missingPhotos && req.session.downloadedPhotos) {
-        const downloadedPhotoIndex = req.session.missingPhotos.findIndex(
+        // Remove from missingPhotos if it exists
+        const missingIndex = req.session.missingPhotos.findIndex(
           (p) => p.photoId.id === photo.photoId.id
         );
-        if (downloadedPhotoIndex > -1) {
-          const [downloadedPhoto] = req.session.missingPhotos.splice(
-            downloadedPhotoIndex,
-            1
-          );
-          req.session.downloadedPhotos.push(downloadedPhoto);
+        if (missingIndex > -1) {
+          req.session.missingPhotos.splice(missingIndex, 1);
         }
+
+        // Remove from downloadedPhotos if it exists (for re-downloads)
+        const downloadedIndex = req.session.downloadedPhotos.findIndex(
+          (p) => p.photoId.id === photo.photoId.id
+        );
+        if (downloadedIndex > -1) {
+          req.session.downloadedPhotos.splice(downloadedIndex, 1);
+        }
+
+        // Add the photo to downloadedPhotos
+        req.session.downloadedPhotos.push(downloadedPhoto);
       }
 
       progressCallback({

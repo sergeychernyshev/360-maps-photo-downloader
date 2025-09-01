@@ -186,7 +186,8 @@ function updatePhotoList() {
   if (!isLoggedIn) return;
   const updateBtn = document.getElementById("update-btn");
   updateBtn.disabled = true;
-  updateBtn.innerHTML = '<div class="spinner spinner-light"></div><span>Starting...</span>';
+  updateBtn.innerHTML =
+    '<div class="spinner spinner-light"></div><span>Starting...</span>';
 
   connectWebSocket();
 
@@ -304,25 +305,26 @@ function connectWebSocket() {
       if (photoId) {
         const row = document.querySelector(`tr[data-photo-id="${photoId}"]`);
         if (row) {
-          const statusCell = row.querySelector('.status-cell');
+          const statusCell = row.querySelector(".status-cell");
           if (downloadProgress !== undefined) {
-            const progressBar = statusCell.querySelector('.progress-bar');
+            const progressBar = statusCell.querySelector(".progress-bar");
             if (progressBar) {
               progressBar.style.width = `${downloadProgress}%`;
               progressBar.textContent = `Downloading: ${downloadProgress}%`;
             }
           }
-          
+
           if (uploadProgress !== undefined) {
-            if (!statusCell.querySelector('.spinner')) {
-              statusCell.innerHTML = '<div class="spinner" style="margin: 0 auto;"></div><span style="margin-left: 10px;">Uploading...</span>';
+            if (!statusCell.querySelector(".spinner")) {
+              statusCell.innerHTML =
+                '<div class="spinner" style="margin: 0 auto;"></div><span style="margin-left: 10px;">Uploading...</span>';
             }
           }
 
           if (complete || error) {
-            const actionsCell = row.querySelector('.actions-cell');
+            const actionsCell = row.querySelector(".actions-cell");
             statusCell.colSpan = 1;
-            actionsCell.style.display = '';
+            actionsCell.style.display = "";
 
             if (error) {
               statusCell.innerHTML = row.dataset.originalStatus;
@@ -342,7 +344,7 @@ function connectWebSocket() {
         }
         return;
       }
-      
+
       document.getElementById("download-fieldset").style.display = "block";
       document.getElementById("cancel-btn").style.display = "block";
 
@@ -464,24 +466,24 @@ function downloadSinglePhoto(photoId) {
   if (!isLoggedIn) return;
 
   const row = document.querySelector(`tr[data-photo-id="${photoId}"]`);
-  const statusCell = row.querySelector('.status-cell');
-  const actionsCell = row.querySelector('.actions-cell');
+  const statusCell = row.querySelector(".status-cell");
+  const actionsCell = row.querySelector(".actions-cell");
   const originalStatusHtml = statusCell.innerHTML;
   const originalActionsHtml = actionsCell.innerHTML;
 
-  const progressContainer = document.createElement('div');
-  progressContainer.className = 'progress-bar-container';
-  progressContainer.style.marginBottom = '0';
-  const progressBar = document.createElement('div');
-  progressBar.className = 'progress-bar';
-  progressBar.style.width = '0%';
-  progressBar.textContent = 'Starting...';
+  const progressContainer = document.createElement("div");
+  progressContainer.className = "progress-bar-container";
+  progressContainer.style.marginBottom = "0";
+  const progressBar = document.createElement("div");
+  progressBar.className = "progress-bar";
+  progressBar.style.width = "0%";
+  progressBar.textContent = "Starting...";
   progressContainer.appendChild(progressBar);
 
-  statusCell.innerHTML = '';
+  statusCell.innerHTML = "";
   statusCell.colSpan = 2;
   statusCell.appendChild(progressContainer);
-  actionsCell.style.display = 'none';
+  actionsCell.style.display = "none";
 
   row.dataset.originalStatus = originalStatusHtml;
   row.dataset.originalActions = originalActionsHtml;
