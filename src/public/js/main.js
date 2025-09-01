@@ -306,19 +306,28 @@ function connectWebSocket() {
         if (row) {
           const progressBar = row.querySelector('.progress-bar');
           if (progressBar) {
+            // Store and update progress in the dataset to handle separate messages
             if (downloadProgress !== undefined) {
-              progressBar.style.width = `${downloadProgress}%`;
-              progressBar.textContent = `Downloading: ${downloadProgress}%`;
-              if (downloadProgress === 100) {
-                progressBar.classList.add('animated');
-                progressBar.textContent = 'Uploading...';
-              }
+              row.dataset.downloadProgress = downloadProgress;
             }
-            if (uploadProgress !== undefined && !progressBar.classList.contains('animated')) {
-              // This case handles when download is already 100% but we get an upload event
-              progressBar.classList.add('animated');
-              progressBar.textContent = 'Uploading...';
+            if (uploadProgress !== undefined) {
+              row.dataset.uploadProgress = uploadProgress;
             }
+
+            const currentDownload = parseInt(row.dataset.downloadProgress || '0', 10);
+            const currentUpload = parseInt(row.dataset.uploadProgress || '0', 10);
+
+            const overallProgress = Math.round(currentDownload / 2) + Math.round(currentUpload / 2);
+            let progressText = '';
+
+            if (currentUpload > 0) {
+              progressText = `Uploading: ${currentUpload}%`;
+            } else {
+              progressText = `Downloading: ${currentDownload}%`;
+            }
+
+            progressBar.style.width = `${overallProgress}%`;
+            progressBar.textContent = progressText;
           }
 
           if (complete || error) {
@@ -341,6 +350,8 @@ function connectWebSocket() {
             }
             delete row.dataset.originalStatus;
             delete row.dataset.originalActions;
+            delete row.dataset.downloadProgress;
+            delete row.dataset.uploadProgress;
           }
         }
         return;
