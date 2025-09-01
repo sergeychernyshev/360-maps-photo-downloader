@@ -79,6 +79,7 @@ async function processPhoto(
 
   const existingFile = await findFile(drive, fileName, folderId);
   let file;
+  progressCallback({ uploadProgress: 0, photoId: photo.photoId.id });
   if (existingFile) {
     file = await updateFile(
       drive,
