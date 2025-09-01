@@ -129,8 +129,14 @@ async function initialize() {
    * Global error handler for the Express app.
    */
   app.use((err, req, res, next) => {
-    console.error(err.stack);
-    res.status(500).send(`Something broke! <pre>${err.stack}</pre>`);
+    if (err.message === "User is not authenticated.") {
+      req.session.destroy(() => {
+        res.redirect("/login");
+      });
+    } else {
+      console.error(err.stack);
+      res.status(500).send(`Something broke! <pre>${err.stack}</pre>`);
+    }
   });
 
   /**
