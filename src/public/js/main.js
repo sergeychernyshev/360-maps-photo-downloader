@@ -375,11 +375,24 @@ function connectWebSocket() {
         const downloadBar = document.getElementById("download-bar");
         downloadBar.style.width = `${downloadProgress}%`;
         downloadBar.textContent = `${downloadProgress}%`;
+
+        // Restore upload bar when a new download starts
+        const uploadContainer = document.getElementById('upload-container');
+        if (uploadContainer && uploadContainer.querySelector('.spinner')) {
+          uploadContainer.innerHTML = `
+            <p>Uploading to Google Drive:</p>
+            <div class="progress-bar-container">
+              <div id="upload-bar" class="progress-bar" style="width: 0%;">0%</div>
+            </div>`;
+        }
       }
       if (uploadProgress !== undefined) {
-        const uploadBar = document.getElementById("upload-bar");
-        uploadBar.style.width = `${uploadProgress}%`;
-        uploadBar.textContent = `${uploadProgress}%`;
+        const uploadContainer = document.getElementById('upload-container');
+        if (uploadContainer && !uploadContainer.querySelector('.spinner')) {
+          uploadContainer.innerHTML = `
+            <p>Uploading to Google Drive:</p>
+            <div class="spinner" style="margin: 0 auto;"></div>`;
+        }
       }
       if (fileComplete) {
         document.getElementById("downloaded-count").textContent =
