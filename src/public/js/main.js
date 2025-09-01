@@ -461,6 +461,27 @@ document.addEventListener("DOMContentLoaded", () => {
       event.preventDefault();
       downloadSinglePhoto(downloadBtn.dataset.photoId);
     }
+
+    const pageBtn = event.target.closest('.pagination button[data-page]');
+    if (pageBtn) {
+      event.preventDefault();
+      const page = parseInt(pageBtn.dataset.page, 10);
+      const location = pageBtn.closest('.pagination').dataset.location;
+      changePage(page, location);
+    }
+  });
+
+  document.getElementById('download-all-btn').addEventListener('click', confirmDownload);
+  document.getElementById('update-btn').addEventListener('click', updatePhotoList);
+  document.getElementById('cancel-btn').addEventListener('click', cancelDownload);
+  document.getElementById('clear-search-btn').addEventListener('click', clearSearch);
+  document.getElementById('reset-filters-btn').addEventListener('click', resetFilters);
+
+  document.querySelectorAll('.pose-filter-group').forEach(group => {
+    group.addEventListener('click', () => {
+      const checkbox = group.querySelector('input[type="checkbox"]');
+      cycleCheckboxState(checkbox);
+    });
   });
 
   document.getElementById('more-filters-btn').addEventListener('click', function() {

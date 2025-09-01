@@ -88,7 +88,7 @@ function buildPaginationHtml(totalPages, currentPage, action, location) {
   let paginationHtml = "";
   if (totalPages > 1) {
     const buildPageClick = (page) => {
-      return `onclick="${action}(${page}, '${location}')"`;
+      return `data-page="${page}"`;
     };
 
     paginationHtml += `<div class="pagination" data-location="${location}">`;
