@@ -22,7 +22,9 @@ async function downloadAllPhotos(
   missingPhotosCount
 ) {
   const progressCallback = (progress) => {
-    updateState(progress);
+    // Strip photoId from progress updates to ensure the global state is updated.
+    const { photoId, ...globalProgress } = progress;
+    updateState(globalProgress);
   };
 
   try {
