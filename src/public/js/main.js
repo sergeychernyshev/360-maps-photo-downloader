@@ -532,6 +532,8 @@ function cancelDownload() {
 }
 
 document.addEventListener("DOMContentLoaded", () => {
+  connectWebSocket();
+
   window.addEventListener("popstate", (event) => {
     const filters = getFiltersFromQuery();
     document.getElementById("search-input").value = filters.search;
@@ -666,7 +668,5 @@ document.addEventListener("DOMContentLoaded", () => {
             <div class="spinner" style="margin: 0 auto;"></div>`;
       }
     }
-
-    connectWebSocket();
   }
 });
