@@ -229,6 +229,12 @@ function connectWebSocket() {
       } = data.payload;
 
       // 1. Update DOM
+      const updateBtn = document.getElementById("update-btn");
+      if (updateBtn && updateBtn.disabled) {
+        updateBtn.disabled = false;
+        updateBtn.innerHTML = totalPhotosCount > 0 ? 'Update the List of Photos' : 'Check for new photos';
+      }
+
       document
         .getElementById("filter-progress-indicator")
         .classList.remove("visible");
