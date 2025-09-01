@@ -65,8 +65,6 @@ async function writeFileContent(drive, fileId, content) {
   });
 }
 
-const { PassThrough } = require("stream");
-
 async function createFile(
   drive,
   fileName,
@@ -81,28 +79,26 @@ async function createFile(
     parents: [folderId],
   };
 
-  const passThrough = new PassThrough();
-  let bytesUploaded = 0;
-
-  passThrough.on("data", (chunk) => {
-    bytesUploaded += chunk.length;
-    if (size) {
-      const percentage = Math.round((bytesUploaded / size) * 100);
-      onUploadProgress(percentage);
-    }
-  });
-
-  contentStream.pipe(passThrough);
-
   const media = {
     mimeType,
-    body: passThrough,
+    body: contentStream,
   };
-  const res = await drive.files.create({
-    resource: fileMetadata,
-    media: media,
-    fields: "id, webViewLink",
-  });
+
+  const res = await drive.files.create(
+    {
+      resource: fileMetadata,
+      media: media,
+      fields: "id, webViewLink",
+    },
+    {
+      onUploadProgress: (evt) => {
+        if (size) {
+          const progress = Math.round((evt.bytesRead / size) * 100);
+          onUploadProgress(progress);
+        }
+      },
+    }
+  );
   return res.data;
 }
 
@@ -149,28 +145,26 @@ async function updateFile(
   size,
   onUploadProgress
 ) {
-  const passThrough = new PassThrough();
-  let bytesUploaded = 0;
-
-  passThrough.on("data", (chunk) => {
-    bytesUploaded += chunk.length;
-    if (size) {
-      const percentage = Math.round((bytesUploaded / size) * 100);
-      onUploadProgress(percentage);
-    }
-  });
-
-  contentStream.pipe(passThrough);
-
   const media = {
     mimeType,
-    body: passThrough,
+    body: contentStream,
   };
-  const res = await drive.files.update({
-    fileId: fileId,
-    media: media,
-    fields: "id, webViewLink",
-  });
+
+  const res = await drive.files.update(
+    {
+      fileId: fileId,
+      media: media,
+      fields: "id, webViewLink",
+    },
+    {
+      onUploadProgress: (evt) => {
+        if (size) {
+          const progress = Math.round((evt.bytesRead / size) * 100);
+          onUploadProgress(progress);
+        }
+      },
+    }
+  );
   return res.data;
 }
 
