@@ -25,7 +25,7 @@ async function processPhoto(
     photo.downloadUrl,
     oAuth2Client,
     (percentage) => {
-      progressCallback({ downloadProgress: percentage });
+      progressCallback({ downloadProgress: percentage, photoId: photo.photoId.id });
     }
   );
 
@@ -88,7 +88,7 @@ async function processPhoto(
       stream,
       newJpeg.length,
       (percentage) => {
-        progressCallback({ uploadProgress: percentage });
+        progressCallback({ uploadProgress: percentage, photoId: photo.photoId.id });
       }
     );
   } else {
@@ -100,7 +100,7 @@ async function processPhoto(
       folderId,
       newJpeg.length,
       (percentage) => {
-        progressCallback({ uploadProgress: percentage });
+        progressCallback({ uploadProgress: percentage, photoId: photo.photoId.id });
       }
     );
   }

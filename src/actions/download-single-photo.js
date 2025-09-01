@@ -14,7 +14,7 @@ const { processPhoto } = require("../utils/photo-processor");
  */
 async function downloadSinglePhoto(req, photo) {
   const progressCallback = (progress) => {
-    updateState(progress);
+    updateState({ ...progress, photoId: photo.photoId.id });
   };
 
   try {

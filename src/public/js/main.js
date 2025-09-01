@@ -298,8 +298,29 @@ function connectWebSocket() {
         notDownloadedCount,
         complete,
         error,
+        photoId,
       } = data.payload;
 
+      if (photoId) {
+        const row = document.querySelector(`button[data-photo-id="${photoId}"]`).closest('tr');
+        if (row) {
+          const progressBar = row.querySelector('.progress-bar');
+          if (progressBar) {
+            const overallProgress = Math.round(((downloadProgress || 0) + (uploadProgress || 0)) / 2);
+            progressBar.style.width = `${overallProgress}%`;
+            progressBar.textContent = `${overallProgress}%`;
+          }
+
+          if (complete || error) {
+            row.cells[4].innerHTML = row.dataset.originalStatus;
+            row.cells[5].innerHTML = row.dataset.originalActions;
+            delete row.dataset.originalStatus;
+            delete row.dataset.originalActions;
+          }
+        }
+        return;
+      }
+      
       document.getElementById("download-fieldset").style.display = "block";
       document.getElementById("cancel-btn").style.display = "block";
 
@@ -419,7 +440,29 @@ function cycleCheckboxState(checkbox, silent = false) {
 
 function downloadSinglePhoto(photoId) {
   if (!isLoggedIn) return;
-  document.getElementById("download-fieldset").style.display = "block";
+
+  const row = document.querySelector(`button[data-photo-id="${photoId}"]`).closest('tr');
+  const statusCell = row.cells[4];
+  const actionsCell = row.cells[5];
+  const originalStatusHtml = statusCell.innerHTML;
+  const originalActionsHtml = actionsCell.innerHTML;
+
+  const progressContainer = document.createElement('div');
+  progressContainer.className = 'progress-bar-container';
+  progressContainer.style.marginBottom = '0';
+  const progressBar = document.createElement('div');
+  progressBar.className = 'progress-bar';
+  progressBar.style.width = '0%';
+  progressBar.textContent = '0%';
+  progressContainer.appendChild(progressBar);
+
+  statusCell.innerHTML = '';
+  statusCell.appendChild(progressContainer);
+  actionsCell.innerHTML = '';
+
+  row.dataset.originalStatus = originalStatusHtml;
+  row.dataset.originalActions = originalActionsHtml;
+
   connectWebSocket();
   if (ws && ws.readyState === WebSocket.OPEN) {
     ws.send(JSON.stringify({ type: "download-photo", payload: { photoId } }));
