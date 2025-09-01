@@ -304,34 +304,20 @@ function connectWebSocket() {
       if (photoId) {
         const row = document.querySelector(`tr[data-photo-id="${photoId}"]`);
         if (row) {
-          const progressBar = row.querySelector('.progress-bar');
-          if (progressBar) {
-            // Store and update progress in the dataset to handle separate messages
-            if (downloadProgress !== undefined) {
-              row.dataset.downloadProgress = downloadProgress;
+          const statusCell = row.querySelector('.status-cell');
+          if (downloadProgress !== undefined) {
+            const progressBar = statusCell.querySelector('.progress-bar');
+            if (progressBar) {
+              progressBar.style.width = `${downloadProgress}%`;
+              progressBar.textContent = `Downloading: ${downloadProgress}%`;
             }
-            if (uploadProgress !== undefined) {
-              row.dataset.uploadProgress = uploadProgress;
-            }
-
-            const currentDownload = parseInt(row.dataset.downloadProgress || '0', 10);
-            const currentUpload = parseInt(row.dataset.uploadProgress || '0', 10);
-
-            const overallProgress = Math.round(currentDownload / 2) + Math.round(currentUpload / 2);
-            let progressText = '';
-
-            if (currentUpload > 0) {
-              progressText = `Uploading: ${currentUpload}%`;
-            } else {
-              progressText = `Downloading: ${currentDownload}%`;
-            }
-
-            progressBar.style.width = `${overallProgress}%`;
-            progressBar.textContent = progressText;
+          }
+          
+          if (uploadProgress !== undefined || (downloadProgress === 100 && !statusCell.querySelector('.spinner'))) {
+            statusCell.innerHTML = '<div class="spinner" style="margin: 0 auto;"></div><span style="margin-left: 10px;">Uploading...</span>';
           }
 
           if (complete || error) {
-            const statusCell = row.querySelector('.status-cell');
             const actionsCell = row.querySelector('.actions-cell');
             statusCell.colSpan = 1;
             actionsCell.style.display = '';
@@ -350,8 +336,6 @@ function connectWebSocket() {
             }
             delete row.dataset.originalStatus;
             delete row.dataset.originalActions;
-            delete row.dataset.downloadProgress;
-            delete row.dataset.uploadProgress;
           }
         }
         return;
@@ -489,7 +473,7 @@ function downloadSinglePhoto(photoId) {
   const progressBar = document.createElement('div');
   progressBar.className = 'progress-bar';
   progressBar.style.width = '0%';
-  progressBar.textContent = 'Starting...';
+  progressBar.textContent = 'Downloading: 0%';
   progressContainer.appendChild(progressBar);
 
   statusCell.innerHTML = '';
