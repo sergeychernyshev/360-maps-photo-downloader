@@ -475,7 +475,7 @@ function downloadSinglePhoto(photoId) {
   const progressBar = document.createElement('div');
   progressBar.className = 'progress-bar';
   progressBar.style.width = '0%';
-  progressBar.textContent = 'Downloading: 0%';
+  progressBar.textContent = 'Starting...';
   progressContainer.appendChild(progressBar);
 
   statusCell.innerHTML = '';
