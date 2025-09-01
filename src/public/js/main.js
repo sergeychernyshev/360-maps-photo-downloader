@@ -640,7 +640,33 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 
   if (downloadState.inProgress) {
-    document.getElementById("download-progress").style.display = "block";
+    document.getElementById("download-fieldset").style.display = "block";
+
+    const { message, totalProgress, downloadProgress, uploadProgress } =
+      downloadState;
+
+    if (message) {
+      document.getElementById("progress-text").textContent = message;
+    }
+    if (totalProgress !== undefined) {
+      const progressBar = document.getElementById("total-progress-bar");
+      progressBar.style.width = `${totalProgress}%`;
+      progressBar.textContent = `${totalProgress}%`;
+    }
+    if (downloadProgress !== undefined) {
+      const downloadBar = document.getElementById("download-bar");
+      downloadBar.style.width = `${downloadProgress}%`;
+      downloadBar.textContent = `${downloadProgress}%`;
+    }
+    if (uploadProgress !== undefined) {
+      const uploadContainer = document.getElementById("upload-container");
+      if (uploadContainer && !uploadContainer.querySelector(".spinner")) {
+        uploadContainer.innerHTML = `
+            <p>Uploading to Google Drive:</p>
+            <div class="spinner" style="margin: 0 auto;"></div>`;
+      }
+    }
+
     connectWebSocket();
   }
 });

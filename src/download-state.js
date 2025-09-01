@@ -39,7 +39,9 @@ function updateState(newState) {
 function setSocket(socket) {
   state.socket = socket;
   if (state.socket && state.inProgress) {
-    state.socket.send(JSON.stringify(getState()));
+    state.socket.send(
+      JSON.stringify({ type: "progress", payload: getState() })
+    );
   }
 }
 
