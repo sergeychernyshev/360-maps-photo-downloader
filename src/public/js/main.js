@@ -331,8 +331,8 @@ function connectWebSocket() {
           }
 
           if (complete || error) {
-            const statusCell = row.cells[4];
-            const actionsCell = row.cells[5];
+            const statusCell = row.querySelector('.status-cell');
+            const actionsCell = row.querySelector('.actions-cell');
             statusCell.colSpan = 1;
             actionsCell.style.display = '';
 
@@ -478,8 +478,8 @@ function downloadSinglePhoto(photoId) {
   if (!isLoggedIn) return;
 
   const row = document.querySelector(`tr[data-photo-id="${photoId}"]`);
-  const statusCell = row.cells[4];
-  const actionsCell = row.cells[5];
+  const statusCell = row.querySelector('.status-cell');
+  const actionsCell = row.querySelector('.actions-cell');
   const originalStatusHtml = statusCell.innerHTML;
   const originalActionsHtml = actionsCell.innerHTML;
 

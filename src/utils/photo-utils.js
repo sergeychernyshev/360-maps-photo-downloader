@@ -69,8 +69,8 @@ function buildPhotoListHtml(photos, downloadedFiles, driveFileLinks) {
       <td>${locationHtml}${poseString}</td>
       <td>${new Date(photo.captureTime).toLocaleDateString()}</td>
       <td>${photo.viewCount || 0}</td>
-      <td>${statusHtml}</td>
-      <td>
+      <td class="status-cell">${statusHtml}</td>
+      <td class="actions-cell">
         <button data-photo-id="${photo.photoId.id}" class="button download-single-btn ${
           isDownloaded ? 'redownload-btn' : 'download-btn'
         }" style="font-size: 12px; padding: 5px 10px;" title="${isDownloaded ? 'Re-download' : 'Download'}">
