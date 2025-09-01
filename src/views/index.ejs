@@ -23,7 +23,7 @@
       <p>
         This is a list of your 360 photos on Google Maps. It indicates which
         ones have already been backed up to the
-        <code
+        <code id="folder-link-container"
           ><% if (locals.folderLink) { %>
           <a href="<%= folderLink %>" target="_blank"><%= folderName %></a>
           <% } else {%> <%= folderName %> <% } %>
@@ -305,6 +305,7 @@
       const downloadState = <%- JSON.stringify(downloadState || { inProgress: false }) %>;
       const isLoggedIn = <%- !!isLoggedIn %>;
       const missingPhotosCount = <%- notDownloadedCount %>;
+      const folderName = "<%= folderName %>";
     </script>
     <script src="/js/main.js" defer></script>
   </body>

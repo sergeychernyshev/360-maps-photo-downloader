@@ -31,6 +31,10 @@ async function downloadAllPhotos(
     const folder = await findOrCreateFolder(drive, FOLDER_NAME);
     const folderId = folder.id;
 
+    progressCallback({
+      folderLink: folder.webViewLink,
+    });
+
     const driveFiles = await listFiles(drive, folderId);
     const existingFileNames = new Set(driveFiles.map((f) => f.name));
 

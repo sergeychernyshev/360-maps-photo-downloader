@@ -24,6 +24,10 @@ async function downloadSinglePhoto(req, photo) {
     const folderId = folder.id;
 
     progressCallback({
+      folderLink: folder.webViewLink,
+    });
+
+    progressCallback({
       message: `Starting download of 1 photo to Google Drive...`,
       total: 1,
       current: 0,

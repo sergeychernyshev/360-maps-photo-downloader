@@ -32,6 +32,10 @@ async function updatePhotoList(req) {
     const folder = await findOrCreateFolder(drive, FOLDER_NAME);
     const folderId = folder.id;
 
+    progressCallback({
+      folderLink: folder.webViewLink,
+    });
+
     // Get the existing photo list file, if it exists
     let photoListFile = await getPhotoListFile(drive, folderId);
 

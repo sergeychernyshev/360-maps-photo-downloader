@@ -306,7 +306,15 @@ function connectWebSocket() {
         complete,
         error,
         photoId,
+        folderLink,
       } = data.payload;
+
+      if (folderLink) {
+        const folderLinkContainer = document.getElementById('folder-link-container');
+        if (folderLinkContainer && !folderLinkContainer.querySelector('a')) {
+          folderLinkContainer.innerHTML = `<a href="${folderLink}" target="_blank">${folderName}</a>`;
+        }
+      }
 
       if (photoId) {
         const row = document.querySelector(`tr[data-photo-id="${photoId}"]`);
