@@ -64,8 +64,6 @@ a.cancel {
 }
 #cancel-btn {
   background: #db4437;
-  height: 1.5em;
-  line-height: 1;
   align-self: flex-end;
   margin-bottom: 1em;
 }
@@ -246,7 +244,6 @@ form input[type="text"] {
 }
 #progress-text {
   margin-top: 10px;
-  display: none;
 }
 .accordion {
   background-color: #eee;
@@ -346,7 +343,8 @@ legend {
 }
 
 #download-fieldset {
-  transition: max-height 0.5s ease-out, opacity 0.5s ease-out, padding 0.5s ease-out, margin 0.5s ease-out;
+  transition: max-height 0.5s ease-out, opacity 0.5s ease-out,
+    padding 0.5s ease-out, margin 0.5s ease-out;
   overflow: hidden;
 }
 

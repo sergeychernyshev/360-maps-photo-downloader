@@ -60,50 +60,29 @@ async function downloadAllPhotos(
       const photo = photos[i];
       const fileName = `${photo.photoId.id}.jpg`;
 
+      let downloadedPhoto;
       if (existingFileNames.has(fileName)) {
         progressCallback({
           message: `Skipping existing file: ${fileName}`,
         });
-        if (req.session.missingPhotos && req.session.downloadedPhotos) {
-          const downloadedPhotoIndex = req.session.missingPhotos.findIndex(
-            (p) => p.photoId.id === photo.photoId.id
-          );
-          if (downloadedPhotoIndex > -1) {
-            const [downloadedPhoto] = req.session.missingPhotos.splice(
-              downloadedPhotoIndex,
-              1
-            );
-            req.session.downloadedPhotos.push(downloadedPhoto);
-          }
-        }
+        downloadedPhoto = photo;
+      } else {
         progressCallback({
-          fileComplete: true,
-          downloadedCount: req.session.downloadedPhotos.length,
-          notDownloadedCount: req.session.missingPhotos.length,
-          totalProgress: Math.round(
-            ((downloadedPhotosCount + i + 1) /
-              (downloadedPhotosCount + missingPhotosCount)) *
-              100
-          ),
+          message: `Processing photo ${
+            downloadedPhotosCount + i + 1
+          } of ${totalPhotoCount} (${fileName})...`,
+          total: totalPhotos,
+          current: i,
         });
-        continue;
+
+        downloadedPhoto = await processPhoto(
+          drive,
+          oAuth2Client,
+          photo,
+          folderId,
+          progressCallback
+        );
       }
-
-      progressCallback({
-        message: `Processing photo ${
-          downloadedPhotosCount + i + 1
-        } of ${totalPhotoCount} (${fileName})...`,
-        total: totalPhotos,
-        current: i,
-      });
-
-      const downloadedPhoto = await processPhoto(
-        drive,
-        oAuth2Client,
-        photo,
-        folderId,
-        progressCallback
-      );
 
       if (downloadedPhoto) {
         if (req.session.missingPhotos && req.session.downloadedPhotos) {
@@ -111,11 +90,11 @@ async function downloadAllPhotos(
             (p) => p.photoId.id === photo.photoId.id
           );
           if (downloadedPhotoIndex > -1) {
-            const [downloadedPhoto] = req.session.missingPhotos.splice(
+            const [splicedPhoto] = req.session.missingPhotos.splice(
               downloadedPhotoIndex,
               1
             );
-            req.session.downloadedPhotos.push(downloadedPhoto);
+            req.session.downloadedPhotos.push(splicedPhoto);
           }
         }
 

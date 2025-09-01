@@ -1,24 +1,24 @@
 let ws;
 
 function updateSortIndicators(sort, order) {
-  document.querySelectorAll('.sort-link').forEach(link => {
+  document.querySelectorAll(".sort-link").forEach((link) => {
     const sortBy = link.dataset.sortby;
     // Clear existing arrows
-    const arrow = link.querySelector('.sort-arrow');
+    const arrow = link.querySelector(".sort-arrow");
     if (arrow) {
       arrow.remove();
     }
 
     if (sortBy === sort) {
-      link.classList.add('active');
+      link.classList.add("active");
       link.dataset.order = order;
-      const arrowSpan = document.createElement('span');
-      arrowSpan.className = 'sort-arrow';
-      arrowSpan.innerHTML = order === 'asc' ? ' &uarr;' : ' &darr;';
+      const arrowSpan = document.createElement("span");
+      arrowSpan.className = "sort-arrow";
+      arrowSpan.innerHTML = order === "asc" ? " &uarr;" : " &darr;";
       link.appendChild(arrowSpan);
     } else {
-      link.classList.remove('active');
-      link.dataset.order = 'desc'; // Default for non-active links
+      link.classList.remove("active");
+      link.dataset.order = "desc"; // Default for non-active links
     }
   });
 }
@@ -49,8 +49,10 @@ function getCurrentFilters() {
     new URLSearchParams(window.location.search).get("page") || "1",
     10
   );
-  const sort = new URLSearchParams(window.location.search).get("sort") || "date";
-  const order = new URLSearchParams(window.location.search).get("order") || "desc";
+  const sort =
+    new URLSearchParams(window.location.search).get("sort") || "date";
+  const order =
+    new URLSearchParams(window.location.search).get("order") || "desc";
   return { search, status, poseFilters, page, sort, order };
 }
 
@@ -69,8 +71,8 @@ function applyFilters(newFilters = {}) {
     isPopState: newFilters.isPopState, // Flag for history handling
   };
 
-  document.getElementById('filter-progress-indicator').classList.add('visible');
-  document.querySelector('tbody').classList.add('filtering');
+  document.getElementById("filter-progress-indicator").classList.add("visible");
+  document.querySelector("tbody").classList.add("filtering");
 
   connectWebSocket();
   if (ws && ws.readyState === WebSocket.OPEN) {
@@ -83,8 +85,10 @@ function applyFilters(newFilters = {}) {
 }
 
 function sortPhotos(sort) {
-  const currentOrder = new URLSearchParams(window.location.search).get("order") || "desc";
-  const currentSort = new URLSearchParams(window.location.search).get("sort") || "date";
+  const currentOrder =
+    new URLSearchParams(window.location.search).get("order") || "desc";
+  const currentSort =
+    new URLSearchParams(window.location.search).get("sort") || "date";
   let order = "asc";
   if (currentSort === sort) {
     order = currentOrder === "asc" ? "desc" : "asc";
@@ -133,19 +137,31 @@ function resetFilters() {
     .forEach((checkbox) => {
       setCheckboxState(checkbox, "any", true);
     });
-  
-  const moreFiltersBtn = document.getElementById('more-filters-btn');
-  const poseFiltersContainer = document.getElementById('pose-filters-container');
-  moreFiltersBtn.classList.remove('active');
-  moreFiltersBtn.textContent = 'More filters';
+
+  const moreFiltersBtn = document.getElementById("more-filters-btn");
+  const poseFiltersContainer = document.getElementById(
+    "pose-filters-container"
+  );
+  moreFiltersBtn.classList.remove("active");
+  moreFiltersBtn.textContent = "More filters";
   poseFiltersContainer.style.maxHeight = null;
 
-  applyFilters({ search: "", status: "all", poseFilters: [], page: 1, sort: "date", order: "desc" });
+  applyFilters({
+    search: "",
+    status: "all",
+    poseFilters: [],
+    page: 1,
+    sort: "date",
+    order: "desc",
+  });
 }
 
 function confirmDownload() {
   if (!isLoggedIn) return;
-  const missingPhotosCount = parseInt(document.getElementById("not-downloaded-count").textContent, 10);
+  const missingPhotosCount = parseInt(
+    document.getElementById("not-downloaded-count").textContent,
+    10
+  );
   if (missingPhotosCount > 10) {
     if (
       !confirm(
@@ -212,8 +228,10 @@ function connectWebSocket() {
       } = data.payload;
 
       // 1. Update DOM
-      document.getElementById('filter-progress-indicator').classList.remove('visible');
-      document.querySelector('tbody').classList.remove('filtering');
+      document
+        .getElementById("filter-progress-indicator")
+        .classList.remove("visible");
+      document.querySelector("tbody").classList.remove("filtering");
       document.querySelector("tbody").innerHTML = photoListHtml;
       document.querySelectorAll(".pagination").forEach((el, i) => {
         el.innerHTML = i === 0 ? paginationHtmlTop : paginationHtmlBottom;
@@ -243,8 +261,10 @@ function connectWebSocket() {
           .join(",");
         if (poseQuery) params.set("pose", poseQuery);
         if (requestPayload.page > 1) params.set("page", requestPayload.page);
-        if (requestPayload.sort && requestPayload.sort !== 'date') params.set("sort", requestPayload.sort);
-        if (requestPayload.order && requestPayload.order !== 'desc') params.set("order", requestPayload.order);
+        if (requestPayload.sort && requestPayload.sort !== "date")
+          params.set("sort", requestPayload.sort);
+        if (requestPayload.order && requestPayload.order !== "desc")
+          params.set("order", requestPayload.order);
 
         const newQueryString = params.toString()
           ? `?${params.toString()}`
@@ -286,6 +306,7 @@ function connectWebSocket() {
       if (message) {
         document.getElementById("progress-text").textContent = message;
       }
+
       if (totalProgress !== undefined) {
         const progressBar = document.getElementById("total-progress-bar");
         progressBar.style.width = `${totalProgress}%`;
@@ -302,36 +323,48 @@ function connectWebSocket() {
         uploadBar.textContent = `${uploadProgress}%`;
       }
       if (fileComplete) {
-        document.getElementById("downloaded-count").textContent = downloadedCount;
-        document.getElementById("not-downloaded-count").textContent = notDownloadedCount;
+        document.getElementById("downloaded-count").textContent =
+          downloadedCount;
+        document.getElementById("not-downloaded-count").textContent =
+          notDownloadedCount;
       }
       if (complete) {
         document.getElementById("cancel-btn").style.display = "none";
         setTimeout(() => {
           const fieldset = document.getElementById("download-fieldset");
-          fieldset.style.maxHeight = fieldset.scrollHeight + 'px'; // Ensure initial height is set for transition
+          fieldset.style.maxHeight = fieldset.scrollHeight + "px"; // Ensure initial height is set for transition
           requestAnimationFrame(() => {
-            fieldset.classList.add('collapsing');
+            fieldset.classList.add("collapsing");
           });
-          fieldset.addEventListener('transitionend', () => {
-            fieldset.style.display = 'none';
-            fieldset.classList.remove('collapsing');
-          }, { once: true });
+          fieldset.addEventListener(
+            "transitionend",
+            () => {
+              fieldset.style.display = "none";
+              fieldset.classList.remove("collapsing");
+            },
+            { once: true }
+          );
         }, 2000);
       }
       if (error) {
-        document.getElementById("progress-text").textContent = `Error: ${error}`;
+        document.getElementById(
+          "progress-text"
+        ).textContent = `Error: ${error}`;
         document.getElementById("cancel-btn").style.display = "none";
         setTimeout(() => {
           const fieldset = document.getElementById("download-fieldset");
-          fieldset.style.maxHeight = fieldset.scrollHeight + 'px'; // Ensure initial height is set for transition
+          fieldset.style.maxHeight = fieldset.scrollHeight + "px"; // Ensure initial height is set for transition
           requestAnimationFrame(() => {
-            fieldset.classList.add('collapsing');
+            fieldset.classList.add("collapsing");
           });
-          fieldset.addEventListener('transitionend', () => {
-            fieldset.style.display = 'none';
-            fieldset.classList.remove('collapsing');
-          }, { once: true });
+          fieldset.addEventListener(
+            "transitionend",
+            () => {
+              fieldset.style.display = "none";
+              fieldset.classList.remove("collapsing");
+            },
+            { once: true }
+          );
         }, 2000);
       }
     }
@@ -442,59 +475,74 @@ document.addEventListener("DOMContentLoaded", () => {
   toggleClearButton();
 
   if (filters.pose.length > 0) {
-    const moreFiltersBtn = document.getElementById('more-filters-btn');
-    const poseFiltersContainer = document.getElementById('pose-filters-container');
-    moreFiltersBtn.classList.add('active');
-    moreFiltersBtn.textContent = 'Less filters';
-    poseFiltersContainer.style.maxHeight = poseFiltersContainer.scrollHeight + "px";
+    const moreFiltersBtn = document.getElementById("more-filters-btn");
+    const poseFiltersContainer = document.getElementById(
+      "pose-filters-container"
+    );
+    moreFiltersBtn.classList.add("active");
+    moreFiltersBtn.textContent = "Less filters";
+    poseFiltersContainer.style.maxHeight =
+      poseFiltersContainer.scrollHeight + "px";
   }
 
-  document.body.addEventListener('click', (event) => {
-    const sortLink = event.target.closest('.sort-link');
+  document.body.addEventListener("click", (event) => {
+    const sortLink = event.target.closest(".sort-link");
     if (sortLink) {
       event.preventDefault();
       sortPhotos(sortLink.dataset.sortby);
     }
-    
-    const downloadBtn = event.target.closest('.download-single-btn');
+
+    const downloadBtn = event.target.closest(".download-single-btn");
     if (downloadBtn) {
       event.preventDefault();
       downloadSinglePhoto(downloadBtn.dataset.photoId);
     }
 
-    const pageBtn = event.target.closest('.pagination button[data-page]');
+    const pageBtn = event.target.closest(".pagination button[data-page]");
     if (pageBtn) {
       event.preventDefault();
       const page = parseInt(pageBtn.dataset.page, 10);
-      const location = pageBtn.closest('.pagination').dataset.location;
+      const location = pageBtn.closest(".pagination").dataset.location;
       changePage(page, location);
     }
   });
 
-  document.getElementById('download-all-btn').addEventListener('click', confirmDownload);
-  document.getElementById('update-btn').addEventListener('click', updatePhotoList);
-  document.getElementById('cancel-btn').addEventListener('click', cancelDownload);
-  document.getElementById('clear-search-btn').addEventListener('click', clearSearch);
-  document.getElementById('reset-filters-btn').addEventListener('click', resetFilters);
+  document
+    .getElementById("download-all-btn")
+    .addEventListener("click", confirmDownload);
+  document
+    .getElementById("update-btn")
+    .addEventListener("click", updatePhotoList);
+  document
+    .getElementById("cancel-btn")
+    .addEventListener("click", cancelDownload);
+  document
+    .getElementById("clear-search-btn")
+    .addEventListener("click", clearSearch);
+  document
+    .getElementById("reset-filters-btn")
+    .addEventListener("click", resetFilters);
 
-  document.querySelectorAll('.pose-filter-group').forEach(group => {
-    group.addEventListener('click', () => {
+  document.querySelectorAll(".pose-filter-group").forEach((group) => {
+    group.addEventListener("click", () => {
       const checkbox = group.querySelector('input[type="checkbox"]');
       cycleCheckboxState(checkbox);
     });
   });
 
-  document.getElementById('more-filters-btn').addEventListener('click', function() {
-    this.classList.toggle('active');
-    const content = document.getElementById('pose-filters-container');
-    if (content.style.maxHeight){
-      content.style.maxHeight = null;
-      this.textContent = 'More filters';
-    } else {
-      content.style.maxHeight = content.scrollHeight + "px";
-      this.textContent = 'Less filters';
-    }
-  });
+  document
+    .getElementById("more-filters-btn")
+    .addEventListener("click", function () {
+      this.classList.toggle("active");
+      const content = document.getElementById("pose-filters-container");
+      if (content.style.maxHeight) {
+        content.style.maxHeight = null;
+        this.textContent = "More filters";
+      } else {
+        content.style.maxHeight = content.scrollHeight + "px";
+        this.textContent = "Less filters";
+      }
+    });
 
   if (downloadState.inProgress) {
     document.getElementById("download-progress").style.display = "block";
