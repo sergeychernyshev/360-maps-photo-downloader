@@ -1,5 +1,4 @@
 const { google } = require("googleapis");
-const { PassThrough } = require("stream");
 
 const FOLDER_NAME = "Google Street View Photos";
 const PHOTO_LIST_FILE_NAME = "streetview_photos.json";
@@ -80,12 +79,9 @@ async function createFile(
     parents: [folderId],
   };
 
-  const passThrough = new PassThrough({ highWaterMark: 1024 * 1024 }); // 1MB chunks
-  contentStream.pipe(passThrough);
-
   const media = {
     mimeType,
-    body: passThrough,
+    body: contentStream,
   };
 
   const res = await drive.files.create(
@@ -149,12 +145,9 @@ async function updateFile(
   size,
   onUploadProgress
 ) {
-  const passThrough = new PassThrough({ highWaterMark: 1024 * 1024 }); // 1MB chunks
-  contentStream.pipe(passThrough);
-
   const media = {
     mimeType,
-    body: passThrough,
+    body: contentStream,
   };
 
   const res = await drive.files.update(
