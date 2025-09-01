@@ -98,11 +98,12 @@ async function createFile(
     mimeType,
     body: passThrough,
   };
-  await drive.files.create({
+  const res = await drive.files.create({
     resource: fileMetadata,
     media: media,
-    fields: "id",
+    fields: "id, webViewLink",
   });
+  return res.data;
 }
 
 async function listFiles(drive, folderId) {
@@ -165,11 +166,12 @@ async function updateFile(
     mimeType,
     body: passThrough,
   };
-  await drive.files.update({
+  const res = await drive.files.update({
     fileId: fileId,
     media: media,
-    fields: "id",
+    fields: "id, webViewLink",
   });
+  return res.data;
 }
 
 module.exports = {
