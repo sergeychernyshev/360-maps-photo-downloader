@@ -5,6 +5,7 @@ let state = {
   message: "",
   downloadProgress: 0,
   uploadProgress: 0,
+  uploadStarted: false,
   totalProgress: 0,
   complete: false,
   cancelled: false,
@@ -52,6 +53,7 @@ function resetState() {
   state.message = "";
   state.downloadProgress = 0;
   state.uploadProgress = 0;
+  state.uploadStarted = false;
   state.totalProgress = 0;
   state.complete = false;
   state.cancelled = false;

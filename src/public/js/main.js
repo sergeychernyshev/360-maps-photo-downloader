@@ -395,7 +395,7 @@ function connectWebSocket() {
             </div>`;
         }
       }
-      if (uploadProgress !== undefined) {
+      if (uploadStarted || uploadProgress !== undefined) {
         const uploadContainer = document.getElementById('upload-container');
         if (uploadContainer && !uploadContainer.querySelector('.spinner')) {
           uploadContainer.innerHTML = `
@@ -639,7 +639,7 @@ document.addEventListener("DOMContentLoaded", () => {
   if (downloadState.inProgress) {
     document.getElementById("download-fieldset").style.display = "block";
 
-    const { message, totalProgress, downloadProgress, uploadProgress } =
+    const { message, totalProgress, downloadProgress, uploadProgress, uploadStarted } =
       downloadState;
 
     if (message) {
@@ -655,7 +655,7 @@ document.addEventListener("DOMContentLoaded", () => {
       downloadBar.style.width = `${downloadProgress}%`;
       downloadBar.textContent = `${downloadProgress}%`;
     }
-    if (uploadProgress !== undefined) {
+    if (uploadStarted || uploadProgress !== undefined) {
       const uploadContainer = document.getElementById("upload-container");
       if (uploadContainer && !uploadContainer.querySelector(".spinner")) {
         uploadContainer.innerHTML = `
