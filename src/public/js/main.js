@@ -337,7 +337,7 @@ function connectWebSocket() {
             progressCell.classList.remove("hidden");
           }
 
-          if (uploadStarted || uploadProgress !== undefined) {
+          if (uploadStarted && uploadProgress === undefined) {
             if (!progressCell.querySelector(".spinner")) {
               progressCell.innerHTML =
                 '<div class="spinner" style="margin: 0 auto;"></div><span style="margin-left: 10px;">Uploading...</span>';
