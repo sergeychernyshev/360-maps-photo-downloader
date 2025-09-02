@@ -403,35 +403,17 @@ function connectWebSocket() {
         if (downloadProgress < 1) {
           const uploadContainer = document.getElementById("upload-container");
           if (uploadContainer) {
-            // Restore original content with progress bar
-            uploadContainer.innerHTML = `
-              <p>Uploading to Google Drive:</p>
-              <div class="progress-bar-container">
-                <div id="upload-bar" class="progress-bar" style="width: 0%;">0%</div>
-              </div>`;
+            // Restore original content
+            uploadContainer.innerHTML = `<p>Uploading to Google Drive:</p>`;
           }
         }
       }
-      if (uploadStarted && uploadProgress === undefined) {
+      if (uploadStarted) {
         const uploadContainer = document.getElementById("upload-container");
         if (uploadContainer && !uploadContainer.querySelector(".spinner")) {
           uploadContainer.innerHTML = `
             <p>Uploading to Google Drive:</p>
             <div class="spinner" style="margin: 0 auto;"></div>`;
-        }
-      } else if (uploadProgress !== undefined) {
-        const uploadContainer = document.getElementById("upload-container");
-        if (uploadContainer && uploadContainer.querySelector(".spinner")) {
-          uploadContainer.innerHTML = `
-            <p>Uploading to Google Drive:</p>
-            <div class="progress-bar-container">
-              <div id="upload-bar" class="progress-bar" style="width: 0%;">0%</div>
-            </div>`;
-        }
-        const uploadBar = document.getElementById("upload-bar");
-        if (uploadBar) {
-          uploadBar.style.width = `${uploadProgress}%`;
-          uploadBar.textContent = `${uploadProgress}%`;
         }
       }
       if (fileComplete) {
