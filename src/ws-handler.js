@@ -21,11 +21,13 @@ async function handleMessage(req, ws, message) {
       ws.send(JSON.stringify({ type: "progress", payload: getState() }));
       break;
     case "download":
+      const downloadedPhotos = req.session.downloadedPhotos || [];
+      const missingPhotos = req.session.missingPhotos || [];
       await downloadAllPhotos(
         req,
-        req.session.missingPhotos,
-        req.session.downloadedPhotos.length,
-        req.session.missingPhotos.length,
+        missingPhotos,
+        downloadedPhotos.length,
+        missingPhotos.length,
       );
       break;
     case "cancel-download":
