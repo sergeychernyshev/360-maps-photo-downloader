@@ -394,26 +394,24 @@ function connectWebSocket() {
         progressBar.style.width = `${totalProgress}%`;
         progressBar.textContent = `${totalProgress}%`;
       }
-      if (downloadProgress !== undefined) {
-        const downloadBar = document.getElementById("download-bar");
-        downloadBar.style.width = `${downloadProgress}%`;
-        downloadBar.textContent = `${downloadProgress}%`;
+      const downloadContainer = document.getElementById("download-container");
+      const uploadContainer = document.getElementById("upload-container");
 
-        // If a new download is starting (progress is low), reset upload display.
-        if (downloadProgress < 1) {
-          const uploadContainer = document.getElementById("upload-container");
-          if (uploadContainer) {
-            // Restore original content
-            uploadContainer.innerHTML = `<p>Uploading to Google Drive:</p>`;
-          }
-        }
-      }
       if (uploadStarted) {
-        const uploadContainer = document.getElementById("upload-container");
-        if (uploadContainer && !uploadContainer.querySelector(".spinner")) {
+        downloadContainer.style.display = "none";
+        uploadContainer.style.display = "block";
+        if (!uploadContainer.querySelector(".spinner")) {
           uploadContainer.innerHTML = `
             <p>Uploading to Google Drive:</p>
             <div class="spinner" style="margin: 0 auto;"></div>`;
+        }
+      } else {
+        downloadContainer.style.display = "block";
+        uploadContainer.style.display = "none";
+        if (downloadProgress !== undefined) {
+          const downloadBar = document.getElementById("download-bar");
+          downloadBar.style.width = `${downloadProgress}%`;
+          downloadBar.textContent = `${downloadProgress}%`;
         }
       }
       if (fileComplete) {
