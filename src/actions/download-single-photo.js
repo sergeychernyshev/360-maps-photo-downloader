@@ -62,6 +62,7 @@ async function downloadSinglePhoto(req, photo) {
         fileComplete: true,
         complete: true,
         driveLink: downloadedFile.webViewLink,
+        downloadProgress: undefined,
       });
 
       updateState({

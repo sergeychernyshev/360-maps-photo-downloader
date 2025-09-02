@@ -122,6 +122,7 @@ async function downloadAllPhotos(
       message: "All photos downloaded successfully to Google Drive!",
       complete: true,
       inProgress: false,
+      downloadProgress: undefined,
     });
   } catch (error) {
     updateState({
