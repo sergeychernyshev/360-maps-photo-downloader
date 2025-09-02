@@ -412,12 +412,26 @@ function connectWebSocket() {
           }
         }
       }
-      if (uploadStarted) {
+      if (uploadStarted && uploadProgress === undefined) {
         const uploadContainer = document.getElementById("upload-container");
         if (uploadContainer && !uploadContainer.querySelector(".spinner")) {
           uploadContainer.innerHTML = `
             <p>Uploading to Google Drive:</p>
             <div class="spinner" style="margin: 0 auto;"></div>`;
+        }
+      } else if (uploadProgress !== undefined) {
+        const uploadContainer = document.getElementById("upload-container");
+        if (uploadContainer && uploadContainer.querySelector(".spinner")) {
+          uploadContainer.innerHTML = `
+            <p>Uploading to Google Drive:</p>
+            <div class="progress-bar-container">
+              <div id="upload-bar" class="progress-bar" style="width: 0%;">0%</div>
+            </div>`;
+        }
+        const uploadBar = document.getElementById("upload-bar");
+        if (uploadBar) {
+          uploadBar.style.width = `${uploadProgress}%`;
+          uploadBar.textContent = `${uploadProgress}%`;
         }
       }
       if (fileComplete) {
