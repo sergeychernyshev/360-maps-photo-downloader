@@ -369,6 +369,7 @@ function connectWebSocket() {
               () => {
                 fieldset.style.display = "none";
                 fieldset.classList.remove("collapsing");
+                fieldset.style.maxHeight = null; // Reset for future use
               },
               { once: true },
             );
