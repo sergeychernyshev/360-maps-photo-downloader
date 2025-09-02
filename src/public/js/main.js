@@ -397,21 +397,21 @@ function connectWebSocket() {
       const downloadContainer = document.getElementById("download-container");
       const uploadContainer = document.getElementById("upload-container");
 
-      if (uploadStarted) {
+      // If we receive a download progress update, always show the download container.
+      if (downloadProgress !== undefined) {
+        downloadContainer.style.display = "block";
+        uploadContainer.style.display = "none";
+        const downloadBar = document.getElementById("download-bar");
+        downloadBar.style.width = `${downloadProgress}%`;
+        downloadBar.textContent = `${downloadProgress}%`;
+      } else if (uploadStarted) {
+        // Otherwise, if an upload has started, show the upload container.
         downloadContainer.style.display = "none";
         uploadContainer.style.display = "block";
         if (!uploadContainer.querySelector(".spinner")) {
           uploadContainer.innerHTML = `
             <p>Uploading to Google Drive:</p>
             <div class="spinner" style="margin: 0 auto;"></div>`;
-        }
-      } else {
-        downloadContainer.style.display = "block";
-        uploadContainer.style.display = "none";
-        if (downloadProgress !== undefined) {
-          const downloadBar = document.getElementById("download-bar");
-          downloadBar.style.width = `${downloadProgress}%`;
-          downloadBar.textContent = `${downloadProgress}%`;
         }
       }
       if (fileComplete) {
