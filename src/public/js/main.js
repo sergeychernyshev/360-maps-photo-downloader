@@ -311,9 +311,12 @@ function connectWebSocket() {
           complete,
           error,
           status,
+          inProgress,
         } = global;
 
-        document.getElementById("download-fieldset").style.display = "block";
+        if (inProgress) {
+          document.getElementById("download-fieldset").style.display = "block";
+        }
         document.getElementById("cancel-btn").style.display = complete
           ? "none"
           : "block";
