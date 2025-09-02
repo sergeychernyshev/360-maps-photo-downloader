@@ -408,11 +408,6 @@ function connectWebSocket() {
         // Otherwise, if an upload has started, show the upload container.
         downloadContainer.style.display = "none";
         uploadContainer.style.display = "block";
-        if (!uploadContainer.querySelector(".spinner")) {
-          uploadContainer.innerHTML = `
-            <p>Uploading to Google Drive:</p>
-            <div class="spinner" style="margin: 0 auto;"></div>`;
-        }
       }
       if (fileComplete) {
         document.getElementById("downloaded-count").textContent =
