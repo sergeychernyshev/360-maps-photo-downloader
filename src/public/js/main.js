@@ -324,62 +324,73 @@ function connectWebSocket() {
         }
       }
 
-      if (photoId) {
-        const row = document.querySelector(`tr[data-photo-id="${photoId}"]`);
-        if (row) {
-          const statusCell = row.querySelector(".status-cell");
-          const actionsCell = row.querySelector(".actions-cell");
-          const progressCell = row.querySelector(".progress-cell");
+      if (individual) {
+        for (const photoId in individual) {
+          const photoState = individual[photoId];
+          const {
+            downloadProgress,
+            uploadProgress,
+            uploadStarted,
+            complete,
+            error,
+            driveLink,
+          } = photoState;
 
-          if (progressCell.classList.contains("hidden")) {
-            statusCell.classList.add("hidden");
-            actionsCell.classList.add("hidden");
-            progressCell.classList.remove("hidden");
-          }
+          const row = document.querySelector(`tr[data-photo-id="${photoId}"]`);
+          if (row) {
+            const statusCell = row.querySelector(".status-cell");
+            const actionsCell = row.querySelector(".actions-cell");
+            const progressCell = row.querySelector(".progress-cell");
 
-          if (uploadStarted && uploadProgress === undefined) {
-            if (!progressCell.querySelector(".spinner")) {
-              progressCell.innerHTML =
-                '<div class="spinner" style="margin: 0 auto;"></div><span style="margin-left: 10px;">Uploading...</span>';
-            }
-          } else {
-            let progressBar = progressCell.querySelector(".progress-bar");
-            if (!progressBar) {
-              progressCell.innerHTML = `
-                <div class="progress-bar-container" style="margin-bottom: 0;">
-                  <div class="progress-bar" style="width: 0%;"></div>
-                </div>`;
-              progressBar = progressCell.querySelector(".progress-bar");
+            if (progressCell.classList.contains("hidden")) {
+              statusCell.classList.add("hidden");
+              actionsCell.classList.add("hidden");
+              progressCell.classList.remove("hidden");
             }
 
-            if (uploadProgress !== undefined) {
-              progressBar.style.width = `${uploadProgress}%`;
-              progressBar.textContent = `Uploading: ${uploadProgress}%`;
-            } else if (downloadProgress !== undefined) {
-              progressBar.style.width = `${downloadProgress}%`;
-              progressBar.textContent = `Downloading: ${downloadProgress}%`;
-            }
-          }
-
-          if (complete || error) {
-            progressCell.classList.add("hidden");
-            statusCell.classList.remove("hidden");
-            actionsCell.classList.remove("hidden");
-
-            if (error) {
-              statusCell.innerHTML = `<span class="status error" title="${error}"><span class="status-text">Error</span><span class="status-icon">!</span></span>`;
+            if (uploadStarted && uploadProgress === undefined) {
+              if (!progressCell.querySelector(".spinner")) {
+                progressCell.innerHTML =
+                  '<div class="spinner" style="margin: 0 auto;"></div><span style="margin-left: 10px;">Uploading...</span>';
+              }
             } else {
-              const statusHtml = `<a href="${data.payload.driveLink}" target="_blank" class="status downloaded" title="View on Google Drive"><span class="status-text">Downloaded</span><span class="status-icon">✔</span></a>`;
-              const actionHtml = `<button data-photo-id="${photoId}" class="button download-single-btn redownload-btn" style="font-size: 12px; padding: 5px 10px;" title="Re-download">
-                  <span class="button-text">Re-download</span>
-                  <span class="button-icon">↻</span>
-                </button>`;
-              statusCell.innerHTML = statusHtml;
-              actionsCell.innerHTML = actionHtml;
+              let progressBar = progressCell.querySelector(".progress-bar");
+              if (!progressBar) {
+                progressCell.innerHTML = `
+                  <div class="progress-bar-container" style="margin-bottom: 0;">
+                    <div class="progress-bar" style="width: 0%;"></div>
+                  </div>`;
+                progressBar = progressCell.querySelector(".progress-bar");
+              }
+
+              if (uploadProgress !== undefined) {
+                progressBar.style.width = `${uploadProgress}%`;
+                progressBar.textContent = `Uploading: ${uploadProgress}%`;
+              } else if (downloadProgress !== undefined) {
+                progressBar.style.width = `${downloadProgress}%`;
+                progressBar.textContent = `Downloading: ${downloadProgress}%`;
+              }
+            }
+
+            if (complete || error) {
+              progressCell.classList.add("hidden");
+              statusCell.classList.remove("hidden");
+              actionsCell.classList.remove("hidden");
+
+              if (error) {
+                statusCell.innerHTML = `<span class="status error" title="${error}"><span class="status-text">Error</span><span class="status-icon">!</span></span>`;
+              } else {
+                const statusHtml = `<a href="${driveLink}" target="_blank" class="status downloaded" title="View on Google Drive"><span class="status-text">Downloaded</span><span class="status-icon">✔</span></a>`;
+                const actionHtml = `<button data-photo-id="${photoId}" class="button download-single-btn redownload-btn" style="font-size: 12px; padding: 5px 10px;" title="Re-download">
+                    <span class="button-text">Re-download</span>
+                    <span class="button-icon">↻</span>
+                  </button>`;
+                statusCell.innerHTML = statusHtml;
+                actionsCell.innerHTML = actionHtml;
+              }
             }
           }
         }
-        return;
       }
 
       document.getElementById("download-fieldset").style.display = "block";
