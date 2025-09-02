@@ -337,18 +337,26 @@ function connectWebSocket() {
           }
 
           if (uploadStarted && uploadProgress === undefined) {
-            progressCell.innerHTML =
-              '<div class="spinner" style="margin: 0 auto;"></div><span style="margin-left: 10px;">Uploading...</span>';
+            if (!progressCell.querySelector(".spinner")) {
+              progressCell.innerHTML =
+                '<div class="spinner" style="margin: 0 auto;"></div><span style="margin-left: 10px;">Uploading...</span>';
+            }
           } else {
-            const progressBar = progressCell.querySelector(".progress-bar");
-            if (progressBar) {
-              if (uploadProgress !== undefined) {
-                progressBar.style.width = `${uploadProgress}%`;
-                progressBar.textContent = `Uploading: ${uploadProgress}%`;
-              } else if (downloadProgress !== undefined) {
-                progressBar.style.width = `${downloadProgress}%`;
-                progressBar.textContent = `Downloading: ${downloadProgress}%`;
-              }
+            let progressBar = progressCell.querySelector(".progress-bar");
+            if (!progressBar) {
+              progressCell.innerHTML = `
+                <div class="progress-bar-container" style="margin-bottom: 0;">
+                  <div class="progress-bar" style="width: 0%;"></div>
+                </div>`;
+              progressBar = progressCell.querySelector(".progress-bar");
+            }
+
+            if (uploadProgress !== undefined) {
+              progressBar.style.width = `${uploadProgress}%`;
+              progressBar.textContent = `Uploading: ${uploadProgress}%`;
+            } else if (downloadProgress !== undefined) {
+              progressBar.style.width = `${downloadProgress}%`;
+              progressBar.textContent = `Downloading: ${downloadProgress}%`;
             }
           }
 
