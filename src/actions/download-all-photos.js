@@ -22,13 +22,8 @@ async function downloadAllPhotos(
   missingPhotosCount,
 ) {
   const progressCallback = (progress) => {
-    // Individual photo updates are sent directly from the state manager
-    if (progress.photoId) {
-      updateState(progress);
-    } else {
-      // Global updates are sent from here
-      updateState(progress);
-    }
+    const { photoId, ...globalProgress } = progress;
+    updateState(globalProgress);
   };
 
   try {
@@ -110,12 +105,7 @@ async function downloadAllPhotos(
         }
 
         updateState({
-          photoId: photo.photoId.id,
           fileComplete: true,
-          complete: true,
-        });
-
-        updateState({
           downloadedCount: req.session.downloadedPhotos.length,
           notDownloadedCount: req.session.missingPhotos.length,
           totalProgress: Math.round(
