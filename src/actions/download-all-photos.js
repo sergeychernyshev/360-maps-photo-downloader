@@ -60,6 +60,7 @@ async function downloadAllPhotos(
           message: "Cancelling...",
           complete: true,
           inProgress: false,
+          uploadStarted: false,
         });
         break;
       }
@@ -123,12 +124,14 @@ async function downloadAllPhotos(
       complete: true,
       inProgress: false,
       downloadProgress: undefined,
+      uploadStarted: false,
     });
   } catch (error) {
     updateState({
       error: `An error occurred: ${error.message}`,
       complete: true,
       inProgress: false,
+      uploadStarted: false,
     });
     console.error(error);
   }
