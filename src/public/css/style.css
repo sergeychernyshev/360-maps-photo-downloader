@@ -176,6 +176,10 @@ td:first-child {
   margin-right: 10px;
 }
 
+#upload-container .spinner {
+  margin: 1em auto;
+}
+
 .spinner-light {
   border-color: rgba(255, 255, 255, 0.3);
   border-top-color: #fff;
