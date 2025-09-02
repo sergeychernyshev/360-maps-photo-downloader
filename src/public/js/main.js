@@ -41,13 +41,13 @@ function getCurrentFilters() {
     .querySelector(".status-filter a.active")
     .id.replace("filter-", "");
   const poseFilters = Array.from(
-    document.querySelectorAll('.pose-filter-group input[type="checkbox"]')
+    document.querySelectorAll('.pose-filter-group input[type="checkbox"]'),
   )
     .filter((c) => c.dataset.state !== "any")
     .map((c) => ({ property: c.name, value: c.dataset.state }));
   const page = parseInt(
     new URLSearchParams(window.location.search).get("page") || "1",
-    10
+    10,
   );
   const sort =
     new URLSearchParams(window.location.search).get("sort") || "date";
@@ -115,7 +115,7 @@ function filterPhotos(status) {
 
 function filterByPose() {
   const poseFilters = Array.from(
-    document.querySelectorAll('.pose-filter-group input[type="checkbox"]')
+    document.querySelectorAll('.pose-filter-group input[type="checkbox"]'),
   )
     .filter((c) => c.dataset.state !== "any")
     .map((c) => ({ property: c.name, value: c.dataset.state }));
@@ -140,7 +140,7 @@ function resetFilters() {
 
   const moreFiltersBtn = document.getElementById("more-filters-btn");
   const poseFiltersContainer = document.getElementById(
-    "pose-filters-container"
+    "pose-filters-container",
   );
   moreFiltersBtn.classList.remove("active");
   moreFiltersBtn.textContent = "More filters";
@@ -160,12 +160,12 @@ function confirmDownload() {
   if (!isLoggedIn) return;
   const missingPhotosCount = parseInt(
     document.getElementById("not-downloaded-count").textContent,
-    10
+    10,
   );
   if (missingPhotosCount > 10) {
     if (
       !confirm(
-        `You are about to download ${missingPhotosCount} photos. Are you sure you want to proceed?`
+        `You are about to download ${missingPhotosCount} photos. Are you sure you want to proceed?`,
       )
     ) {
       return;
@@ -206,9 +206,7 @@ function connectWebSocket() {
   ws = new WebSocket(`ws://${window.location.host}`);
   ws.onopen = () => {
     console.log("WebSocket connection established.");
-    if (downloadState.inProgress) {
-      ws.send(JSON.stringify({ type: "get-state" }));
-    }
+    ws.send(JSON.stringify({ type: "get-state" }));
   };
   ws.onclose = () => console.log("WebSocket connection closed");
   ws.onerror = (error) => console.error("WebSocket error:", error);
@@ -237,7 +235,10 @@ function connectWebSocket() {
       const updateBtn = document.getElementById("update-btn");
       if (updateBtn && updateBtn.disabled) {
         updateBtn.disabled = false;
-        updateBtn.innerHTML = totalPhotosCount > 0 ? 'Update the List of Photos' : 'Check for new photos';
+        updateBtn.innerHTML =
+          totalPhotosCount > 0
+            ? "Update the List of Photos"
+            : "Check for new photos";
       }
 
       document
@@ -254,9 +255,8 @@ function connectWebSocket() {
         notDownloadedCount;
       document.getElementById("all-count").textContent = totalPhotosCount;
       if (filteredTotal > 0) {
-        document.getElementById(
-          "photo-counter"
-        ).textContent = `Showing photos ${startIndex}-${endIndex} (page ${currentPage} of ${totalPages}) out of ${filteredTotal} filtered photos.`;
+        document.getElementById("photo-counter").textContent =
+          `Showing photos ${startIndex}-${endIndex} (page ${currentPage} of ${totalPages}) out of ${filteredTotal} filtered photos.`;
       } else {
         document.getElementById("photo-counter").textContent =
           "No photos match the current filters.";
@@ -315,8 +315,10 @@ function connectWebSocket() {
       } = data.payload;
 
       if (folderLink) {
-        const folderLinkContainer = document.getElementById('folder-link-container');
-        if (folderLinkContainer && !folderLinkContainer.querySelector('a')) {
+        const folderLinkContainer = document.getElementById(
+          "folder-link-container",
+        );
+        if (folderLinkContainer && !folderLinkContainer.querySelector("a")) {
           folderLinkContainer.innerHTML = `<a href="${folderLink}" target="_blank">${folderName}</a>`;
         }
       }
@@ -328,33 +330,31 @@ function connectWebSocket() {
           const actionsCell = row.querySelector(".actions-cell");
           const progressCell = row.querySelector(".progress-cell");
 
-          if (progressCell.classList.contains('hidden')) {
-            statusCell.classList.add('hidden');
-            actionsCell.classList.add('hidden');
-            progressCell.classList.remove('hidden');
+          if (progressCell.classList.contains("hidden")) {
+            statusCell.classList.add("hidden");
+            actionsCell.classList.add("hidden");
+            progressCell.classList.remove("hidden");
           }
 
-          if (downloadProgress !== undefined) {
-            const progressBar = progressCell.querySelector(".progress-bar");
-            if (progressBar) {
+          const progressBar = progressCell.querySelector(".progress-bar");
+          if (progressBar) {
+            if (uploadProgress !== undefined) {
+              progressBar.style.width = `${uploadProgress}%`;
+              progressBar.textContent = `Uploading: ${uploadProgress}%`;
+            } else if (downloadProgress !== undefined) {
               progressBar.style.width = `${downloadProgress}%`;
               progressBar.textContent = `Downloading: ${downloadProgress}%`;
             }
           }
 
-          if (uploadStarted || uploadProgress !== undefined) {
-            if (!progressCell.querySelector(".spinner")) {
-              progressCell.innerHTML =
-                '<div class="spinner" style="margin: 0 auto;"></div><span style="margin-left: 10px;">Uploading...</span>';
-            }
-          }
-
           if (complete || error) {
-            progressCell.classList.add('hidden');
-            statusCell.classList.remove('hidden');
-            actionsCell.classList.remove('hidden');
+            progressCell.classList.add("hidden");
+            statusCell.classList.remove("hidden");
+            actionsCell.classList.remove("hidden");
 
-            if (!error) {
+            if (error) {
+              statusCell.innerHTML = `<span class="status error" title="${error}"><span class="status-text">Error</span><span class="status-icon">!</span></span>`;
+            } else {
               const statusHtml = `<a href="${data.payload.driveLink}" target="_blank" class="status downloaded" title="View on Google Drive"><span class="status-text">Downloaded</span><span class="status-icon">✔</span></a>`;
               const actionHtml = `<button data-photo-id="${photoId}" class="button download-single-btn redownload-btn" style="font-size: 12px; padding: 5px 10px;" title="Re-download">
                   <span class="button-text">Re-download</span>
@@ -385,22 +385,20 @@ function connectWebSocket() {
         downloadBar.style.width = `${downloadProgress}%`;
         downloadBar.textContent = `${downloadProgress}%`;
 
-        // Restore upload bar when a new download starts
-        const uploadContainer = document.getElementById('upload-container');
-        if (uploadContainer && uploadContainer.querySelector('.spinner')) {
-          uploadContainer.innerHTML = `
-            <p>Uploading to Google Drive:</p>
-            <div class="progress-bar-container">
-              <div id="upload-bar" class="progress-bar" style="width: 0%;">0%</div>
-            </div>`;
+        // If a new download is starting (progress is low), reset upload bar.
+        if (downloadProgress < 1) {
+          const uploadBar = document.getElementById("upload-bar");
+          if (uploadBar) {
+            uploadBar.style.width = "0%";
+            uploadBar.textContent = "0%";
+          }
         }
       }
-      if (uploadStarted || uploadProgress !== undefined) {
-        const uploadContainer = document.getElementById('upload-container');
-        if (uploadContainer && !uploadContainer.querySelector('.spinner')) {
-          uploadContainer.innerHTML = `
-            <p>Uploading to Google Drive:</p>
-            <div class="spinner" style="margin: 0 auto;"></div>`;
+      if (uploadProgress !== undefined) {
+        const uploadBar = document.getElementById("upload-bar");
+        if (uploadBar) {
+          uploadBar.style.width = `${uploadProgress}%`;
+          uploadBar.textContent = `${uploadProgress}%`;
         }
       }
       if (fileComplete) {
@@ -423,14 +421,13 @@ function connectWebSocket() {
               fieldset.style.display = "none";
               fieldset.classList.remove("collapsing");
             },
-            { once: true }
+            { once: true },
           );
         }, 2000);
       }
       if (error) {
-        document.getElementById(
-          "progress-text"
-        ).textContent = `Error: ${error}`;
+        document.getElementById("progress-text").textContent =
+          `Error: ${error}`;
         document.getElementById("cancel-btn").style.display = "none";
         setTimeout(() => {
           const fieldset = document.getElementById("download-fieldset");
@@ -444,7 +441,7 @@ function connectWebSocket() {
               fieldset.style.display = "none";
               fieldset.classList.remove("collapsing");
             },
-            { once: true }
+            { once: true },
           );
         }, 2000);
       }
@@ -502,13 +499,13 @@ function downloadSinglePhoto(photoId) {
   if (!isLoggedIn) return;
 
   const row = document.querySelector(`tr[data-photo-id="${photoId}"]`);
-  const statusCell = row.querySelector('.status-cell');
-  const actionsCell = row.querySelector('.actions-cell');
-  const progressCell = row.querySelector('.progress-cell');
+  const statusCell = row.querySelector(".status-cell");
+  const actionsCell = row.querySelector(".actions-cell");
+  const progressCell = row.querySelector(".progress-cell");
 
-  statusCell.classList.add('hidden');
-  actionsCell.classList.add('hidden');
-  progressCell.classList.remove('hidden');
+  statusCell.classList.add("hidden");
+  actionsCell.classList.add("hidden");
+  progressCell.classList.remove("hidden");
 
   connectWebSocket();
   if (ws && ws.readyState === WebSocket.OPEN) {
@@ -540,7 +537,7 @@ document.addEventListener("DOMContentLoaded", () => {
       .querySelectorAll('.pose-filter-group input[type="checkbox"]')
       .forEach((checkbox) => {
         const poseFilter = filters.pose.find((p) =>
-          p.startsWith(checkbox.name)
+          p.startsWith(checkbox.name),
         );
         const newState = poseFilter ? poseFilter.split(":")[1] : "any";
         setCheckboxState(checkbox, newState, true);
@@ -569,7 +566,7 @@ document.addEventListener("DOMContentLoaded", () => {
   if (filters.pose.length > 0) {
     const moreFiltersBtn = document.getElementById("more-filters-btn");
     const poseFiltersContainer = document.getElementById(
-      "pose-filters-container"
+      "pose-filters-container",
     );
     moreFiltersBtn.classList.add("active");
     moreFiltersBtn.textContent = "Less filters";
@@ -635,33 +632,4 @@ document.addEventListener("DOMContentLoaded", () => {
         this.textContent = "Less filters";
       }
     });
-
-  if (downloadState.inProgress) {
-    document.getElementById("download-fieldset").style.display = "block";
-
-    const { message, totalProgress, downloadProgress, uploadProgress, uploadStarted } =
-      downloadState;
-
-    if (message) {
-      document.getElementById("progress-text").textContent = message;
-    }
-    if (totalProgress !== undefined) {
-      const progressBar = document.getElementById("total-progress-bar");
-      progressBar.style.width = `${totalProgress}%`;
-      progressBar.textContent = `${totalProgress}%`;
-    }
-    if (downloadProgress !== undefined) {
-      const downloadBar = document.getElementById("download-bar");
-      downloadBar.style.width = `${downloadProgress}%`;
-      downloadBar.textContent = `${downloadProgress}%`;
-    }
-    if (uploadStarted || uploadProgress !== undefined) {
-      const uploadContainer = document.getElementById("upload-container");
-      if (uploadContainer && !uploadContainer.querySelector(".spinner")) {
-        uploadContainer.innerHTML = `
-            <p>Uploading to Google Drive:</p>
-            <div class="spinner" style="margin: 0 auto;"></div>`;
-      }
-    }
-  }
 });

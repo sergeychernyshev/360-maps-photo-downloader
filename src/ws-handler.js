@@ -6,7 +6,6 @@ const { updatePhotoList } = require("./actions/update-photo-list");
 const { filterPhotos } = require("./actions/filter-photos");
 const { updateState, getState } = require("./download-state");
 
-
 /**
  * Handles incoming WebSocket messages.
  * @param {object} req - The Express request object, containing the session.
@@ -26,7 +25,7 @@ async function handleMessage(req, ws, message) {
         req,
         req.session.missingPhotos,
         req.session.downloadedPhotos.length,
-        req.session.missingPhotos.length
+        req.session.missingPhotos.length,
       );
       break;
     case "cancel-download":
@@ -36,13 +35,12 @@ async function handleMessage(req, ws, message) {
       await deleteDuplicates(req, payload.fileIds);
       break;
     case "download-photo":
-      const allPhotos = (req.session.downloadedPhotos || []).concat(req.session.missingPhotos || []);
-      const photo = allPhotos.find(p => p.photoId.id === payload.photoId);
+      const allPhotos = (req.session.downloadedPhotos || []).concat(
+        req.session.missingPhotos || [],
+      );
+      const photo = allPhotos.find((p) => p.photoId.id === payload.photoId);
       if (photo) {
-        await downloadSinglePhoto(
-          req,
-          photo,
-        );
+        await downloadSinglePhoto(req, photo);
       } else {
         updateState({ error: `Photo with ID ${payload.photoId} not found.` });
       }

@@ -23,10 +23,10 @@ const app = express();
 const server = http.createServer(app);
 const wss = new WebSocket.Server({ noServer: true });
 
-server.on('upgrade', function upgrade(request, socket, head) {
+server.on("upgrade", function upgrade(request, socket, head) {
   sessionParser(request, {}, () => {
     wss.handleUpgrade(request, socket, head, function done(ws) {
-      wss.emit('connection', ws, request);
+      wss.emit("connection", ws, request);
     });
   });
 });
@@ -112,7 +112,7 @@ async function initialize() {
         ) {
           await fs.writeFile(
             TOKEN_PATH,
-            JSON.stringify(req.session.tokens, null, 2)
+            JSON.stringify(req.session.tokens, null, 2),
           );
           console.log("Saved token to disk.");
         }
@@ -153,7 +153,7 @@ async function initialize() {
     } catch (error) {
       console.error("❌ FATAL ERROR: `credentials.json` not found.");
       console.error(
-        "   Please ensure the credentials file from Google Cloud is in the project directory."
+        "   Please ensure the credentials file from Google Cloud is in the project directory.",
       );
       process.exit(1);
     }

@@ -72,7 +72,7 @@ async function createFile(
   contentStream,
   folderId,
   size,
-  onUploadProgress
+  onUploadProgress,
 ) {
   const fileMetadata = {
     name: fileName,
@@ -97,7 +97,7 @@ async function createFile(
           onUploadProgress(progress);
         }
       },
-    }
+    },
   );
   return res.data;
 }
@@ -143,7 +143,7 @@ async function updateFile(
   mimeType,
   contentStream,
   size,
-  onUploadProgress
+  onUploadProgress,
 ) {
   const media = {
     mimeType,
@@ -163,7 +163,7 @@ async function updateFile(
           onUploadProgress(progress);
         }
       },
-    }
+    },
   );
   return res.data;
 }

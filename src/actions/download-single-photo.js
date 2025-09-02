@@ -39,14 +39,14 @@ async function downloadSinglePhoto(req, photo) {
       oAuth2Client,
       photo,
       folderId,
-      progressCallback
+      progressCallback,
     );
 
     if (downloadedPhoto) {
       if (req.session.missingPhotos && req.session.downloadedPhotos) {
         // Remove from missingPhotos if it exists
         const missingIndex = req.session.missingPhotos.findIndex(
-          (p) => p.photoId.id === photo.photoId.id
+          (p) => p.photoId.id === photo.photoId.id,
         );
         if (missingIndex > -1) {
           req.session.missingPhotos.splice(missingIndex, 1);
@@ -54,7 +54,7 @@ async function downloadSinglePhoto(req, photo) {
 
         // Remove from downloadedPhotos if it exists (for re-downloads)
         const downloadedIndex = req.session.downloadedPhotos.findIndex(
-          (p) => p.photoId.id === photo.photoId.id
+          (p) => p.photoId.id === photo.photoId.id,
         );
         if (downloadedIndex > -1) {
           req.session.downloadedPhotos.splice(downloadedIndex, 1);

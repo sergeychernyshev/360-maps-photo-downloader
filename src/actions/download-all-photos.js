@@ -19,7 +19,7 @@ async function downloadAllPhotos(
   req,
   photos,
   downloadedPhotosCount,
-  missingPhotosCount
+  missingPhotosCount,
 ) {
   const progressCallback = (progress) => {
     // Strip photoId from progress updates to ensure the global state is updated.
@@ -86,19 +86,19 @@ async function downloadAllPhotos(
           oAuth2Client,
           photo,
           folderId,
-          progressCallback
+          progressCallback,
         );
       }
 
       if (downloadedPhoto) {
         if (req.session.missingPhotos && req.session.downloadedPhotos) {
           const downloadedPhotoIndex = req.session.missingPhotos.findIndex(
-            (p) => p.photoId.id === photo.photoId.id
+            (p) => p.photoId.id === photo.photoId.id,
           );
           if (downloadedPhotoIndex > -1) {
             const [splicedPhoto] = req.session.missingPhotos.splice(
               downloadedPhotoIndex,
-              1
+              1,
             );
             req.session.downloadedPhotos.push(splicedPhoto);
           }
@@ -111,7 +111,7 @@ async function downloadAllPhotos(
           totalProgress: Math.round(
             ((downloadedPhotosCount + i + 1) /
               (downloadedPhotosCount + missingPhotosCount)) *
-              100
+              100,
           ),
         });
       }

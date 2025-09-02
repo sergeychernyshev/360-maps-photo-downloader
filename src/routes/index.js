@@ -18,7 +18,11 @@ const {
   PHOTO_LIST_FILE_NAME,
 } = require("../drive-manager");
 const { getState } = require("../download-state");
-const { calculatePoseCounts, buildPhotoListHtml, buildPaginationHtml } = require("../utils/photo-utils");
+const {
+  calculatePoseCounts,
+  buildPhotoListHtml,
+  buildPaginationHtml,
+} = require("../utils/photo-utils");
 
 const router = express.Router();
 
@@ -68,46 +72,56 @@ router.get("/", async (req, res, next) => {
     const search = req.query.search || "";
     const status = req.query.status || "all";
     const poseQuery = req.query.pose || "";
-    const poseFilters = poseQuery.split(',').filter(Boolean).map(p => {
-      const [property, value] = p.split(':');
-      return { property, value };
-    });
+    const poseFilters = poseQuery
+      .split(",")
+      .filter(Boolean)
+      .map((p) => {
+        const [property, value] = p.split(":");
+        return { property, value };
+      });
 
-    const searchedPhotos = photos.filter(photo => {
+    const searchedPhotos = photos.filter((photo) => {
       if (!search) {
         return true;
       }
       if (photo.places && photo.places.length > 0 && photo.places[0].name) {
-        return photo.places[0].name.toLowerCase().includes(search.toLowerCase());
+        return photo.places[0].name
+          .toLowerCase()
+          .includes(search.toLowerCase());
       }
       return false;
     });
 
     const driveFiles = loggedIn ? await listFiles(drive, folderId) : [];
-    const drivePhotoCount = driveFiles.filter(f => f.name !== PHOTO_LIST_FILE_NAME).length;
+    const drivePhotoCount = driveFiles.filter(
+      (f) => f.name !== PHOTO_LIST_FILE_NAME,
+    ).length;
     const downloadedFiles = new Set(driveFiles.map((f) => f.name));
-    const driveFileLinks = new Map(driveFiles.map(f => [f.name, f.webViewLink]));
+    const driveFileLinks = new Map(
+      driveFiles.map((f) => [f.name, f.webViewLink]),
+    );
 
-    const statusFilteredPhotos = searchedPhotos.filter(photo => {
-      if (status === 'all') {
+    const statusFilteredPhotos = searchedPhotos.filter((photo) => {
+      if (status === "all") {
         return true;
       }
       const isDownloaded = downloadedFiles.has(`${photo.photoId.id}.jpg`);
-      return status === 'downloaded' ? isDownloaded : !isDownloaded;
+      return status === "downloaded" ? isDownloaded : !isDownloaded;
     });
 
-    const poseFilteredPhotos = statusFilteredPhotos.filter(photo => {
+    const poseFilteredPhotos = statusFilteredPhotos.filter((photo) => {
       if (!poseFilters || poseFilters.length === 0) {
         return true;
       }
-      return poseFilters.every(filter => {
-        if (filter.value === 'any') {
+      return poseFilters.every((filter) => {
+        if (filter.value === "any") {
           return true;
         }
-        const exists = filter.property === 'latLngPair'
-          ? photo.pose && photo.pose.latLngPair !== undefined
-          : photo.pose && typeof photo.pose[filter.property] === 'number';
-        return filter.value === 'exists' ? exists : !exists;
+        const exists =
+          filter.property === "latLngPair"
+            ? photo.pose && photo.pose.latLngPair !== undefined
+            : photo.pose && typeof photo.pose[filter.property] === "number";
+        return filter.value === "exists" ? exists : !exists;
       });
     });
 
@@ -117,10 +131,10 @@ router.get("/", async (req, res, next) => {
     const sortedPhotos = poseFilteredPhotos.sort((a, b) => {
       let valA, valB;
 
-      if (sort === 'date') {
+      if (sort === "date") {
         valA = new Date(a.captureTime);
         valB = new Date(b.captureTime);
-      } else if (sort === 'views') {
+      } else if (sort === "views") {
         valA = parseInt(a.viewCount, 10) || 0;
         valB = parseInt(b.viewCount, 10) || 0;
       } else {
@@ -128,7 +142,7 @@ router.get("/", async (req, res, next) => {
         valB = 0;
       }
 
-      if (order === 'asc') {
+      if (order === "asc") {
         return valA - valB;
       } else {
         return valB - valA;
@@ -138,13 +152,20 @@ router.get("/", async (req, res, next) => {
     const filteredPhotos = sortedPhotos;
 
     const totalPhotosCount = photos.length;
-    const downloadedCount = photos.filter(p => downloadedFiles.has(`${p.photoId.id}.jpg`)).length;
+    const downloadedCount = photos.filter((p) =>
+      downloadedFiles.has(`${p.photoId.id}.jpg`),
+    ).length;
     const notDownloadedCount = totalPhotosCount - downloadedCount;
 
     const poseCounts = calculatePoseCounts(photos);
 
-    const photoIdsFromStreetView = new Set(filteredPhotos.map(p => `${p.photoId.id}.jpg`));
-    const driveOnlyFiles = driveFiles.filter(f => f.name !== PHOTO_LIST_FILE_NAME && !photoIdsFromStreetView.has(f.name));
+    const photoIdsFromStreetView = new Set(
+      filteredPhotos.map((p) => `${p.photoId.id}.jpg`),
+    );
+    const driveOnlyFiles = driveFiles.filter(
+      (f) =>
+        f.name !== PHOTO_LIST_FILE_NAME && !photoIdsFromStreetView.has(f.name),
+    );
     const driveOnlyCount = driveOnlyFiles.length;
 
     const duplicates = driveFiles.reduce((acc, file) => {
@@ -162,15 +183,19 @@ router.get("/", async (req, res, next) => {
     const duplicateFilesCount = Object.keys(duplicateFiles).length;
 
     const downloadedPhotos = filteredPhotos.filter((p) =>
-      downloadedFiles.has(`${p.photoId.id}.jpg`)
+      downloadedFiles.has(`${p.photoId.id}.jpg`),
     );
     const missingPhotos = filteredPhotos.filter(
-      (p) => !downloadedFiles.has(`${p.photoId.id}.jpg`)
+      (p) => !downloadedFiles.has(`${p.photoId.id}.jpg`),
     );
 
     if (loggedIn) {
-      const allDownloadedPhotos = photos.filter((p) => downloadedFiles.has(`${p.photoId.id}.jpg`));
-      const allMissingPhotos = photos.filter((p) => !downloadedFiles.has(`${p.photoId.id}.jpg`));
+      const allDownloadedPhotos = photos.filter((p) =>
+        downloadedFiles.has(`${p.photoId.id}.jpg`),
+      );
+      const allMissingPhotos = photos.filter(
+        (p) => !downloadedFiles.has(`${p.photoId.id}.jpg`),
+      );
       req.session.downloadedPhotos = allDownloadedPhotos;
       req.session.missingPhotos = allMissingPhotos;
     }
@@ -186,8 +211,18 @@ router.get("/", async (req, res, next) => {
       return `<a class="sort-link" href="#" data-sortby="${sortBy}">${label}</a>`;
     };
 
-    const paginationHtmlTop = buildPaginationHtml(totalPages, page, 'changePage', 'top');
-    const paginationHtmlBottom = buildPaginationHtml(totalPages, page, 'changePage', 'bottom');
+    const paginationHtmlTop = buildPaginationHtml(
+      totalPages,
+      page,
+      "changePage",
+      "top",
+    );
+    const paginationHtmlBottom = buildPaginationHtml(
+      totalPages,
+      page,
+      "changePage",
+      "bottom",
+    );
 
     res.render("index", {
       isLoggedIn: loggedIn,
@@ -197,7 +232,7 @@ router.get("/", async (req, res, next) => {
       search: search,
       status: status,
       folderLink: loggedIn ? folderLink : null,
-      downloadState: getState(),
+
       downloadedCount: loggedIn ? downloadedCount : 0,
       notDownloadedCount: loggedIn ? notDownloadedCount : 0,
       driveOnlyCount: loggedIn ? driveOnlyCount : 0,
@@ -206,7 +241,11 @@ router.get("/", async (req, res, next) => {
       duplicateFiles: loggedIn ? duplicateFiles : {},
       duplicateFilesCount: loggedIn ? duplicateFilesCount : 0,
       folderName: folderName,
-      photoListHtml: buildPhotoListHtml(paginatedPhotos, downloadedFiles, driveFileLinks),
+      photoListHtml: buildPhotoListHtml(
+        paginatedPhotos,
+        downloadedFiles,
+        driveFileLinks,
+      ),
       paginationHtmlTop,
       paginationHtmlBottom,
       buildSortLink,

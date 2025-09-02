@@ -53,7 +53,11 @@ async function listAllPhotos(authClient, progressCallback = () => {}) {
  * @param {object} photo The photo metadata object from the API.
  * @param {(message: string) => void} log A function to log progress messages.
  */
-async function downloadPhoto(photoUrl, authClient, progressCallback = () => {}) {
+async function downloadPhoto(
+  photoUrl,
+  authClient,
+  progressCallback = () => {},
+) {
   const response = await axios({
     method: "GET",
     url: photoUrl,
@@ -63,7 +67,7 @@ async function downloadPhoto(photoUrl, authClient, progressCallback = () => {}) 
     },
     onDownloadProgress: (progressEvent) => {
       const percentage = Math.round(
-        (progressEvent.loaded * 100) / progressEvent.total
+        (progressEvent.loaded * 100) / progressEvent.total,
       );
       progressCallback(percentage);
     },
@@ -73,7 +77,7 @@ async function downloadPhoto(photoUrl, authClient, progressCallback = () => {}) 
 }
 
 function filterPhotos(allPhotos, { search, status, filters, downloadedFiles }) {
-  const filteredBySearch = allPhotos.filter(photo => {
+  const filteredBySearch = allPhotos.filter((photo) => {
     if (!search) {
       return true;
     }
@@ -83,26 +87,27 @@ function filterPhotos(allPhotos, { search, status, filters, downloadedFiles }) {
     return false;
   });
 
-  const filteredByStatus = filteredBySearch.filter(photo => {
-    if (status === 'all') {
+  const filteredByStatus = filteredBySearch.filter((photo) => {
+    if (status === "all") {
       return true;
     }
     const isDownloaded = downloadedFiles.has(`${photo.photoId.id}.jpg`);
-    return status === 'downloaded' ? isDownloaded : !isDownloaded;
+    return status === "downloaded" ? isDownloaded : !isDownloaded;
   });
 
-  const filteredByPose = filteredByStatus.filter(photo => {
+  const filteredByPose = filteredByStatus.filter((photo) => {
     if (!filters || filters.length === 0) {
       return true;
     }
-    return filters.every(filter => {
-      if (filter.value === 'any') {
+    return filters.every((filter) => {
+      if (filter.value === "any") {
         return true;
       }
-      const exists = filter.property === 'latLngPair'
-        ? photo.pose && photo.pose.latLngPair !== undefined
-        : photo.pose && typeof photo.pose[filter.property] === 'number';
-      return filter.value === 'exists' ? exists : !exists;
+      const exists =
+        filter.property === "latLngPair"
+          ? photo.pose && photo.pose.latLngPair !== undefined
+          : photo.pose && typeof photo.pose[filter.property] === "number";
+      return filter.value === "exists" ? exists : !exists;
     });
   });
 

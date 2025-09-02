@@ -1,6 +1,7 @@
 body {
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica,
-    Arial, sans-serif;
+  font-family:
+    -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial,
+    sans-serif;
   line-height: 1.6;
   padding: 2em;
   margin: auto;
@@ -349,8 +350,11 @@ legend {
 }
 
 #download-fieldset {
-  transition: max-height 0.5s ease-out, opacity 0.5s ease-out,
-    padding 0.5s ease-out, margin 0.5s ease-out;
+  transition:
+    max-height 0.5s ease-out,
+    opacity 0.5s ease-out,
+    padding 0.5s ease-out,
+    margin 0.5s ease-out;
   overflow: hidden;
 }
 
@@ -366,4 +370,9 @@ legend {
 
 .hidden {
   display: none;
+}
+
+.status.error {
+  background-color: #db4437;
+  color: white;
 }

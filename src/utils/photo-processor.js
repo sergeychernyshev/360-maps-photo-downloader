@@ -10,7 +10,7 @@ async function processPhoto(
   oAuth2Client,
   photo,
   folderId,
-  progressCallback
+  progressCallback,
 ) {
   const fileName = `${photo.photoId.id}.jpg`;
 
@@ -24,8 +24,11 @@ async function processPhoto(
     photo.downloadUrl,
     oAuth2Client,
     (percentage) => {
-      progressCallback({ downloadProgress: percentage, photoId: photo.photoId.id });
-    }
+      progressCallback({
+        downloadProgress: percentage,
+        photoId: photo.photoId.id,
+      });
+    },
   );
 
   if (getState().cancelled) {
@@ -88,8 +91,11 @@ async function processPhoto(
       stream,
       newJpeg.length,
       (percentage) => {
-        progressCallback({ uploadProgress: percentage, photoId: photo.photoId.id });
-      }
+        progressCallback({
+          uploadProgress: percentage,
+          photoId: photo.photoId.id,
+        });
+      },
     );
   } else {
     file = await createFile(
@@ -100,8 +106,11 @@ async function processPhoto(
       folderId,
       newJpeg.length,
       (percentage) => {
-        progressCallback({ uploadProgress: percentage, photoId: photo.photoId.id });
-      }
+        progressCallback({
+          uploadProgress: percentage,
+          photoId: photo.photoId.id,
+        });
+      },
     );
   }
 

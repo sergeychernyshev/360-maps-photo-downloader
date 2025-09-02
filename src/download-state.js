@@ -23,7 +23,7 @@ function updateState(newState) {
     // Single photo progress update
     if (state.socket) {
       state.socket.send(
-        JSON.stringify({ type: "progress", payload: newState })
+        JSON.stringify({ type: "progress", payload: newState }),
       );
     }
   } else {
@@ -31,7 +31,10 @@ function updateState(newState) {
     Object.assign(state, newState);
     if (state.socket) {
       state.socket.send(
-        JSON.stringify({ type: "progress", payload: { ...getState(), ...newState } })
+        JSON.stringify({
+          type: "progress",
+          payload: { ...getState(), ...newState },
+        }),
       );
     }
   }
@@ -41,7 +44,7 @@ function setSocket(socket) {
   state.socket = socket;
   if (state.socket && state.inProgress) {
     state.socket.send(
-      JSON.stringify({ type: "progress", payload: getState() })
+      JSON.stringify({ type: "progress", payload: getState() }),
     );
   }
 }
