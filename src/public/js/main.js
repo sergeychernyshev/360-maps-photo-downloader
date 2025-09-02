@@ -298,29 +298,77 @@ function connectWebSocket() {
 
     // Handle other WebSocket messages (download progress, etc.)
     if (data.type === "progress") {
-      const {
-        message,
-        total,
-        current,
-        totalProgress,
-        downloadProgress,
-        uploadProgress,
-        uploadStarted,
-        fileComplete,
-        downloadedCount,
-        notDownloadedCount,
-        complete,
-        error,
-        photoId,
-        folderLink,
-      } = data.payload;
+      const { global, individual } = data.payload;
 
-      if (folderLink) {
-        const folderLinkContainer = document.getElementById(
-          "folder-link-container",
-        );
-        if (folderLinkContainer && !folderLinkContainer.querySelector("a")) {
-          folderLinkContainer.innerHTML = `<a href="${folderLink}" target="_blank">${folderName}</a>`;
+      if (global) {
+        const {
+          message,
+          totalProgress,
+          downloadProgress,
+          uploadStarted,
+          fileComplete,
+          downloadedCount,
+          notDownloadedCount,
+          complete,
+          error,
+        } = global;
+
+        document.getElementById("download-fieldset").style.display = "block";
+        document.getElementById("cancel-btn").style.display = complete
+          ? "none"
+          : "block";
+
+        if (message) {
+          document.getElementById("progress-text").textContent = message;
+        }
+        if (totalProgress !== undefined) {
+          const progressBar = document.getElementById("total-progress-bar");
+          progressBar.style.width = `${totalProgress}%`;
+          progressBar.textContent = `${totalProgress}%`;
+        }
+
+        const downloadContainer = document.getElementById("download-container");
+        const uploadContainer = document.getElementById("upload-container");
+
+        if (downloadProgress !== undefined) {
+          downloadContainer.classList.remove("hidden");
+          uploadContainer.classList.add("hidden");
+          const downloadBar = document.getElementById("download-bar");
+          downloadBar.style.width = `${downloadProgress}%`;
+          downloadBar.textContent = `${downloadProgress}%`;
+        } else if (uploadStarted) {
+          downloadContainer.classList.add("hidden");
+          uploadContainer.classList.remove("hidden");
+        }
+
+        if (fileComplete) {
+          document.getElementById("downloaded-count").textContent =
+            downloadedCount;
+          document.getElementById("not-downloaded-count").textContent =
+            notDownloadedCount;
+        }
+
+        if (complete || error) {
+          document.getElementById("cancel-btn").style.display = "none";
+          setTimeout(() => {
+            const fieldset = document.getElementById("download-fieldset");
+            fieldset.style.maxHeight = fieldset.scrollHeight + "px";
+            requestAnimationFrame(() => {
+              fieldset.classList.add("collapsing");
+            });
+            fieldset.addEventListener(
+              "transitionend",
+              () => {
+                fieldset.style.display = "none";
+                fieldset.classList.remove("collapsing");
+              },
+              { once: true },
+            );
+          }, 2000);
+        }
+        if (error) {
+          document.getElementById("progress-text").textContent =
+            `Error: ${error}`;
         }
       }
 
@@ -391,77 +439,6 @@ function connectWebSocket() {
             }
           }
         }
-      }
-
-      document.getElementById("download-fieldset").style.display = "block";
-      document.getElementById("cancel-btn").style.display = "block";
-
-      if (message) {
-        document.getElementById("progress-text").textContent = message;
-      }
-
-      if (totalProgress !== undefined) {
-        const progressBar = document.getElementById("total-progress-bar");
-        progressBar.style.width = `${totalProgress}%`;
-        progressBar.textContent = `${totalProgress}%`;
-      }
-      const downloadContainer = document.getElementById("download-container");
-      const uploadContainer = document.getElementById("upload-container");
-
-      if (downloadProgress !== undefined) {
-        downloadContainer.classList.remove("hidden");
-        uploadContainer.classList.add("hidden");
-        const downloadBar = document.getElementById("download-bar");
-        downloadBar.style.width = `${downloadProgress}%`;
-        downloadBar.textContent = `${downloadProgress}%`;
-      } else if (uploadStarted) {
-        downloadContainer.classList.add("hidden");
-        uploadContainer.classList.remove("hidden");
-      }
-
-      if (fileComplete) {
-        document.getElementById("downloaded-count").textContent =
-          downloadedCount;
-        document.getElementById("not-downloaded-count").textContent =
-          notDownloadedCount;
-      }
-      if (complete) {
-        document.getElementById("cancel-btn").style.display = "none";
-        setTimeout(() => {
-          const fieldset = document.getElementById("download-fieldset");
-          fieldset.style.maxHeight = fieldset.scrollHeight + "px"; // Ensure initial height is set for transition
-          requestAnimationFrame(() => {
-            fieldset.classList.add("collapsing");
-          });
-          fieldset.addEventListener(
-            "transitionend",
-            () => {
-              fieldset.style.display = "none";
-              fieldset.classList.remove("collapsing");
-            },
-            { once: true },
-          );
-        }, 2000);
-      }
-      if (error) {
-        document.getElementById("progress-text").textContent =
-          `Error: ${error}`;
-        document.getElementById("cancel-btn").style.display = "none";
-        setTimeout(() => {
-          const fieldset = document.getElementById("download-fieldset");
-          fieldset.style.maxHeight = fieldset.scrollHeight + "px"; // Ensure initial height is set for transition
-          requestAnimationFrame(() => {
-            fieldset.classList.add("collapsing");
-          });
-          fieldset.addEventListener(
-            "transitionend",
-            () => {
-              fieldset.style.display = "none";
-              fieldset.classList.remove("collapsing");
-            },
-            { once: true },
-          );
-        }, 2000);
       }
     }
     // ...
