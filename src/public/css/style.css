@@ -176,7 +176,7 @@ td:first-child {
   margin-right: 10px;
 }
 
-#upload-container .spinner {
+#upload-container .upload-progress-indicator {
   margin: 1em auto;
 }
 

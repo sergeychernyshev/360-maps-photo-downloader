@@ -4,7 +4,7 @@ const { cancelDownload } = require("./actions/cancel-download");
 const { deleteDuplicates } = require("./actions/delete-duplicates");
 const { updatePhotoList } = require("./actions/update-photo-list");
 const { filterPhotos } = require("./actions/filter-photos");
-const { updateState, getState } = require("./download-state");
+const { updateState, getState, resetState } = require("./download-state");
 
 /**
  * Handles incoming WebSocket messages.
@@ -21,6 +21,7 @@ async function handleMessage(req, ws, message) {
       ws.send(JSON.stringify({ type: "progress", payload: getState() }));
       break;
     case "download":
+      resetState();
       const downloadedPhotos = req.session.downloadedPhotos || [];
       const missingPhotos = req.session.missingPhotos || [];
       await downloadAllPhotos(
