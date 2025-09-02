@@ -3,19 +3,18 @@ const { Readable } = require("stream");
 const { downloadPhoto } = require("../photo-manager");
 const { createFile, updateFile, findFile } = require("../drive-manager");
 const { degToDmsRational } = require("./photo-utils");
-const { getState } = require("../download-state");
+const { getState, updateState } = require("../download-state");
 
 async function processPhoto(
   drive,
   oAuth2Client,
   photo,
   folderId,
-  progressCallback
+  progressCallback,
 ) {
   const fileName = `${photo.photoId.id}.jpg`;
 
   progressCallback({
-    message: `Processing photo ${fileName}...`,
     photoId: photo.photoId.id,
     downloadProgress: 0,
   });
@@ -24,8 +23,11 @@ async function processPhoto(
     photo.downloadUrl,
     oAuth2Client,
     (percentage) => {
-      progressCallback({ downloadProgress: percentage, photoId: photo.photoId.id });
-    }
+      progressCallback({
+        downloadProgress: percentage,
+        photoId: photo.photoId.id,
+      });
+    },
   );
 
   if (getState().cancelled) {
@@ -80,6 +82,7 @@ async function processPhoto(
   const existingFile = await findFile(drive, fileName, folderId);
   let file;
   progressCallback({ uploadStarted: true, photoId: photo.photoId.id });
+  updateState({ status: "uploading" });
   if (existingFile) {
     file = await updateFile(
       drive,
@@ -88,8 +91,11 @@ async function processPhoto(
       stream,
       newJpeg.length,
       (percentage) => {
-        progressCallback({ uploadProgress: percentage, photoId: photo.photoId.id });
-      }
+        progressCallback({
+          uploadProgress: percentage,
+          photoId: photo.photoId.id,
+        });
+      },
     );
   } else {
     file = await createFile(
@@ -100,8 +106,11 @@ async function processPhoto(
       folderId,
       newJpeg.length,
       (percentage) => {
-        progressCallback({ uploadProgress: percentage, photoId: photo.photoId.id });
-      }
+        progressCallback({
+          uploadProgress: percentage,
+          photoId: photo.photoId.id,
+        });
+      },
     );
   }
 

@@ -112,16 +112,16 @@
             <div id="total-progress-bar" class="progress-bar">0%</div>
           </div>
           <div style="display: flex; gap: 1em">
-            <div style="flex-grow: 1">
+            <div style="flex-grow: 1" id="download-container">
               <p>Downloading 360 photos from Google Maps:</p>
               <div class="progress-bar-container">
                 <div id="download-bar" class="progress-bar">0%</div>
               </div>
             </div>
-            <div style="flex-grow: 1" id="upload-container">
+            <div style="flex-grow: 1" id="upload-container" class="hidden">
               <p>Uploading to Google Drive:</p>
-              <div class="progress-bar-container">
-                <div id="upload-bar" class="progress-bar">0%</div>
+              <div class="upload-progress-indicator">
+                <div class="spinner"></div><span>Uploading...</span>
               </div>
             </div>
           </div>
@@ -302,7 +302,7 @@
 
     <script>
       const poseCounts = <%- JSON.stringify(poseCounts || {}) %>;
-      const downloadState = <%- JSON.stringify(downloadState || { inProgress: false }) %>;
+      
       const isLoggedIn = <%- !!isLoggedIn %>;
       const missingPhotosCount = <%- notDownloadedCount %>;
       const folderName = "<%= folderName %>";

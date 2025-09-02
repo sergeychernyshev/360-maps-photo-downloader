@@ -4,8 +4,7 @@ const { cancelDownload } = require("./actions/cancel-download");
 const { deleteDuplicates } = require("./actions/delete-duplicates");
 const { updatePhotoList } = require("./actions/update-photo-list");
 const { filterPhotos } = require("./actions/filter-photos");
-const { updateState, getState } = require("./download-state");
-
+const { updateState, getState, resetState } = require("./download-state");
 
 /**
  * Handles incoming WebSocket messages.
@@ -22,11 +21,14 @@ async function handleMessage(req, ws, message) {
       ws.send(JSON.stringify({ type: "progress", payload: getState() }));
       break;
     case "download":
+      resetState();
+      const downloadedPhotos = req.session.downloadedPhotos || [];
+      const missingPhotos = req.session.missingPhotos || [];
       await downloadAllPhotos(
         req,
-        req.session.missingPhotos,
-        req.session.downloadedPhotos.length,
-        req.session.missingPhotos.length
+        missingPhotos,
+        downloadedPhotos.length,
+        missingPhotos.length,
       );
       break;
     case "cancel-download":
@@ -36,13 +38,12 @@ async function handleMessage(req, ws, message) {
       await deleteDuplicates(req, payload.fileIds);
       break;
     case "download-photo":
-      const allPhotos = (req.session.downloadedPhotos || []).concat(req.session.missingPhotos || []);
-      const photo = allPhotos.find(p => p.photoId.id === payload.photoId);
+      const allPhotos = (req.session.downloadedPhotos || []).concat(
+        req.session.missingPhotos || [],
+      );
+      const photo = allPhotos.find((p) => p.photoId.id === payload.photoId);
       if (photo) {
-        await downloadSinglePhoto(
-          req,
-          photo,
-        );
+        await downloadSinglePhoto(req, photo);
       } else {
         updateState({ error: `Photo with ID ${payload.photoId} not found.` });
       }

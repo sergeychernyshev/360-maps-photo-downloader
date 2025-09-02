@@ -24,14 +24,7 @@ async function downloadSinglePhoto(req, photo) {
     const folderId = folder.id;
 
     progressCallback({
-      folderLink: folder.webViewLink,
-    });
-
-    progressCallback({
       message: `Starting download of 1 photo to Google Drive...`,
-      total: 1,
-      current: 0,
-      totalProgress: 0,
     });
 
     const { photo: downloadedPhoto, file: downloadedFile } = await processPhoto(
@@ -39,14 +32,14 @@ async function downloadSinglePhoto(req, photo) {
       oAuth2Client,
       photo,
       folderId,
-      progressCallback
+      progressCallback,
     );
 
     if (downloadedPhoto) {
       if (req.session.missingPhotos && req.session.downloadedPhotos) {
         // Remove from missingPhotos if it exists
         const missingIndex = req.session.missingPhotos.findIndex(
-          (p) => p.photoId.id === photo.photoId.id
+          (p) => p.photoId.id === photo.photoId.id,
         );
         if (missingIndex > -1) {
           req.session.missingPhotos.splice(missingIndex, 1);
@@ -54,7 +47,7 @@ async function downloadSinglePhoto(req, photo) {
 
         // Remove from downloadedPhotos if it exists (for re-downloads)
         const downloadedIndex = req.session.downloadedPhotos.findIndex(
-          (p) => p.photoId.id === photo.photoId.id
+          (p) => p.photoId.id === photo.photoId.id,
         );
         if (downloadedIndex > -1) {
           req.session.downloadedPhotos.splice(downloadedIndex, 1);
@@ -65,17 +58,16 @@ async function downloadSinglePhoto(req, photo) {
       }
 
       progressCallback({
+        photoId: photo.photoId.id,
         fileComplete: true,
-        downloadedCount: req.session.downloadedPhotos.length,
-        notDownloadedCount: req.session.missingPhotos.length,
-        totalProgress: 100,
+        complete: true,
+        driveLink: downloadedFile.webViewLink,
+        downloadProgress: undefined,
       });
 
-      progressCallback({
-        message: `Photo ${photo.photoId.id}.jpg downloaded successfully to Google Drive!`,
-        complete: true,
-        inProgress: false,
-        driveLink: downloadedFile.webViewLink,
+      updateState({
+        downloadedCount: req.session.downloadedPhotos.length,
+        notDownloadedCount: req.session.missingPhotos.length,
       });
     }
   } catch (error) {

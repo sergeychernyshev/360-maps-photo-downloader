@@ -19,10 +19,9 @@ async function downloadAllPhotos(
   req,
   photos,
   downloadedPhotosCount,
-  missingPhotosCount
+  missingPhotosCount,
 ) {
   const progressCallback = (progress) => {
-    // Strip photoId from progress updates to ensure the global state is updated.
     const { photoId, ...globalProgress } = progress;
     updateState(globalProgress);
   };
@@ -33,7 +32,7 @@ async function downloadAllPhotos(
     const folder = await findOrCreateFolder(drive, FOLDER_NAME);
     const folderId = folder.id;
 
-    progressCallback({
+    updateState({
       folderLink: folder.webViewLink,
     });
 
@@ -47,7 +46,8 @@ async function downloadAllPhotos(
         ? Math.round((downloadedPhotosCount / totalPhotoCount) * 100)
         : 0;
 
-    progressCallback({
+    updateState({
+      inProgress: true,
       message: `Starting download of ${totalPhotos} photos to Google Drive...`,
       total: totalPhotos,
       current: 0,
@@ -55,11 +55,12 @@ async function downloadAllPhotos(
     });
 
     for (let i = 0; i < photos.length; i++) {
-      if (getState().cancelled) {
-        progressCallback({
+      if (getState().global.cancelled) {
+        updateState({
           message: "Cancelling...",
           complete: true,
           inProgress: false,
+          uploadStarted: false,
         });
         break;
       }
@@ -68,17 +69,18 @@ async function downloadAllPhotos(
 
       let downloadedPhoto;
       if (existingFileNames.has(fileName)) {
-        progressCallback({
+        updateState({
           message: `Skipping existing file: ${fileName}`,
         });
         downloadedPhoto = photo;
       } else {
-        progressCallback({
+        updateState({
           message: `Processing photo ${
             downloadedPhotosCount + i + 1
           } of ${totalPhotoCount} (${fileName})...`,
           total: totalPhotos,
           current: i,
+          status: "downloading",
         });
 
         downloadedPhoto = await processPhoto(
@@ -86,48 +88,51 @@ async function downloadAllPhotos(
           oAuth2Client,
           photo,
           folderId,
-          progressCallback
+          progressCallback,
         );
       }
 
       if (downloadedPhoto) {
         if (req.session.missingPhotos && req.session.downloadedPhotos) {
           const downloadedPhotoIndex = req.session.missingPhotos.findIndex(
-            (p) => p.photoId.id === photo.photoId.id
+            (p) => p.photoId.id === photo.photoId.id,
           );
           if (downloadedPhotoIndex > -1) {
             const [splicedPhoto] = req.session.missingPhotos.splice(
               downloadedPhotoIndex,
-              1
+              1,
             );
             req.session.downloadedPhotos.push(splicedPhoto);
           }
         }
 
-        progressCallback({
+        updateState({
           fileComplete: true,
           downloadedCount: req.session.downloadedPhotos.length,
           notDownloadedCount: req.session.missingPhotos.length,
           totalProgress: Math.round(
             ((downloadedPhotosCount + i + 1) /
               (downloadedPhotosCount + missingPhotosCount)) *
-              100
+              100,
           ),
         });
       }
     }
 
     delete req.session.allPhotos;
-    progressCallback({
+    updateState({
       message: "All photos downloaded successfully to Google Drive!",
       complete: true,
       inProgress: false,
+      downloadProgress: undefined,
+      uploadStarted: false,
     });
   } catch (error) {
-    progressCallback({
+    updateState({
       error: `An error occurred: ${error.message}`,
       complete: true,
       inProgress: false,
+      uploadStarted: false,
     });
     console.error(error);
   }
