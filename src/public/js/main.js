@@ -336,7 +336,8 @@ function connectWebSocket() {
           const downloadBar = document.getElementById("download-bar");
           downloadBar.style.width = `${downloadProgress}%`;
           downloadBar.textContent = `${downloadProgress}%`;
-        } else if (uploadStarted) {
+        }
+        if (uploadStarted) {
           downloadContainer.classList.add("hidden");
           uploadContainer.classList.remove("hidden");
         }
