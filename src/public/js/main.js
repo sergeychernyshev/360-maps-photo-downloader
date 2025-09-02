@@ -41,13 +41,13 @@ function getCurrentFilters() {
     .querySelector(".status-filter a.active")
     .id.replace("filter-", "");
   const poseFilters = Array.from(
-    document.querySelectorAll('.pose-filter-group input[type="checkbox"]')
+    document.querySelectorAll('.pose-filter-group input[type="checkbox"]'),
   )
     .filter((c) => c.dataset.state !== "any")
     .map((c) => ({ property: c.name, value: c.dataset.state }));
   const page = parseInt(
     new URLSearchParams(window.location.search).get("page") || "1",
-    10
+    10,
   );
   const sort =
     new URLSearchParams(window.location.search).get("sort") || "date";
@@ -115,7 +115,7 @@ function filterPhotos(status) {
 
 function filterByPose() {
   const poseFilters = Array.from(
-    document.querySelectorAll('.pose-filter-group input[type="checkbox"]')
+    document.querySelectorAll('.pose-filter-group input[type="checkbox"]'),
   )
     .filter((c) => c.dataset.state !== "any")
     .map((c) => ({ property: c.name, value: c.dataset.state }));
@@ -140,7 +140,7 @@ function resetFilters() {
 
   const moreFiltersBtn = document.getElementById("more-filters-btn");
   const poseFiltersContainer = document.getElementById(
-    "pose-filters-container"
+    "pose-filters-container",
   );
   moreFiltersBtn.classList.remove("active");
   moreFiltersBtn.textContent = "More filters";
@@ -160,12 +160,12 @@ function confirmDownload() {
   if (!isLoggedIn) return;
   const missingPhotosCount = parseInt(
     document.getElementById("not-downloaded-count").textContent,
-    10
+    10,
   );
   if (missingPhotosCount > 10) {
     if (
       !confirm(
-        `You are about to download ${missingPhotosCount} photos. Are you sure you want to proceed?`
+        `You are about to download ${missingPhotosCount} photos. Are you sure you want to proceed?`,
       )
     ) {
       return;
@@ -255,9 +255,8 @@ function connectWebSocket() {
         notDownloadedCount;
       document.getElementById("all-count").textContent = totalPhotosCount;
       if (filteredTotal > 0) {
-        document.getElementById(
-          "photo-counter"
-        ).textContent = `Showing photos ${startIndex}-${endIndex} (page ${currentPage} of ${totalPages}) out of ${filteredTotal} filtered photos.`;
+        document.getElementById("photo-counter").textContent =
+          `Showing photos ${startIndex}-${endIndex} (page ${currentPage} of ${totalPages}) out of ${filteredTotal} filtered photos.`;
       } else {
         document.getElementById("photo-counter").textContent =
           "No photos match the current filters.";
@@ -318,7 +317,7 @@ function connectWebSocket() {
 
       if (folderLink) {
         const folderLinkContainer = document.getElementById(
-          "folder-link-container"
+          "folder-link-container",
         );
         if (folderLinkContainer && !folderLinkContainer.querySelector("a")) {
           folderLinkContainer.innerHTML = `<a href="${folderLink}" target="_blank">${folderName}</a>`;
@@ -409,15 +408,14 @@ function connectWebSocket() {
           }
         }
       }
-      if (uploadStarted || uploadProgress !== undefined) {
+      if (uploadStarted && uploadProgress === undefined) {
         const uploadContainer = document.getElementById("upload-container");
         if (uploadContainer && !uploadContainer.querySelector(".spinner")) {
           uploadContainer.innerHTML = `
             <p>Uploading to Google Drive:</p>
             <div class="spinner" style="margin: 0 auto;"></div>`;
         }
-      }
-      if (uploadProgress !== undefined) {
+      } else if (uploadProgress !== undefined) {
         const uploadContainer = document.getElementById("upload-container");
         if (uploadContainer && uploadContainer.querySelector(".spinner")) {
           uploadContainer.innerHTML = `
@@ -452,14 +450,13 @@ function connectWebSocket() {
               fieldset.style.display = "none";
               fieldset.classList.remove("collapsing");
             },
-            { once: true }
+            { once: true },
           );
         }, 2000);
       }
       if (error) {
-        document.getElementById(
-          "progress-text"
-        ).textContent = `Error: ${error}`;
+        document.getElementById("progress-text").textContent =
+          `Error: ${error}`;
         document.getElementById("cancel-btn").style.display = "none";
         setTimeout(() => {
           const fieldset = document.getElementById("download-fieldset");
@@ -473,7 +470,7 @@ function connectWebSocket() {
               fieldset.style.display = "none";
               fieldset.classList.remove("collapsing");
             },
-            { once: true }
+            { once: true },
           );
         }, 2000);
       }
@@ -569,7 +566,7 @@ document.addEventListener("DOMContentLoaded", () => {
       .querySelectorAll('.pose-filter-group input[type="checkbox"]')
       .forEach((checkbox) => {
         const poseFilter = filters.pose.find((p) =>
-          p.startsWith(checkbox.name)
+          p.startsWith(checkbox.name),
         );
         const newState = poseFilter ? poseFilter.split(":")[1] : "any";
         setCheckboxState(checkbox, newState, true);
@@ -598,7 +595,7 @@ document.addEventListener("DOMContentLoaded", () => {
   if (filters.pose.length > 0) {
     const moreFiltersBtn = document.getElementById("more-filters-btn");
     const poseFiltersContainer = document.getElementById(
-      "pose-filters-container"
+      "pose-filters-container",
     );
     moreFiltersBtn.classList.add("active");
     moreFiltersBtn.textContent = "Less filters";
