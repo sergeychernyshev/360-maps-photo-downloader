@@ -112,12 +112,12 @@ async function downloadAllPhotos(
         updateState({
           photoId: photo.photoId.id,
           fileComplete: true,
-          downloadedCount: req.session.downloadedPhotos.length,
-          notDownloadedCount: req.session.missingPhotos.length,
           complete: true,
         });
 
         updateState({
+          downloadedCount: req.session.downloadedPhotos.length,
+          notDownloadedCount: req.session.missingPhotos.length,
           totalProgress: Math.round(
             ((downloadedPhotosCount + i + 1) /
               (downloadedPhotosCount + missingPhotosCount)) *

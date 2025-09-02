@@ -60,10 +60,13 @@ async function downloadSinglePhoto(req, photo) {
       progressCallback({
         photoId: photo.photoId.id,
         fileComplete: true,
-        downloadedCount: req.session.downloadedPhotos.length,
-        notDownloadedCount: req.session.missingPhotos.length,
         complete: true,
         driveLink: downloadedFile.webViewLink,
+      });
+
+      updateState({
+        downloadedCount: req.session.downloadedPhotos.length,
+        notDownloadedCount: req.session.missingPhotos.length,
       });
     }
   } catch (error) {
