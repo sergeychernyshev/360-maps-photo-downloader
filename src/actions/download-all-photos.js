@@ -22,9 +22,13 @@ async function downloadAllPhotos(
   missingPhotosCount,
 ) {
   const progressCallback = (progress) => {
-    // Strip photoId from progress updates to ensure the global state is updated.
-    const { photoId, ...globalProgress } = progress;
-    updateState(globalProgress);
+    // Individual photo updates are sent directly from the state manager
+    if (progress.photoId) {
+      updateState(progress);
+    } else {
+      // Global updates are sent from here
+      updateState(progress);
+    }
   };
 
   try {
@@ -33,7 +37,7 @@ async function downloadAllPhotos(
     const folder = await findOrCreateFolder(drive, FOLDER_NAME);
     const folderId = folder.id;
 
-    progressCallback({
+    updateState({
       folderLink: folder.webViewLink,
     });
 
@@ -47,7 +51,8 @@ async function downloadAllPhotos(
         ? Math.round((downloadedPhotosCount / totalPhotoCount) * 100)
         : 0;
 
-    progressCallback({
+    updateState({
+      inProgress: true,
       message: `Starting download of ${totalPhotos} photos to Google Drive...`,
       total: totalPhotos,
       current: 0,
@@ -55,8 +60,8 @@ async function downloadAllPhotos(
     });
 
     for (let i = 0; i < photos.length; i++) {
-      if (getState().cancelled) {
-        progressCallback({
+      if (getState().global.cancelled) {
+        updateState({
           message: "Cancelling...",
           complete: true,
           inProgress: false,
@@ -68,12 +73,12 @@ async function downloadAllPhotos(
 
       let downloadedPhoto;
       if (existingFileNames.has(fileName)) {
-        progressCallback({
+        updateState({
           message: `Skipping existing file: ${fileName}`,
         });
         downloadedPhoto = photo;
       } else {
-        progressCallback({
+        updateState({
           message: `Processing photo ${
             downloadedPhotosCount + i + 1
           } of ${totalPhotoCount} (${fileName})...`,
@@ -104,10 +109,15 @@ async function downloadAllPhotos(
           }
         }
 
-        progressCallback({
+        updateState({
+          photoId: photo.photoId.id,
           fileComplete: true,
           downloadedCount: req.session.downloadedPhotos.length,
           notDownloadedCount: req.session.missingPhotos.length,
+          complete: true,
+        });
+
+        updateState({
           totalProgress: Math.round(
             ((downloadedPhotosCount + i + 1) /
               (downloadedPhotosCount + missingPhotosCount)) *
@@ -118,13 +128,13 @@ async function downloadAllPhotos(
     }
 
     delete req.session.allPhotos;
-    progressCallback({
+    updateState({
       message: "All photos downloaded successfully to Google Drive!",
       complete: true,
       inProgress: false,
     });
   } catch (error) {
-    progressCallback({
+    updateState({
       error: `An error occurred: ${error.message}`,
       complete: true,
       inProgress: false,

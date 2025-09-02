@@ -397,17 +397,13 @@ function connectWebSocket() {
       const downloadContainer = document.getElementById("download-container");
       const uploadContainer = document.getElementById("upload-container");
 
-      // If we receive a download progress update, always show the download container.
       if (downloadProgress !== undefined) {
         downloadContainer.classList.remove("hidden");
         uploadContainer.classList.add("hidden");
         const downloadBar = document.getElementById("download-bar");
         downloadBar.style.width = `${downloadProgress}%`;
         downloadBar.textContent = `${downloadProgress}%`;
-      }
-
-      if (uploadStarted) {
-        // Otherwise, if an upload has started, show the upload container.
+      } else if (uploadStarted) {
         downloadContainer.classList.add("hidden");
         uploadContainer.classList.remove("hidden");
       }

@@ -15,7 +15,6 @@ async function processPhoto(
   const fileName = `${photo.photoId.id}.jpg`;
 
   progressCallback({
-    message: `Processing photo ${fileName}...`,
     photoId: photo.photoId.id,
     downloadProgress: 0,
   });

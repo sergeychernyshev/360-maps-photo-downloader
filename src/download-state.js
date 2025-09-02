@@ -1,15 +1,15 @@
 let state = {
-  inProgress: false,
-  total: 0,
-  current: 0,
-  message: "",
-  downloadProgress: 0,
-  uploadProgress: 0,
-  uploadStarted: false,
-  totalProgress: 0,
-  complete: false,
-  cancelled: false,
-  error: null,
+  global: {
+    inProgress: false,
+    total: 0,
+    current: 0,
+    message: "",
+    totalProgress: 0,
+    complete: false,
+    cancelled: false,
+    error: null,
+  },
+  individual: {}, // photoId -> { downloadProgress, uploadProgress, uploadStarted, complete, error, driveLink }
   socket: null,
 };
 
@@ -20,20 +20,29 @@ function getState() {
 
 function updateState(newState) {
   if (newState.photoId) {
-    // Single photo progress update
-    if (state.socket) {
-      state.socket.send(
-        JSON.stringify({ type: "progress", payload: newState }),
-      );
+    const { photoId, ...photoState } = newState;
+    if (!state.individual[photoId]) {
+      state.individual[photoId] = {};
     }
-  } else {
-    // Global progress update
-    Object.assign(state, newState);
+    Object.assign(state.individual[photoId], photoState);
+
+    // Don't send the whole individual state object, just the update for the specific photo
     if (state.socket) {
       state.socket.send(
         JSON.stringify({
           type: "progress",
-          payload: { ...getState(), ...newState },
+          payload: { individual: { [photoId]: state.individual[photoId] } },
+        }),
+      );
+    }
+  } else {
+    // Global progress update
+    Object.assign(state.global, newState);
+    if (state.socket) {
+      state.socket.send(
+        JSON.stringify({
+          type: "progress",
+          payload: { global: state.global },
         }),
       );
     }
@@ -42,7 +51,10 @@ function updateState(newState) {
 
 function setSocket(socket) {
   state.socket = socket;
-  if (state.socket && state.inProgress) {
+  if (
+    state.socket &&
+    (state.global.inProgress || Object.keys(state.individual).length > 0)
+  ) {
     state.socket.send(
       JSON.stringify({ type: "progress", payload: getState() }),
     );
@@ -50,17 +62,17 @@ function setSocket(socket) {
 }
 
 function resetState() {
-  state.inProgress = false;
-  state.total = 0;
-  state.current = 0;
-  state.message = "";
-  state.downloadProgress = 0;
-  state.uploadProgress = 0;
-  state.uploadStarted = false;
-  state.totalProgress = 0;
-  state.complete = false;
-  state.cancelled = false;
-  state.error = null;
+  state.global = {
+    inProgress: false,
+    total: 0,
+    current: 0,
+    message: "",
+    totalProgress: 0,
+    complete: false,
+    cancelled: false,
+    error: null,
+  };
+  state.individual = {};
 }
 
 module.exports = {

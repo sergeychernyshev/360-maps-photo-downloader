@@ -24,14 +24,7 @@ async function downloadSinglePhoto(req, photo) {
     const folderId = folder.id;
 
     progressCallback({
-      folderLink: folder.webViewLink,
-    });
-
-    progressCallback({
       message: `Starting download of 1 photo to Google Drive...`,
-      total: 1,
-      current: 0,
-      totalProgress: 0,
     });
 
     const { photo: downloadedPhoto, file: downloadedFile } = await processPhoto(
@@ -65,16 +58,11 @@ async function downloadSinglePhoto(req, photo) {
       }
 
       progressCallback({
+        photoId: photo.photoId.id,
         fileComplete: true,
         downloadedCount: req.session.downloadedPhotos.length,
         notDownloadedCount: req.session.missingPhotos.length,
-        totalProgress: 100,
-      });
-
-      progressCallback({
-        message: `Photo ${photo.photoId.id}.jpg downloaded successfully to Google Drive!`,
         complete: true,
-        inProgress: false,
         driveLink: downloadedFile.webViewLink,
       });
     }
