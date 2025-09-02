@@ -3,7 +3,7 @@ const { Readable } = require("stream");
 const { downloadPhoto } = require("../photo-manager");
 const { createFile, updateFile, findFile } = require("../drive-manager");
 const { degToDmsRational } = require("./photo-utils");
-const { getState } = require("../download-state");
+const { getState, updateState } = require("../download-state");
 
 async function processPhoto(
   drive,
