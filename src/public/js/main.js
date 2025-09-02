@@ -311,6 +311,7 @@ function connectWebSocket() {
           notDownloadedCount,
           complete,
           error,
+          inProgress,
         } = global;
 
         document.getElementById("download-fieldset").style.display = "block";
@@ -330,16 +331,20 @@ function connectWebSocket() {
         const downloadContainer = document.getElementById("download-container");
         const uploadContainer = document.getElementById("upload-container");
 
+        // Prioritize download progress messages to switch back from upload spinner
         if (downloadProgress !== undefined) {
           downloadContainer.classList.remove("hidden");
           uploadContainer.classList.add("hidden");
           const downloadBar = document.getElementById("download-bar");
           downloadBar.style.width = `${downloadProgress}%`;
           downloadBar.textContent = `${downloadProgress}%`;
-        }
-        if (uploadStarted) {
+        } else if (uploadStarted) {
           downloadContainer.classList.add("hidden");
           uploadContainer.classList.remove("hidden");
+        } else if (inProgress) {
+          // Handle the very start of the download
+          downloadContainer.classList.remove("hidden");
+          uploadContainer.classList.add("hidden");
         }
 
         if (fileComplete) {
