@@ -52,6 +52,7 @@ async function downloadAllPhotos(
       total: totalPhotos,
       current: 0,
       totalProgress: initialProgress,
+      status: "downloading",
     });
 
     for (let i = 0; i < photos.length; i++) {

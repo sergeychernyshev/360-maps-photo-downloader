@@ -8,6 +8,7 @@ let state = {
     complete: false,
     cancelled: false,
     error: null,
+    status: "idle", // idle, downloading, uploading
   },
   individual: {}, // photoId -> { downloadProgress, uploadProgress, uploadStarted, complete, error, driveLink }
   socket: null,

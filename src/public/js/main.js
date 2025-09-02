@@ -305,13 +305,12 @@ function connectWebSocket() {
           message,
           totalProgress,
           downloadProgress,
-          uploadStarted,
           fileComplete,
           downloadedCount,
           notDownloadedCount,
           complete,
           error,
-          inProgress,
+          status,
         } = global;
 
         document.getElementById("download-fieldset").style.display = "block";
@@ -331,19 +330,19 @@ function connectWebSocket() {
         const downloadContainer = document.getElementById("download-container");
         const uploadContainer = document.getElementById("upload-container");
 
-        // Prioritize download progress messages to switch back from upload spinner
-        if (downloadProgress !== undefined) {
+        if (status === "downloading") {
           downloadContainer.classList.remove("hidden");
           uploadContainer.classList.add("hidden");
-          const downloadBar = document.getElementById("download-bar");
-          downloadBar.style.width = `${downloadProgress}%`;
-          downloadBar.textContent = `${downloadProgress}%`;
-        } else if (uploadStarted) {
+          if (downloadProgress !== undefined) {
+            const downloadBar = document.getElementById("download-bar");
+            downloadBar.style.width = `${downloadProgress}%`;
+            downloadBar.textContent = `${downloadProgress}%`;
+          }
+        } else if (status === "uploading") {
           downloadContainer.classList.add("hidden");
           uploadContainer.classList.remove("hidden");
-        } else if (inProgress) {
-          // Handle the very start of the download
-          downloadContainer.classList.remove("hidden");
+        } else if (status === "idle") {
+          downloadContainer.classList.add("hidden");
           uploadContainer.classList.add("hidden");
         }
 
