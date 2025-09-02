@@ -336,14 +336,19 @@ function connectWebSocket() {
             progressCell.classList.remove("hidden");
           }
 
-          const progressBar = progressCell.querySelector(".progress-bar");
-          if (progressBar) {
-            if (uploadProgress !== undefined) {
-              progressBar.style.width = `${uploadProgress}%`;
-              progressBar.textContent = `Uploading: ${uploadProgress}%`;
-            } else if (downloadProgress !== undefined) {
-              progressBar.style.width = `${downloadProgress}%`;
-              progressBar.textContent = `Downloading: ${downloadProgress}%`;
+          if (uploadStarted && uploadProgress === undefined) {
+            progressCell.innerHTML =
+              '<div class="spinner" style="margin: 0 auto;"></div><span style="margin-left: 10px;">Uploading...</span>';
+          } else {
+            const progressBar = progressCell.querySelector(".progress-bar");
+            if (progressBar) {
+              if (uploadProgress !== undefined) {
+                progressBar.style.width = `${uploadProgress}%`;
+                progressBar.textContent = `Uploading: ${uploadProgress}%`;
+              } else if (downloadProgress !== undefined) {
+                progressBar.style.width = `${downloadProgress}%`;
+                progressBar.textContent = `Downloading: ${downloadProgress}%`;
+              }
             }
           }
 
@@ -394,7 +399,23 @@ function connectWebSocket() {
           }
         }
       }
+      if (uploadStarted || uploadProgress !== undefined) {
+        const uploadContainer = document.getElementById("upload-container");
+        if (uploadContainer && !uploadContainer.querySelector(".spinner")) {
+          uploadContainer.innerHTML = `
+            <p>Uploading to Google Drive:</p>
+            <div class="spinner" style="margin: 0 auto;"></div>`;
+        }
+      }
       if (uploadProgress !== undefined) {
+        const uploadContainer = document.getElementById("upload-container");
+        if (uploadContainer && uploadContainer.querySelector(".spinner")) {
+          uploadContainer.innerHTML = `
+            <p>Uploading to Google Drive:</p>
+            <div class="progress-bar-container">
+              <div id="upload-bar" class="progress-bar" style="width: 0%;">0%</div>
+            </div>`;
+        }
         const uploadBar = document.getElementById("upload-bar");
         if (uploadBar) {
           uploadBar.style.width = `${uploadProgress}%`;
