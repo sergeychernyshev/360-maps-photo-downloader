@@ -399,15 +399,15 @@ function connectWebSocket() {
 
       // If we receive a download progress update, always show the download container.
       if (downloadProgress !== undefined) {
-        downloadContainer.style.display = "block";
-        uploadContainer.style.display = "none";
+        downloadContainer.classList.remove("hidden");
+        uploadContainer.classList.add("hidden");
         const downloadBar = document.getElementById("download-bar");
         downloadBar.style.width = `${downloadProgress}%`;
         downloadBar.textContent = `${downloadProgress}%`;
       } else if (uploadStarted) {
         // Otherwise, if an upload has started, show the upload container.
-        downloadContainer.style.display = "none";
-        uploadContainer.style.display = "block";
+        downloadContainer.classList.add("hidden");
+        uploadContainer.classList.remove("hidden");
       }
       if (fileComplete) {
         document.getElementById("downloaded-count").textContent =
