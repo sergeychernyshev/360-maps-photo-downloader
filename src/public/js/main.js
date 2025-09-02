@@ -404,11 +404,14 @@ function connectWebSocket() {
         const downloadBar = document.getElementById("download-bar");
         downloadBar.style.width = `${downloadProgress}%`;
         downloadBar.textContent = `${downloadProgress}%`;
-      } else if (uploadStarted) {
+      }
+
+      if (uploadStarted) {
         // Otherwise, if an upload has started, show the upload container.
         downloadContainer.classList.add("hidden");
         uploadContainer.classList.remove("hidden");
       }
+
       if (fileComplete) {
         document.getElementById("downloaded-count").textContent =
           downloadedCount;
