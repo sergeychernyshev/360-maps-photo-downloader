@@ -399,35 +399,25 @@ function connectWebSocket() {
         downloadBar.style.width = `${downloadProgress}%`;
         downloadBar.textContent = `${downloadProgress}%`;
 
-        // If a new download is starting (progress is low), reset upload bar.
+        // If a new download is starting (progress is low), reset upload display.
         if (downloadProgress < 1) {
-          const uploadBar = document.getElementById("upload-bar");
-          if (uploadBar) {
-            uploadBar.style.width = "0%";
-            uploadBar.textContent = "0%";
+          const uploadContainer = document.getElementById("upload-container");
+          if (uploadContainer) {
+            // Restore original content with progress bar
+            uploadContainer.innerHTML = `
+              <p>Uploading to Google Drive:</p>
+              <div class="progress-bar-container">
+                <div id="upload-bar" class="progress-bar" style="width: 0%;">0%</div>
+              </div>`;
           }
         }
       }
-      if (uploadStarted && uploadProgress === undefined) {
+      if (uploadStarted) {
         const uploadContainer = document.getElementById("upload-container");
         if (uploadContainer && !uploadContainer.querySelector(".spinner")) {
           uploadContainer.innerHTML = `
             <p>Uploading to Google Drive:</p>
             <div class="spinner" style="margin: 0 auto;"></div>`;
-        }
-      } else if (uploadProgress !== undefined) {
-        const uploadContainer = document.getElementById("upload-container");
-        if (uploadContainer && uploadContainer.querySelector(".spinner")) {
-          uploadContainer.innerHTML = `
-            <p>Uploading to Google Drive:</p>
-            <div class="progress-bar-container">
-              <div id="upload-bar" class="progress-bar" style="width: 0%;">0%</div>
-            </div>`;
-        }
-        const uploadBar = document.getElementById("upload-bar");
-        if (uploadBar) {
-          uploadBar.style.width = `${uploadProgress}%`;
-          uploadBar.textContent = `${uploadProgress}%`;
         }
       }
       if (fileComplete) {
