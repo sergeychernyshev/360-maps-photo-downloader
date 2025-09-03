@@ -1,39 +1,54 @@
+@import url("https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap");
+
 body {
-  font-family:
-    -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial,
-    sans-serif;
+  font-family: "Roboto", sans-serif;
   line-height: 1.6;
   padding: 2em;
   margin: auto;
-  background: #f7f7f7;
+  background: #f1f3f4;
+  color: #202124;
 }
 .container {
   background: white;
   padding: 2em;
   border-radius: 8px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  box-shadow:
+    0 1px 2px 0 rgba(60, 64, 67, 0.3),
+    0 2px 6px 2px rgba(60, 64, 67, 0.15);
 }
 h1 {
-  color: #333;
+  color: #202124;
+  font-weight: 500;
 }
 .button,
 button {
   display: inline-block;
   text-decoration: none;
-  background: #4285f4;
+  background: #1a73e8;
   color: white;
-  padding: 10px 20px;
-  border-radius: 5px;
+  padding: 10px 24px;
+  border-radius: 4px;
   border: none;
   cursor: pointer;
-  font-size: 16px;
+  font-size: 14px;
+  font-weight: 500;
   margin-right: 10px;
   line-height: 1.5;
   box-sizing: border-box;
   white-space: nowrap;
+  transition: box-shadow 0.2s ease-in-out;
+}
+.button:hover,
+button:hover {
+  box-shadow:
+    0 1px 2px 0 rgba(60, 64, 67, 0.3),
+    0 1px 3px 1px rgba(60, 64, 67, 0.15);
 }
 a {
-  color: #4285f4;
+  color: #1a73e8;
+  text-decoration: none;
+}
+a:hover {
   text-decoration: underline;
 }
 a.button {
@@ -42,34 +57,38 @@ a.button {
 }
 .sort-link {
   background: none;
-  color: #4285f4;
+  color: #1a73e8;
   padding: 0;
   border-radius: 0;
   border: none;
   font-size: inherit;
   margin: 0;
   line-height: inherit;
+  text-decoration: none;
+  font-weight: 500;
+}
+.sort-link:hover {
   text-decoration: underline;
 }
 a.logout {
-  background: #db4437;
+  background: #d93025;
 }
 a.cancel {
-  background: #6c757d;
+  background: #5f6368;
 }
 .download-btn {
-  background-color: #34a853;
+  background-color: #1e8e3e;
 }
 .redownload-btn {
-  background-color: #c0c0c0;
+  background-color: #9aa0a6;
 }
 #cancel-btn {
-  background: #db4437;
+  background: #d93025;
   align-self: flex-end;
   margin-bottom: 1em;
 }
 .update-btn {
-  background: #34a853;
+  background: #1e8e3e;
 }
 table {
   width: 100%;
@@ -83,29 +102,32 @@ tbody.filtering {
 th,
 td {
   text-align: left;
-  padding: 10px;
-  border-bottom: 1px solid #ddd;
+  padding: 12px 16px;
+  border-bottom: 1px solid #dadce0;
   font-size: 14px;
 }
 th {
-  background-color: #f2f2f2;
+  background-color: #f8f9fa;
+  font-weight: 500;
   white-space: nowrap;
 }
 td:first-child {
-  font-family: monospace;
-  font-size: 12px;
-  max-width: 200px;
+  font-family: "Roboto", sans-serif;
+  font-size: 14px;
+  max-width: 250px;
   overflow: hidden;
   text-overflow: ellipsis;
-  white-space: nowrap;
+  white-space: normal;
 }
 .status {
-  padding: 4px 10px;
-  border-radius: 12px;
+  padding: 4px 12px;
+  border-radius: 16px;
   font-size: 12px;
   color: white;
   font-weight: 500;
   white-space: nowrap;
+  display: inline-flex;
+  align-items: center;
 }
 .status-icon {
   display: none;
@@ -124,49 +146,52 @@ td:first-child {
   }
 }
 .status.downloaded {
-  background-color: #34a853;
+  background-color: #1e8e3e;
 }
 .status.not-downloaded {
-  background-color: #ea4335;
+  background-color: #d93025;
 }
 .pagination {
-  margin: 1em 0;
+  margin: 1.5em 0;
   text-align: center;
 }
 .pagination a,
 .pagination span {
-  color: #4285f4;
+  color: #1a73e8;
   padding: 8px 16px;
   text-decoration: none;
   background: white;
-  border: 1px solid #ddd;
+  border: 1px solid #dadce0;
   margin: 0 2px;
+  border-radius: 4px;
 }
 .pagination button {
-  color: #4285f4;
+  color: #1a73e8;
   padding: 8px 16px;
   text-decoration: none;
   background: white;
-  border: 1px solid #ddd;
+  border: 1px solid #dadce0;
   margin: 0 2px;
   cursor: pointer;
+  border-radius: 4px;
 }
 .pagination button:hover {
-  background-color: #f1f1f1;
+  background-color: #f8f9fa;
 }
 .pagination button:disabled {
-  background-color: #f1f1f1;
+  background-color: #f8f9fa;
   cursor: default;
+  color: #5f6368;
 }
 .pagination a:hover {
-  background-color: #f1f1f1;
+  background-color: #f8f9fa;
 }
 .pagination span {
   border: 1px solid transparent;
 }
 .spinner {
   border: 4px solid rgba(0, 0, 0, 0.1);
-  border-top: 4px solid #4285f4;
+  border-top: 4px solid #1a73e8;
   border-radius: 50%;
   width: 16px;
   height: 16px;
@@ -194,7 +219,7 @@ td:first-child {
   }
 }
 button:disabled {
-  opacity: 0.7;
+  opacity: 0.65;
   cursor: not-allowed;
 }
 .search-container {
@@ -211,62 +236,86 @@ button:disabled {
   line-height: 1;
   font-size: 12px;
   margin: 0;
+  background: #f1f3f4;
+  color: #5f6368;
+  border-radius: 50%;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 form input[type="text"] {
   width: 100%;
-  padding: 9px 10px;
+  padding: 10px 16px;
   font-size: 16px;
   line-height: 1.5;
-  border-radius: 5px;
-  border: 1px solid #ddd;
+  border-radius: 8px;
+  border: 1px solid #dadce0;
   box-sizing: border-box;
 }
+form input[type="text"]:focus {
+  outline: none;
+  border-color: #1a73e8;
+  box-shadow: 0 0 0 1px #1a73e8;
+}
 .status-filter {
-  margin-top: 1em;
-  margin-bottom: 1em;
+  margin-top: 1.5em;
+  margin-bottom: 1.5em;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.status-filter span {
+  font-weight: 500;
 }
 .status-filter a {
   margin-right: 10px;
   text-decoration: none;
-  padding: 5px 10px;
-  border-radius: 5px;
+  padding: 8px 16px;
+  border-radius: 16px;
+  font-size: 14px;
+  color: #3c4043;
+  background-color: #f1f3f4;
 }
 .status-filter a.active {
-  background-color: #f2f2f2;
-  font-weight: bold;
+  background-color: #e8f0fe;
+  color: #1967d2;
+  font-weight: 500;
 }
 .status-filter a.has-count {
-  padding-right: 5px;
+  padding-right: 8px;
 }
 .progress-bar-container {
   width: 100%;
-  background-color: #f3f3f3;
-  border-radius: 5px;
+  background-color: #e8f0fe;
+  border-radius: 4px;
   margin: 1em 0;
+  height: 8px;
 }
 .progress-bar {
   width: 0%;
-  height: 1.5em;
-  background-color: #4caf50;
-  text-align: center;
-  line-height: 1.5em;
-  color: white;
-  border-radius: 5px;
+  height: 100%;
+  background-color: #1a73e8;
+  border-radius: 4px;
 }
 #progress-text {
   margin-top: 10px;
+  font-size: 14px;
+  color: #5f6368;
 }
 .accordion {
-  background-color: #eee;
-  color: #444;
+  background-color: #f8f9fa;
+  color: #202124;
   cursor: pointer;
   padding: 18px;
   width: 100%;
-  border: none;
+  border: 1px solid #dadce0;
   text-align: left;
   outline: none;
   font-size: 15px;
   transition: 0.4s;
+  border-radius: 8px;
 }
 
 .panel {
@@ -277,59 +326,65 @@ form input[type="text"] {
   transition: max-height 0.2s ease-out;
 }
 #pose-filters-container.panel {
-  padding: 0;
+  padding: 1em 0 0 0;
 }
 .pose-filter {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.5em;
+  gap: 1em;
   margin-bottom: 1em;
 }
 .pose-filter-group {
   display: flex;
   flex-direction: column;
   align-items: flex-start;
-  border: 1px solid #eee;
-  padding: 0.5em;
-  border-radius: 5px;
+  border: 1px solid #dadce0;
+  padding: 0.75em;
+  border-radius: 8px;
   cursor: pointer;
   transition: background-color 0.2s ease-out;
 }
 .pose-filter-group:hover {
-  background-color: #f5f5f5;
+  background-color: #f8f9fa;
 }
 .pose-filter-label {
-  font-weight: bold;
+  font-weight: 500;
 }
 .pose-filter-value {
-  font-style: italic;
+  color: #5f6368;
+}
+input[type="checkbox"] {
+  margin-right: 8px;
 }
 input[type="checkbox"][data-state="any"] {
-  accent-color: grey;
+  accent-color: #5f6368;
 }
 input[type="checkbox"][data-state="exists"] {
-  accent-color: green;
+  accent-color: #1e8e3e;
 }
 input[type="checkbox"][data-state="missing"] {
-  accent-color: red;
+  accent-color: #d93025;
 }
 #photo-counter {
   text-align: center;
+  color: #5f6368;
+  font-size: 14px;
 }
 fieldset {
-  border: 1px solid #e0e0e0;
+  border: 1px solid #dadce0;
   border-radius: 8px;
-  padding: 1em;
-  margin-top: 1.5em;
+  padding: 1.5em;
+  margin-top: 2em;
 }
 legend {
-  font-weight: bold;
+  font-weight: 500;
   padding: 0 0.5em;
   margin-left: 0.5em;
+  font-size: 16px;
 }
 .progress-line-container {
   height: 4px;
-  background-color: #e0e0e0;
+  background-color: #e8f0fe;
   position: relative;
   overflow: hidden;
   visibility: hidden;
@@ -340,7 +395,7 @@ legend {
 .progress-line {
   width: 100%;
   height: 100%;
-  background-color: #4285f4;
+  background-color: #1a73e8;
   position: absolute;
   animation: progress-animation 1s infinite linear;
 }
@@ -377,7 +432,7 @@ legend {
 }
 
 .status.error {
-  background-color: #db4437;
+  background-color: #d93025;
   color: white;
 }
 
