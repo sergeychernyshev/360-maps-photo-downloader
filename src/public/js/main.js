@@ -191,7 +191,7 @@ function updatePhotoList() {
 
   document
     .querySelectorAll(
-      "#search-input, #reset-filters-btn, .status-filter a, #more-filters-btn, .pose-filter-group",
+      '#search-input, #reset-filters-btn, .status-filter a, #more-filters-btn, .pose-filter-group, #download-all-btn, form button[type="submit"]',
     )
     .forEach((el) => el.classList.add("disabled"));
 
@@ -313,7 +313,7 @@ function connectWebSocket() {
         updateBtn.disabled = false;
         document
           .querySelectorAll(
-            "#search-input, #reset-filters-btn, .status-filter a, #more-filters-btn, .pose-filter-group",
+            '#search-input, #reset-filters-btn, .status-filter a, #more-filters-btn, .pose-filter-group, #download-all-btn, form button[type="submit"]',
           )
           .forEach((el) => el.classList.remove("disabled"));
         location.reload();
