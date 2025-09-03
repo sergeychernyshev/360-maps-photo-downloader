@@ -30,8 +30,8 @@ function getFiltersFromQuery() {
     status: params.get("status") || "all",
     pose: params.get("pose")?.split(",").filter(Boolean) || [],
     page: parseInt(params.get("page") || "1", 10),
-    sort: params.get("sort") || "date",
-    order: params.get("order") || "desc",
+    sort: params.get("sort") || "location",
+    order: params.get("order") || "asc",
   };
 }
 
@@ -50,9 +50,9 @@ function getCurrentFilters() {
     10,
   );
   const sort =
-    new URLSearchParams(window.location.search).get("sort") || "date";
+    new URLSearchParams(window.location.search).get("sort") || "location";
   const order =
-    new URLSearchParams(window.location.search).get("order") || "desc";
+    new URLSearchParams(window.location.search).get("order") || "asc";
   return { search, status, poseFilters, page, sort, order };
 }
 
@@ -86,9 +86,9 @@ function applyFilters(newFilters = {}) {
 
 function sortPhotos(sort) {
   const currentOrder =
-    new URLSearchParams(window.location.search).get("order") || "desc";
+    new URLSearchParams(window.location.search).get("order") || "asc";
   const currentSort =
-    new URLSearchParams(window.location.search).get("sort") || "date";
+    new URLSearchParams(window.location.search).get("sort") || "location";
   let order = "asc";
   if (currentSort === sort) {
     order = currentOrder === "asc" ? "desc" : "asc";
@@ -151,8 +151,8 @@ function resetFilters() {
     status: "all",
     poseFilters: [],
     page: 1,
-    sort: "date",
-    order: "desc",
+    sort: "location",
+    order: "asc",
   });
 }
 
@@ -273,9 +273,9 @@ function connectWebSocket() {
           .join(",");
         if (poseQuery) params.set("pose", poseQuery);
         if (requestPayload.page > 1) params.set("page", requestPayload.page);
-        if (requestPayload.sort && requestPayload.sort !== "date")
+        if (requestPayload.sort && requestPayload.sort !== "location")
           params.set("sort", requestPayload.sort);
-        if (requestPayload.order && requestPayload.order !== "desc")
+        if (requestPayload.order && requestPayload.order !== "asc")
           params.set("order", requestPayload.order);
 
         const newQueryString = params.toString()
