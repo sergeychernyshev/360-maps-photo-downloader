@@ -74,9 +74,13 @@ function buildPhotoListHtml(photos, downloadedFiles, driveFileLinks) {
       const lat = photo.pose.latLngPair.latitude;
       const lon = photo.pose.latLngPair.longitude;
       const coordinates = `<small><span title="Latitude: ${lat.toFixed(4)}, Longitude: ${lon.toFixed(4)}">${lat.toFixed(4)}, ${lon.toFixed(4)}</span></small>`;
-      const locationHtml = locationName
-        ? `${locationName}<br>${coordinates}`
-        : coordinates;
+      const photoIdHtml = locationName
+        ? `<a href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(
+            locationName,
+          )}" target="_blank">${locationName}</a><br><small><a href="${
+            photo.shareLink
+          }" target="_blank">${photo.photoId.id}</a></small>`
+        : `<a href="${photo.shareLink}" target="_blank">${photo.photoId.id}</a>`;
 
       const isDownloaded = downloadedFiles.has(`${photo.photoId.id}.jpg`);
       const driveLink = isDownloaded
@@ -88,7 +92,7 @@ function buildPhotoListHtml(photos, downloadedFiles, driveFileLinks) {
 
       return `
     <tr data-photo-id="${photo.photoId.id}">
-      <td><a href="${photo.shareLink}" target="_blank">${photo.photoId.id}</a></td>
+      <td>${photoIdHtml}</td>
       <td>${locationHtml}${poseString}</td>
       <td>${new Date(photo.captureTime).toLocaleDateString()}</td>
       <td>${photo.viewCount || 0}</td>
