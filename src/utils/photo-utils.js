@@ -126,9 +126,9 @@ function buildPhotoListHtml(photos, downloadedFiles, driveFileLinks) {
         </button>
       </td>
       <td class="progress-cell hidden" colspan="2">
-        <div class="spinner-container hidden" style="display: flex; align-items: center; justify-content: center;">
-          <div class="spinner" style="margin: 0 auto;"></div>
-          <span style="margin-left: 10px;">Uploading...</span>
+        <div class="spinner-container hidden">
+          <div class="spinner"></div>
+          <span>Uploading...</span>
         </div>
         <div class="progress-bar-container" style="margin-bottom: 0;">
           <div class="progress-bar" style="width: 0%;">Starting...</div>
