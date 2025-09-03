@@ -77,6 +77,8 @@ function buildPhotoListHtml(photos, downloadedFiles, driveFileLinks) {
 
       const locationName =
         photo.places && photo.places.length > 0 && photo.places[0].name;
+      const placeId =
+        photo.places && photo.places.length > 0 && photo.places[0].placeId;
       const lat = photo.pose.latLngPair.latitude;
       const lon = photo.pose.latLngPair.longitude;
       const coordinates = `<small><span title="Latitude: ${lat.toFixed(
@@ -87,9 +89,7 @@ function buildPhotoListHtml(photos, downloadedFiles, driveFileLinks) {
       const locationHtml = `${coordinates}`;
 
       const photoIdHtml = locationName
-        ? `<a href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(
-            locationName,
-          )}" target="_blank">${locationName}</a><br><small><a href="${
+        ? `<a href="https://www.google.com/maps/place/?q=place_id:${placeId}" target="_blank">${locationName}</a><br><small><a href="${
             photo.shareLink
           }" target="_blank">${photo.photoId.id}</a></small>`
         : `<a href="${photo.shareLink}" target="_blank">${photo.photoId.id}</a>`;
