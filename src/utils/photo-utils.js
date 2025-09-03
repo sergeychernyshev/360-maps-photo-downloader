@@ -110,14 +110,26 @@ function buildPhotoListHtml(photos, downloadedFiles, driveFileLinks) {
       <td>${photo.viewCount || 0}</td>
       <td class="status-cell">${statusHtml}</td>
       <td class="actions-cell">
-        <button data-photo-id="${photo.photoId.id}" class="button download-single-btn ${
+        <button data-photo-id="${
+          photo.photoId.id
+        }" class="button download-single-btn ${
           isDownloaded ? "redownload-btn" : "download-btn"
-        }" style="font-size: 12px; padding: 5px 10px;" title="${isDownloaded ? "Re-download" : "Download"}">
-          <span class="button-text">${isDownloaded ? "Re-download" : "Download"}</span>
-          <span class="button-icon">${isDownloaded ? "&#10227;" : "&#11015;"}</span>
+        }" style="font-size: 12px; padding: 5px 10px;" title="${
+          isDownloaded ? "Re-download" : "Download"
+        }">
+          <span class="button-text">${
+            isDownloaded ? "Re-download" : "Download"
+          }</span>
+          <span class="button-icon">${
+            isDownloaded ? "&#10227;" : "&#11015;"
+          }</span>
         </button>
       </td>
       <td class="progress-cell hidden" colspan="2">
+        <div class="spinner-container hidden">
+          <div class="spinner"></div>
+          <span>Uploading...</span>
+        </div>
         <div class="progress-bar-container" style="margin-bottom: 0;">
           <div class="progress-bar" style="width: 0%;">Starting...</div>
         </div>

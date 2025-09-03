@@ -330,6 +330,9 @@ form input[type="text"]:focus {
   border-radius: 4px;
   margin: 1em 0;
 }
+.progress-cell .progress-bar-container {
+  margin: 0;
+}
 .progress-bar {
   width: 0%;
   height: 1.5em;
@@ -467,10 +470,6 @@ legend {
   border: none;
 }
 
-.hidden {
-  display: none;
-}
-
 .status.error {
   background-color: var(--error-color);
   color: var(--primary-text-color);
@@ -500,4 +499,21 @@ legend {
 .theme-switcher button.active {
   background-color: var(--active-bg-color);
   color: var(--active-text-color);
+}
+
+.spinner-container {
+  align-items: center;
+  justify-content: center;
+}
+
+.spinner-container .spinner {
+  margin: 0 auto;
+}
+
+.spinner-container span {
+  margin-left: 10px;
+}
+
+.hidden {
+  display: none;
 }

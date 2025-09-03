@@ -429,6 +429,13 @@ function connectWebSocket() {
             const statusCell = row.querySelector(".status-cell");
             const actionsCell = row.querySelector(".actions-cell");
             const progressCell = row.querySelector(".progress-cell");
+            const progressBarContainer = progressCell.querySelector(
+              ".progress-bar-container",
+            );
+            const spinnerContainer =
+              progressCell.querySelector(".spinner-container");
+            const progressBar =
+              progressBarContainer.querySelector(".progress-bar");
 
             if (progressCell.classList.contains("hidden")) {
               statusCell.classList.add("hidden");
@@ -436,28 +443,20 @@ function connectWebSocket() {
               progressCell.classList.remove("hidden");
             }
 
-            if (uploadStarted && uploadProgress === undefined) {
-              if (!progressCell.querySelector(".spinner")) {
-                progressCell.innerHTML =
-                  '<div class="spinner" style="margin: 0 auto;"></div><span style="margin-left: 10px;">Uploading...</span>';
-              }
+            if (uploadStarted || uploadProgress !== undefined) {
+              progressBarContainer.classList.add("hidden");
+              spinnerContainer.classList.remove("hidden");
             } else {
-              let progressBar = progressCell.querySelector(".progress-bar");
-              if (!progressBar) {
-                progressCell.innerHTML = `
-                  <div class="progress-bar-container" style="margin-bottom: 0;">
-                    <div class="progress-bar" style="width: 0%;"></div>
-                  </div>`;
-                progressBar = progressCell.querySelector(".progress-bar");
-              }
+              spinnerContainer.classList.add("hidden");
+              progressBarContainer.classList.remove("hidden");
+            }
 
-              if (uploadProgress !== undefined) {
-                progressBar.style.width = `${uploadProgress}%`;
-                progressBar.textContent = `Uploading: ${uploadProgress}%`;
-              } else if (downloadProgress !== undefined) {
-                progressBar.style.width = `${downloadProgress}%`;
-                progressBar.textContent = `Downloading: ${downloadProgress}%`;
-              }
+            if (uploadProgress !== undefined) {
+              progressBar.style.width = `${uploadProgress}%`;
+              progressBar.textContent = `Uploading: ${uploadProgress}%`;
+            } else if (downloadProgress !== undefined) {
+              progressBar.style.width = `${downloadProgress}%`;
+              progressBar.textContent = `Downloading: ${downloadProgress}%`;
             }
 
             if (complete || error) {
@@ -537,10 +536,16 @@ function downloadSinglePhoto(photoId) {
   const statusCell = row.querySelector(".status-cell");
   const actionsCell = row.querySelector(".actions-cell");
   const progressCell = row.querySelector(".progress-cell");
+  const progressBarContainer = progressCell.querySelector(
+    ".progress-bar-container",
+  );
+  const spinnerContainer = progressCell.querySelector(".spinner-container");
 
   statusCell.classList.add("hidden");
   actionsCell.classList.add("hidden");
   progressCell.classList.remove("hidden");
+  spinnerContainer.classList.add("hidden");
+  progressBarContainer.classList.remove("hidden");
 
   connectWebSocket();
   if (ws && ws.readyState === WebSocket.OPEN) {
