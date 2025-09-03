@@ -39,8 +39,12 @@ async function filterPhotos(req, ws, payload) {
   // 1. Filter by search term
   const searchedPhotos = allPhotos.filter((photo) => {
     if (!search) return true;
+    const lowerCaseSearch = search.toLowerCase();
+    if (photo.photoId.id.toLowerCase().includes(lowerCaseSearch)) {
+      return true;
+    }
     if (photo.places && photo.places.length > 0 && photo.places[0].name) {
-      return photo.places[0].name.toLowerCase().includes(search.toLowerCase());
+      return photo.places[0].name.toLowerCase().includes(lowerCaseSearch);
     }
     return false;
   });
