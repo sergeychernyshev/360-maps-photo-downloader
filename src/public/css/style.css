@@ -514,6 +514,11 @@ legend {
   margin-left: 10px;
 }
 
+#map {
+  height: 400px;
+  margin-bottom: 2em;
+}
+
 .hidden {
   display: none;
 }

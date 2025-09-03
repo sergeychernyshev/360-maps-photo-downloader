@@ -1,4 +1,39 @@
 let ws;
+let map;
+let markers;
+
+function updateMap(photos) {
+  if (!map) {
+    map = L.map("map").setView([0, 0], 2);
+    L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+      attribution:
+        '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+    }).addTo(map);
+    markers = L.markerClusterGroup();
+    map.addLayer(markers);
+  }
+
+  markers.clearLayers();
+  photos.forEach((photo) => {
+    if (photo.pose && photo.pose.latLngPair) {
+      const { latitude, longitude } = photo.pose.latLngPair;
+      const marker = L.marker([latitude, longitude]);
+      marker.bindPopup(
+        `<a href="${photo.shareLink}" target="_blank">${
+          photo.places?.[0]?.name || photo.photoId.id
+        }</a>`,
+      );
+      markers.addLayer(marker);
+    }
+  });
+
+  if (photos.length > 0) {
+    const bounds = markers.getBounds();
+    if (bounds.isValid()) {
+      map.fitBounds(bounds, { padding: [50, 50] });
+    }
+  }
+}
 
 function updateSortIndicators(sort, order) {
   document.querySelectorAll(".sort-link").forEach((link) => {
@@ -295,10 +330,18 @@ function connectWebSocket() {
       // 3. Update sort indicators
       updateSortIndicators(requestPayload.sort, requestPayload.order);
 
-      // 4. Scroll if needed
+      // 4. Update map
+      updateMap(data.payload.filteredPhotos);
+
+      // 5. Scroll if needed
       if (requestPayload.location === "bottom") {
         window.scrollTo(0, 0);
       }
+      return;
+    }
+
+    if (data.type === "all-photos") {
+      updateMap(data.payload);
       return;
     }
 
@@ -587,6 +630,12 @@ function setTheme(theme) {
 
 document.addEventListener("DOMContentLoaded", () => {
   connectWebSocket();
+
+  if (isLoggedIn) {
+    ws.onopen = () => {
+      ws.send(JSON.stringify({ type: "get-all-photos" }));
+    };
+  }
 
   window
     .matchMedia("(prefers-color-scheme: dark)")
