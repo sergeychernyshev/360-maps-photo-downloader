@@ -443,20 +443,20 @@ function connectWebSocket() {
               progressCell.classList.remove("hidden");
             }
 
-            if (uploadStarted && uploadProgress === undefined) {
+            if (uploadStarted || uploadProgress !== undefined) {
               progressBarContainer.classList.add("hidden");
               spinnerContainer.classList.remove("hidden");
             } else {
               spinnerContainer.classList.add("hidden");
               progressBarContainer.classList.remove("hidden");
+            }
 
-              if (uploadProgress !== undefined) {
-                progressBar.style.width = `${uploadProgress}%`;
-                progressBar.textContent = `Uploading: ${uploadProgress}%`;
-              } else if (downloadProgress !== undefined) {
-                progressBar.style.width = `${downloadProgress}%`;
-                progressBar.textContent = `Downloading: ${downloadProgress}%`;
-              }
+            if (uploadProgress !== undefined) {
+              progressBar.style.width = `${uploadProgress}%`;
+              progressBar.textContent = `Uploading: ${uploadProgress}%`;
+            } else if (downloadProgress !== undefined) {
+              progressBar.style.width = `${downloadProgress}%`;
+              progressBar.textContent = `Downloading: ${downloadProgress}%`;
             }
 
             if (complete || error) {
