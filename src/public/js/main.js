@@ -562,8 +562,43 @@ function cancelDownload() {
   }
 }
 
+function setTheme(theme) {
+  const html = document.documentElement;
+  if (theme === "auto") {
+    const prefersDark = window.matchMedia(
+      "(prefers-color-scheme: dark)",
+    ).matches;
+    html.dataset.theme = prefersDark ? "dark" : "light";
+    localStorage.removeItem("theme");
+  } else {
+    html.dataset.theme = theme;
+    localStorage.setItem("theme", theme);
+  }
+
+  document.querySelectorAll(".theme-switcher button").forEach((btn) => {
+    btn.classList.toggle("active", btn.dataset.theme === theme);
+  });
+}
+
 document.addEventListener("DOMContentLoaded", () => {
   connectWebSocket();
+
+  const savedTheme = localStorage.getItem("theme") || "auto";
+  setTheme(savedTheme);
+
+  window
+    .matchMedia("(prefers-color-scheme: dark)")
+    .addEventListener("change", (e) => {
+      if (localStorage.getItem("theme") === null || savedTheme === "auto") {
+        setTheme("auto");
+      }
+    });
+
+  document.querySelectorAll(".theme-switcher button").forEach((btn) => {
+    btn.addEventListener("click", (e) => {
+      setTheme(e.target.dataset.theme);
+    });
+  });
 
   window.addEventListener("popstate", (event) => {
     const filters = getFiltersFromQuery();
