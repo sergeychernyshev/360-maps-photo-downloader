@@ -541,6 +541,8 @@ function downloadSinglePhoto(photoId) {
   statusCell.classList.add("hidden");
   actionsCell.classList.add("hidden");
   progressCell.classList.remove("hidden");
+  progressCell.innerHTML =
+    '<div class="spinner" style="margin: 0 auto;"></div><span style="margin-left: 10px;">Starting...</span>';
 
   connectWebSocket();
   if (ws && ws.readyState === WebSocket.OPEN) {
