@@ -5,10 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Google Maps 360 Photo Downloader</title>
     <link rel="stylesheet" href="/css/style.css" />
-    <link
-      rel="stylesheet"
-      href="/modules/leaflet/leaflet.css"
-    />
+    <link rel="stylesheet" href="/modules/leaflet/leaflet.css" />
     <link
       rel="stylesheet"
       href="/modules/leaflet.markercluster/MarkerCluster.css"
@@ -46,7 +43,9 @@
       <h1>Google Maps 360 Photo Downloader</h1>
       <% if (isLoggedIn) { %>
       <h2>
-        <%= totalPhotos %> Street View Photos Found, and <%= drivePhotoCount %>
+        <%= totalPhotos %>
+        Street View Photos Found, and
+        <%= drivePhotoCount %>
         on Google Drive
       </h2>
       <% } else { %>
@@ -54,14 +53,18 @@
         Please log in with your Google account to download or update photos.
       </p>
       <a href="/login" class="button">Login with Google</a>
-      <% } %> <% if (totalPhotos > 0) { %> <% if (isLoggedIn) { %>
+      <% } %>
+      <% if (totalPhotos > 0) { %>
+      <% if (isLoggedIn) { %>
       <p>
         This is a list of your 360 photos on Google Maps. It indicates which
         ones have already been backed up to the
         <code id="folder-link-container"
           ><% if (locals.folderLink) { %>
           <a href="<%= folderLink %>" target="_blank"><%= folderName %></a>
-          <% } else {%> <%= folderName %> <% } %>
+          <% } else {%>
+          <%= folderName %>
+          <% } %>
         </code>
         directory in your Google Drive.
       </p>
@@ -88,7 +91,8 @@
           <% }); %>
         </ul>
       </div>
-      <% } %> <% if (duplicateFilesCount > 0) { %>
+      <% } %>
+      <% if (duplicateFilesCount > 0) { %>
       <p>
         There are <%= duplicateFilesCount %> files with duplicate names in your
         Google Drive folder.
@@ -123,7 +127,8 @@
                 <a href="<%= file.webViewLink %>" target="_blank"
                   ><%= file.name %></a
                 >
-                (ID: <%= file.id %>)
+                (ID:
+                <%= file.id %>)
               </li>
               <% }); %>
             </ul>
@@ -156,17 +161,13 @@
             <div style="flex-grow: 1" id="upload-container" class="hidden">
               <p>Uploading to Google Drive:</p>
               <div class="upload-progress-indicator">
-                <div class="spinner"></div><span>Uploading...</span>
+                <div class="spinner"></div>
+                <span>Uploading...</span>
               </div>
             </div>
           </div>
         </div>
-        <button
-          id="cancel-btn"
-          class="button cancel"
-        >
-          Cancel
-        </button>
+        <button id="cancel-btn" class="button cancel">Cancel</button>
       </fieldset>
       <% } %>
 
@@ -236,9 +237,7 @@
         <div id="pose-filters-container" class="panel">
           <span>Location and orientation filters:</span>
           <div class="pose-filter">
-            <div
-              class="pose-filter-group"
-            >
+            <div class="pose-filter-group">
               <div>
                 <strong class="pose-filter-label">GPS Record</strong>
                 <span class="pose-filter-count"></span>
@@ -248,9 +247,7 @@
                 <span class="pose-filter-value">Any</span></label
               >
             </div>
-            <div
-              class="pose-filter-group"
-            >
+            <div class="pose-filter-group">
               <div>
                 <strong class="pose-filter-label">Place Data</strong>
                 <span class="pose-filter-count"></span>
@@ -260,9 +257,7 @@
                 <span class="pose-filter-value">Any</span></label
               >
             </div>
-            <div
-              class="pose-filter-group"
-            >
+            <div class="pose-filter-group">
               <div>
                 <strong class="pose-filter-label">Heading</strong>
                 <span class="pose-filter-count"></span>
@@ -272,9 +267,7 @@
                 <span class="pose-filter-value">Any</span></label
               >
             </div>
-            <div
-              class="pose-filter-group"
-            >
+            <div class="pose-filter-group">
               <div>
                 <strong class="pose-filter-label">Pitch</strong>
                 <span class="pose-filter-count"></span>
@@ -284,9 +277,7 @@
                 <span class="pose-filter-value">Any</span></label
               >
             </div>
-            <div
-              class="pose-filter-group"
-            >
+            <div class="pose-filter-group">
               <div>
                 <strong class="pose-filter-label">Roll</strong>
                 <span class="pose-filter-count"></span>
@@ -296,9 +287,7 @@
                 <span class="pose-filter-value">Any</span></label
               >
             </div>
-            <div
-              class="pose-filter-group"
-            >
+            <div class="pose-filter-group">
               <div>
                 <strong class="pose-filter-label">Altitude</strong>
                 <span class="pose-filter-count"></span>
@@ -314,10 +303,19 @@
       </fieldset>
 
       <div id="photo-counter" style="margin-top: 1em">
-        <% if (filteredTotal > 0) { %> Showing photos <%= startIndex %>-<%=
-        endIndex %> (page <%= currentPage %> of <%= totalPages %>) out of <%=
-        filteredTotal %> filtered photos. <% } else { %> No photos match the
-        current filters. <% } %>
+        <% if (filteredTotal > 0) { %> Showing photos
+        <%= startIndex %>-<%=
+        endIndex %>
+        (page
+        <%= currentPage %>
+        of
+        <%= totalPages %>) out of
+        <%=
+        filteredTotal %>
+        filtered photos.
+        <% } else { %>
+        No photos match the current filters.
+        <% } %>
       </div>
       <%- paginationHtmlTop %>
       <table>
@@ -338,18 +336,17 @@
           <%- photoListHtml %>
         </tbody>
       </table>
-      <%- paginationHtmlBottom %> <% } else if (isLoggedIn) { %>
+      <%- paginationHtmlBottom %>
+      <% } else if (isLoggedIn) { %>
       <p>You do not have any photos uploaded 360 photos to Google Maps.</p>
-      <button id="update-btn" class="update-btn">
-        Check for new photos
-      </button>
+      <button id="update-btn" class="update-btn">Check for new photos</button>
       <a href="/logout" class="logout button">Logout</a>
       <% } %>
     </div>
 
     <script>
       const poseCounts = <%- JSON.stringify(poseCounts || {}) %>;
-      
+
       const isLoggedIn = <%- !!isLoggedIn %>;
       const missingPhotosCount = <%- notDownloadedCount %>;
       const folderName = "<%= folderName %>";
