@@ -189,6 +189,12 @@ function updatePhotoList() {
   updateBtn.innerHTML =
     '<div class="spinner spinner-light"></div><span>Starting...</span>';
 
+  document
+    .querySelectorAll(
+      "#search-input, #reset-filters-btn, .status-filter a, #more-filters-btn, .pose-filter-group",
+    )
+    .forEach((el) => el.classList.add("disabled"));
+
   connectWebSocket();
 
   if (ws && ws.readyState === WebSocket.OPEN) {
@@ -305,6 +311,11 @@ function connectWebSocket() {
       } else if (complete) {
         updateBtn.innerHTML = "Update the List of Photos";
         updateBtn.disabled = false;
+        document
+          .querySelectorAll(
+            "#search-input, #reset-filters-btn, .status-filter a, #more-filters-btn, .pose-filter-group",
+          )
+          .forEach((el) => el.classList.remove("disabled"));
         location.reload();
       } else {
         updateBtn.innerHTML = `<div class="spinner spinner-light"></div><span>${message}</span>`;
