@@ -544,8 +544,8 @@ function downloadSinglePhoto(photoId) {
   statusCell.classList.add("hidden");
   actionsCell.classList.add("hidden");
   progressCell.classList.remove("hidden");
-  progressBarContainer.classList.add("hidden");
-  spinnerContainer.classList.remove("hidden");
+  spinnerContainer.classList.add("hidden");
+  progressBarContainer.classList.remove("hidden");
 
   connectWebSocket();
   if (ws && ws.readyState === WebSocket.OPEN) {
