@@ -296,6 +296,22 @@ function connectWebSocket() {
       return;
     }
 
+    if (data.type === "update-progress") {
+      const { message, count, complete, error } = data.payload;
+      const updateBtn = document.getElementById("update-btn");
+      if (error) {
+        updateBtn.innerHTML = `Error: ${error}`;
+        updateBtn.disabled = false;
+      } else if (complete) {
+        updateBtn.innerHTML = "Update the List of Photos";
+        updateBtn.disabled = false;
+        location.reload();
+      } else {
+        updateBtn.innerHTML = `<div class="spinner spinner-light"></div><span>${message}</span>`;
+      }
+      return;
+    }
+
     // Handle other WebSocket messages (download progress, etc.)
     if (data.type === "progress") {
       const { global, individual } = data.payload;

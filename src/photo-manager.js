@@ -10,7 +10,7 @@ const CREDENTIALS_PATH = path.join(process.cwd(), "credentials.json");
  * @param {import('google-auth-library').OAuth2Client} authClient An authorized OAuth2 client.
  * @param {(message: string) => void} [log=() => {}] An optional function to log progress messages.
  */
-async function listAllPhotos(authClient, progressCallback = () => {}) {
+async function listAllPhotos(authClient, ws) {
   const credsContent = await fs.readFile(CREDENTIALS_PATH);
   const { api_key } = JSON.parse(credsContent).web;
   const streetviewpublish = google.streetviewpublish({
@@ -21,7 +21,12 @@ async function listAllPhotos(authClient, progressCallback = () => {}) {
   const allPhotos = [];
   let nextPageToken = null;
 
-  progressCallback({ message: "Fetching photo list...", count: 0 });
+  ws.send(
+    JSON.stringify({
+      type: "update-progress",
+      payload: { message: "Fetching photo list...", count: 0 },
+    }),
+  );
 
   do {
     const res = await streetviewpublish.photos.list({
@@ -32,19 +37,29 @@ async function listAllPhotos(authClient, progressCallback = () => {}) {
 
     if (res.data.photos && res.data.photos.length > 0) {
       allPhotos.push(...res.data.photos);
-      progressCallback({
-        message: `Found ${allPhotos.length} photos...`,
-        count: allPhotos.length,
-      });
+      ws.send(
+        JSON.stringify({
+          type: "update-progress",
+          payload: {
+            message: `Found ${allPhotos.length} photos...`,
+            count: allPhotos.length,
+          },
+        }),
+      );
     }
     nextPageToken = res.data.nextPageToken;
   } while (nextPageToken);
 
-  progressCallback({
-    message: `Found ${allPhotos.length} total photos.`,
-    count: allPhotos.length,
-    complete: true,
-  });
+  ws.send(
+    JSON.stringify({
+      type: "update-progress",
+      payload: {
+        message: `Found ${allPhotos.length} total photos.`,
+        count: allPhotos.length,
+        complete: true,
+      },
+    }),
+  );
   return allPhotos;
 }
 
