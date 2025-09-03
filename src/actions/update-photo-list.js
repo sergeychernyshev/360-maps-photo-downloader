@@ -14,15 +14,7 @@ const { updateState } = require("../download-state");
  * Updates the list of photos from Google Street View and saves it to Google Drive.
  * @param {object} req - The Express request object, containing the session.
  */
-async function updatePhotoList(req) {
-  /**
-   * Sends progress updates to the client.
-   * @param {object} progress - The progress object.
-   */
-  const progressCallback = (progress) => {
-    updateState(progress);
-  };
-
+async function updatePhotoList(req, ws) {
   try {
     // Get authenticated clients for Google Drive and Street View
     const oAuth2Client = await getAuthenticatedClient(req);
@@ -32,15 +24,18 @@ async function updatePhotoList(req) {
     const folder = await findOrCreateFolder(drive, FOLDER_NAME);
     const folderId = folder.id;
 
-    progressCallback({
-      folderLink: folder.webViewLink,
-    });
+    ws.send(
+      JSON.stringify({
+        type: "update-progress",
+        payload: { folderLink: folder.webViewLink },
+      }),
+    );
 
     // Get the existing photo list file, if it exists
     let photoListFile = await getPhotoListFile(drive, folderId);
 
     // List all photos from Google Street View
-    const photos = await listAllPhotos(oAuth2Client, progressCallback);
+    const photos = await listAllPhotos(oAuth2Client, ws);
 
     // If the photo list file exists, update it. Otherwise, create a new file.
     if (photoListFile) {
@@ -60,11 +55,16 @@ async function updatePhotoList(req) {
     }
   } catch (error) {
     // Handle errors
-    progressCallback({
-      error: `An error occurred: ${error.message}`,
-      complete: true,
-      inProgress: false,
-    });
+    ws.send(
+      JSON.stringify({
+        type: "update-progress",
+        payload: {
+          error: `An error occurred: ${error.message}`,
+          complete: true,
+          inProgress: false,
+        },
+      }),
+    );
     console.error(error);
   }
 }

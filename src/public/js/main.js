@@ -189,6 +189,12 @@ function updatePhotoList() {
   updateBtn.innerHTML =
     '<div class="spinner spinner-light"></div><span>Starting...</span>';
 
+  document
+    .querySelectorAll(
+      '#search-input, #reset-filters-btn, .status-filter a, #more-filters-btn, .pose-filter-group, #download-all-btn, form button[type="submit"]',
+    )
+    .forEach((el) => el.classList.add("disabled"));
+
   connectWebSocket();
 
   if (ws && ws.readyState === WebSocket.OPEN) {
@@ -292,6 +298,27 @@ function connectWebSocket() {
       // 4. Scroll if needed
       if (requestPayload.location === "bottom") {
         window.scrollTo(0, 0);
+      }
+      return;
+    }
+
+    if (data.type === "update-progress") {
+      const { message, count, complete, error } = data.payload;
+      const updateBtn = document.getElementById("update-btn");
+      if (error) {
+        updateBtn.innerHTML = `Error: ${error}`;
+        updateBtn.disabled = false;
+      } else if (complete) {
+        updateBtn.innerHTML = "Update the List of Photos";
+        updateBtn.disabled = false;
+        document
+          .querySelectorAll(
+            '#search-input, #reset-filters-btn, .status-filter a, #more-filters-btn, .pose-filter-group, #download-all-btn, form button[type="submit"]',
+          )
+          .forEach((el) => el.classList.remove("disabled"));
+        location.reload();
+      } else {
+        updateBtn.innerHTML = `<div class="spinner spinner-light"></div><span>${message}</span>`;
       }
       return;
     }

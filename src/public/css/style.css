@@ -380,3 +380,8 @@ legend {
   background-color: #db4437;
   color: white;
 }
+
+.disabled {
+  opacity: 0.5;
+  pointer-events: none;
+}

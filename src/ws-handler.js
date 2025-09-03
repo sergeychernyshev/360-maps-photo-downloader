@@ -49,7 +49,7 @@ async function handleMessage(req, ws, message) {
       }
       break;
     case "update-photo-list":
-      await updatePhotoList(req);
+      await updatePhotoList(req, ws);
       break;
     case "filter-photos":
       await filterPhotos(req, ws, payload);
