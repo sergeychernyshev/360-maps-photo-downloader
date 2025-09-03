@@ -64,6 +64,12 @@ function updateState(newState) {
         }),
       );
     }
+
+    if (state.individual[photoId].complete) {
+      setTimeout(() => {
+        delete state.individual[photoId];
+      }, 5000);
+    }
   } else {
     // Global progress update
     Object.assign(state.global, newState);
