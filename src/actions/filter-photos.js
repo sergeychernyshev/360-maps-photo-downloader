@@ -16,7 +16,7 @@ async function filterPhotos(req, ws, payload) {
   const { search, status, poseFilters, page, sort, order } = payload;
   if (!req.session.allPhotos) {
     const oAuth2Client = await getAuthenticatedClient(req);
-    req.session.allPhotos = await listAllPhotos(oAuth2Client);
+    req.session.allPhotos = await listAllPhotos(oAuth2Client, ws);
   }
   const { allPhotos } = req.session;
 
