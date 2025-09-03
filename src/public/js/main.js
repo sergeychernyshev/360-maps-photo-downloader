@@ -626,7 +626,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
   document.querySelectorAll(".pose-filter-group").forEach((group) => {
     group.addEventListener("click", (event) => {
-      event.preventDefault();
+      if (event.target.tagName !== "INPUT") {
+        event.preventDefault();
+      }
       const checkbox = group.querySelector('input[type="checkbox"]');
       cycleCheckboxState(checkbox);
     });
