@@ -583,9 +583,6 @@ function setTheme(theme) {
 document.addEventListener("DOMContentLoaded", () => {
   connectWebSocket();
 
-  const savedTheme = localStorage.getItem("theme") || "auto";
-  setTheme(savedTheme);
-
   window
     .matchMedia("(prefers-color-scheme: dark)")
     .addEventListener("change", (e) => {

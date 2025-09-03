@@ -5,6 +5,19 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Google Maps 360 Photo Downloader</title>
     <link rel="stylesheet" href="/css/style.css" />
+    <script>
+      (function () {
+        const theme = localStorage.getItem("theme") || "auto";
+        if (theme === "auto") {
+          const prefersDark = window.matchMedia(
+            "(prefers-color-scheme: dark)",
+          ).matches;
+          document.documentElement.dataset.theme = prefersDark ? "dark" : "light";
+        } else {
+          document.documentElement.dataset.theme = theme;
+        }
+      })();
+    </script>
   </head>
   <body>
     <div class="theme-switcher">
