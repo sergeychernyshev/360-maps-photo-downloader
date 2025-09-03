@@ -6,59 +6,6 @@ const path = require("path");
 const CREDENTIALS_PATH = path.join(process.cwd(), "credentials.json");
 
 /**
- * Lists all photos from Google Photos for the authenticated user.
- * @param {import('google-auth-library').OAuth2Client} authClient An authorized OAuth2 client.
- * @param {(message: string) => void} [log=() => {}] An optional function to log progress messages.
- */
-async function listGooglePhotos(authClient, ws) {
-  const photoslibrary = google.photoslibrary({
-    version: "v1",
-    auth: authClient,
-  });
-  const allPhotos = [];
-  let nextPageToken = null;
-
-  ws.send(
-    JSON.stringify({
-      type: "update-progress",
-      payload: { message: "Fetching Google Photos list...", count: 0 },
-    }),
-  );
-
-  do {
-    const res = await photoslibrary.mediaItems.list({
-      pageSize: 100,
-      pageToken: nextPageToken,
-    });
-
-    if (res.data.mediaItems && res.data.mediaItems.length > 0) {
-      const regularPhotos = res.data.mediaItems
-        .filter((p) => p.mediaMetadata.photo)
-        .map((photo) => ({
-          photoId: { id: photo.id },
-          downloadUrl: photo.baseUrl,
-          captureTime: photo.mediaMetadata.creationTime,
-          type: "regular",
-          ...photo,
-        }));
-      allPhotos.push(...regularPhotos);
-      ws.send(
-        JSON.stringify({
-          type: "update-progress",
-          payload: {
-            message: `Found ${allPhotos.length} Google Photos...`,
-            count: allPhotos.length,
-          },
-        }),
-      );
-    }
-    nextPageToken = res.data.nextPageToken;
-  } while (nextPageToken);
-
-  return allPhotos;
-}
-
-/**
  * Lists all photos for the authenticated user, handling pagination.
  * @param {import('google-auth-library').OAuth2Client} authClient An authorized OAuth2 client.
  * @param {(message: string) => void} [log=() => {}] An optional function to log progress messages.
@@ -77,7 +24,7 @@ async function listAllPhotos(authClient, ws) {
   ws.send(
     JSON.stringify({
       type: "update-progress",
-      payload: { message: "Fetching 360 photo list...", count: 0 },
+      payload: { message: "Fetching photo list...", count: 0 },
     }),
   );
 
@@ -89,16 +36,12 @@ async function listAllPhotos(authClient, ws) {
     });
 
     if (res.data.photos && res.data.photos.length > 0) {
-      const streetViewPhotos = res.data.photos.map((p) => ({
-        ...p,
-        type: "360",
-      }));
-      allPhotos.push(...streetViewPhotos);
+      allPhotos.push(...res.data.photos);
       ws.send(
         JSON.stringify({
           type: "update-progress",
           payload: {
-            message: `Found ${allPhotos.length} 360 photos...`,
+            message: `Found ${allPhotos.length} photos...`,
             count: allPhotos.length,
           },
         }),
@@ -106,9 +49,6 @@ async function listAllPhotos(authClient, ws) {
     }
     nextPageToken = res.data.nextPageToken;
   } while (nextPageToken);
-
-  const googlePhotos = await listGooglePhotos(authClient, ws);
-  allPhotos.push(...googlePhotos);
 
   ws.send(
     JSON.stringify({
@@ -158,9 +98,6 @@ function filterPhotos(allPhotos, { search, status, filters, downloadedFiles }) {
     }
     if (photo.places && photo.places.length > 0 && photo.places[0].name) {
       return photo.places[0].name.toLowerCase().includes(search.toLowerCase());
-    }
-    if (photo.filename) {
-      return photo.filename.toLowerCase().includes(search.toLowerCase());
     }
     return false;
   });
