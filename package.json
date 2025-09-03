@@ -16,6 +16,8 @@
     "express": "^4.19.2",
     "express-session": "^1.18.0",
     "googleapis": "^140.0.0",
+    "leaflet": "^1.9.4",
+    "leaflet.markercluster": "^1.5.3",
     "memorystore": "^1.6.7",
     "piexifjs": "^1.0.6",
     "prettier": "^3.6.2",

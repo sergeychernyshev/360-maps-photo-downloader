@@ -123,6 +123,7 @@ async function initialize() {
 
   // --- WEB INTERFACE & ROUTES ---
   app.use(express.static(path.join(__dirname, "public")));
+  app.use("/modules", express.static(path.join(process.cwd(), "node_modules")));
   app.use("/", indexRouter);
 
   /**
