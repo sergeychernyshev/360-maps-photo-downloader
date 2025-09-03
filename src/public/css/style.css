@@ -467,10 +467,6 @@ legend {
   border: none;
 }
 
-.hidden {
-  display: none;
-}
-
 .status.error {
   background-color: var(--error-color);
   color: var(--primary-text-color);
@@ -514,4 +510,8 @@ legend {
 
 .spinner-container span {
   margin-left: 10px;
+}
+
+.hidden {
+  display: none;
 }
