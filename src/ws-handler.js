@@ -54,6 +54,14 @@ async function handleMessage(req, ws, message) {
     case "filter-photos":
       await filterPhotos(req, ws, payload);
       break;
+    case "get-all-photos":
+      ws.send(
+        JSON.stringify({
+          type: "all-photos",
+          payload: req.session.allPhotos,
+        }),
+      );
+      break;
     default:
       console.log(`Unknown message type: ${type}`);
   }

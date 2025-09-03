@@ -5,6 +5,18 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Google Maps 360 Photo Downloader</title>
     <link rel="stylesheet" href="/css/style.css" />
+    <link
+      rel="stylesheet"
+      href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css"
+    />
+    <link
+      rel="stylesheet"
+      href="https://unpkg.com/leaflet.markercluster@1.4.1/dist/MarkerCluster.css"
+    />
+    <link
+      rel="stylesheet"
+      href="https://unpkg.com/leaflet.markercluster@1.4.1/dist/MarkerCluster.Default.css"
+    />
     <script>
       (function () {
         const theme = localStorage.getItem("theme") || "auto";
@@ -12,7 +24,9 @@
           const prefersDark = window.matchMedia(
             "(prefers-color-scheme: dark)",
           ).matches;
-          document.documentElement.dataset.theme = prefersDark ? "dark" : "light";
+          document.documentElement.dataset.theme = prefersDark
+            ? "dark"
+            : "light";
         } else {
           document.documentElement.dataset.theme = theme;
         }
@@ -26,6 +40,7 @@
       <button data-theme="dark">Dark</button>
     </div>
     <div class="container">
+      <div id="map"></div>
       <h1>Google Maps 360 Photo Downloader</h1>
       <% if (isLoggedIn) { %>
       <h2>
@@ -338,5 +353,7 @@
       const folderName = "<%= folderName %>";
     </script>
     <script src="/js/main.js" defer></script>
+    <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+    <script src="https://unpkg.com/leaflet.markercluster@1.4.1/dist/leaflet.markercluster.js"></script>
   </body>
 </html>
