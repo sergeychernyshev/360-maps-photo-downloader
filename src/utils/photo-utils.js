@@ -18,6 +18,7 @@ function calculatePoseCounts(photos) {
     roll: { exists: 0, missing: 0 },
     altitude: { exists: 0, missing: 0 },
     latLngPair: { exists: 0, missing: 0 },
+    place: { exists: 0, missing: 0 },
   };
 
   photos.forEach((photo) => {
@@ -38,6 +39,11 @@ function calculatePoseCounts(photos) {
       poseCounts.roll.missing++;
       poseCounts.altitude.missing++;
       poseCounts.latLngPair.missing++;
+    }
+    if (photo.places && photo.places.length > 0) {
+      poseCounts.place.exists++;
+    } else {
+      poseCounts.place.missing++;
     }
   });
 

@@ -60,7 +60,9 @@ async function filterPhotos(req, ws, payload) {
       const exists =
         filter.property === "latLngPair"
           ? photo.pose && photo.pose.latLngPair !== undefined
-          : photo.pose && typeof photo.pose[filter.property] === "number";
+          : filter.property === "place"
+            ? photo.places && photo.places.length > 0
+            : photo.pose && typeof photo.pose[filter.property] === "number";
       return filter.value === "exists" ? exists : !exists;
     });
   });
