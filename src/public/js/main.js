@@ -637,6 +637,12 @@ function setTheme(theme) {
 document.addEventListener("DOMContentLoaded", () => {
   connectWebSocket();
 
+  if (isLoggedIn) {
+    ws.onopen = () => {
+      ws.send(JSON.stringify({ type: "get-all-photos" }));
+    };
+  }
+
   window
     .matchMedia("(prefers-color-scheme: dark)")
     .addEventListener("change", (e) => {
