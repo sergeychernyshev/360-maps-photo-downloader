@@ -40,7 +40,9 @@
       <button data-theme="dark">Dark</button>
     </div>
     <div class="container">
+      <% if (isLoggedIn) { %>
       <div id="map"></div>
+      <% } %>
       <h1>Google Maps 360 Photo Downloader</h1>
       <% if (isLoggedIn) { %>
       <h2>
