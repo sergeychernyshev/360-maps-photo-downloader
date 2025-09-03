@@ -270,6 +270,7 @@ router.get("/login", async (req, res, next) => {
       scope: [
         "https://www.googleapis.com/auth/streetviewpublish",
         "https://www.googleapis.com/auth/drive.file",
+        "https://www.googleapis.com/auth/photoslibrary.readonly",
       ],
       prompt: "consent",
     });

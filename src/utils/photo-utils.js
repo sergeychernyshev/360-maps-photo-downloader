@@ -102,9 +102,15 @@ function buildPhotoListHtml(photos, downloadedFiles, driveFileLinks) {
         ? `<a href="${driveLink}" target="_blank" class="status downloaded" title="View on Google Drive"><span class="status-text">Downloaded</span><span class="status-icon">&#10004;</span></a>`
         : '<span class="status not-downloaded" title="Not Downloaded"><span class="status-text">Not Downloaded</span><span class="status-icon">&#10006;</span></span>';
 
+      const photoTypeHtml =
+        photo.type === "360"
+          ? '<span title="360 Photo">🌐</span>'
+          : '<span title="Regular Photo">📷</span>';
+
       return `
     <tr data-photo-id="${photo.photoId.id}">
       <td>${photoIdHtml}</td>
+      <td>${photoTypeHtml}</td>
       <td>${locationHtml}${poseString}</td>
       <td>${new Date(photo.captureTime).toLocaleDateString()}</td>
       <td>${photo.viewCount || 0}</td>
