@@ -330,6 +330,9 @@ form input[type="text"]:focus {
   border-radius: 4px;
   margin: 1em 0;
 }
+.progress-cell .progress-bar-container {
+  margin: 0;
+}
 .progress-bar {
   width: 0%;
   height: 1.5em;
