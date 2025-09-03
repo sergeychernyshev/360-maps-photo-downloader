@@ -331,13 +331,7 @@ function connectWebSocket() {
       updateSortIndicators(requestPayload.sort, requestPayload.order);
 
       // 4. Update map
-      if (
-        !requestPayload.search &&
-        requestPayload.status === "all" &&
-        (!requestPayload.poseFilters || requestPayload.poseFilters.length === 0)
-      ) {
-        ws.send(JSON.stringify({ type: "get-all-photos" }));
-      }
+      updateMap(data.payload.filteredPhotos);
 
       // 5. Scroll if needed
       if (requestPayload.location === "bottom") {
