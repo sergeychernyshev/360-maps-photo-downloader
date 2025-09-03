@@ -357,7 +357,11 @@ function connectWebSocket() {
         }
 
         if (complete || error) {
-          document.getElementById("cancel-btn").style.display = "none";
+          const cancelBtn = document.getElementById("cancel-btn");
+          cancelBtn.style.display = "none";
+          cancelBtn.disabled = false;
+          cancelBtn.innerHTML = "Cancel";
+
           setTimeout(() => {
             const fieldset = document.getElementById("download-fieldset");
             fieldset.style.maxHeight = fieldset.scrollHeight + "px";
@@ -524,6 +528,10 @@ function downloadSinglePhoto(photoId) {
 function cancelDownload() {
   if (ws && ws.readyState === WebSocket.OPEN) {
     ws.send(JSON.stringify({ type: "cancel-download" }));
+    const cancelBtn = document.getElementById("cancel-btn");
+    cancelBtn.disabled = true;
+    cancelBtn.innerHTML =
+      '<div class="spinner spinner-light"></div><span>Cancelling...</span>';
   }
 }
 
