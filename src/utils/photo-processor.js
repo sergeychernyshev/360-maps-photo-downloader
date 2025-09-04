@@ -74,8 +74,29 @@ async function processPhoto(
       }`;
   }
 
-  const exifbytes = piexif.dump(exifObj);
-  const newData = piexif.insert(exifbytes, jpegData);
+  let newData;
+  let attempts = 0;
+  const maxAttempts = 3;
+
+  while (attempts < maxAttempts) {
+    try {
+      const exifbytes = piexif.dump(exifObj);
+      newData = piexif.insert(exifbytes, jpegData);
+      break; // Success
+    } catch (e) {
+      if (e.message.includes("pack") && attempts < maxAttempts) {
+        attempts++;
+        console.log(
+          `Caught piexifjs pack error, retrying... (${attempts}/${maxAttempts})`,
+        );
+        if (attempts === maxAttempts) {
+          throw e;
+        }
+      } else {
+        throw e;
+      }
+    }
+  }
   const newJpeg = Buffer.from(newData, "binary");
   const stream = Readable.from(newJpeg);
 
