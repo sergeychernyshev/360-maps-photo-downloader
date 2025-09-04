@@ -424,6 +424,8 @@ function connectWebSocket() {
             downloadedCount;
           document.getElementById("not-downloaded-count").textContent =
             notDownloadedCount;
+          document.getElementById("all-count").textContent =
+            downloadedCount + notDownloadedCount;
         }
 
         if (complete || error) {
