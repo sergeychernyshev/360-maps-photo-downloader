@@ -420,10 +420,23 @@ function connectWebSocket() {
         }
 
         if (fileComplete) {
+          const { downloadedCount, notDownloadedCount, totalPhotosCount } =
+            global;
+
           document.getElementById("downloaded-count").textContent =
             downloadedCount;
           document.getElementById("not-downloaded-count").textContent =
             notDownloadedCount;
+          if (totalPhotosCount !== undefined) {
+            document.getElementById("all-count").textContent = totalPhotosCount;
+            document.getElementById("total-photos-count").textContent =
+              totalPhotosCount;
+            document.getElementById("drive-photo-count").textContent =
+              downloadedCount;
+          } else {
+            document.getElementById("all-count").textContent =
+              downloadedCount + notDownloadedCount;
+          }
         }
 
         if (complete || error) {

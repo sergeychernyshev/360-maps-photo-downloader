@@ -68,6 +68,9 @@ async function downloadSinglePhoto(req, photo) {
       updateState({
         downloadedCount: req.session.downloadedPhotos.length,
         notDownloadedCount: req.session.missingPhotos.length,
+        totalPhotosCount:
+          req.session.downloadedPhotos.length +
+          req.session.missingPhotos.length,
       });
     }
   } catch (error) {
