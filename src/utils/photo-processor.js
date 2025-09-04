@@ -127,7 +127,14 @@ async function processPhoto(
         console.log(message);
         progressCallback({ message, photoId: photo.photoId.id });
         if (attempts === maxAttempts) {
-          throw e;
+          const finalMessage = `All ${maxAttempts} attempts failed for photo ${photo.photoId.id}. Skipping file.`;
+          console.error(finalMessage, e);
+          progressCallback({
+            message: finalMessage,
+            photoId: photo.photoId.id,
+            error: true,
+          });
+          return null;
         }
         await new Promise((resolve) => setTimeout(resolve, 1000 * attempts));
       } else {
