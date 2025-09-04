@@ -116,6 +116,15 @@ async function downloadAllPhotos(
               100,
           ),
         });
+      } else {
+        updateState({
+          message: `Skipping photo ${photo.photoId.id} after multiple failed attempts.`,
+          totalProgress: Math.round(
+            ((downloadedPhotosCount + i + 1) /
+              (downloadedPhotosCount + missingPhotosCount)) *
+              100,
+          ),
+        });
       }
     }
 
