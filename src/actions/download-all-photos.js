@@ -113,6 +113,7 @@ async function downloadAllPhotos(
           fileComplete: true,
           downloadedCount: req.session.downloadedPhotos.length,
           notDownloadedCount: req.session.missingPhotos.length,
+          totalPhotosCount: totalPhotoCount,
           totalProgress: Math.round(
             ((downloadedPhotosCount + i + 1) /
               (downloadedPhotosCount + missingPhotosCount)) *
@@ -121,7 +122,19 @@ async function downloadAllPhotos(
         });
       } else {
         skippedCount++;
+        if (req.session.missingPhotos) {
+          const skippedPhotoIndex = req.session.missingPhotos.findIndex(
+            (p) => p.photoId.id === photo.photoId.id,
+          );
+          if (skippedPhotoIndex > -1) {
+            req.session.missingPhotos.splice(skippedPhotoIndex, 1);
+          }
+        }
         updateState({
+          fileComplete: true,
+          downloadedCount: req.session.downloadedPhotos.length,
+          notDownloadedCount: req.session.missingPhotos.length,
+          totalPhotosCount: totalPhotoCount,
           message: `Skipping photo ${photo.photoId.id} after multiple failed attempts.`,
           totalProgress: Math.round(
             ((downloadedPhotosCount + i + 1) /
