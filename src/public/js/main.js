@@ -429,6 +429,10 @@ function connectWebSocket() {
             notDownloadedCount;
           if (totalPhotosCount !== undefined) {
             document.getElementById("all-count").textContent = totalPhotosCount;
+            document.getElementById("total-photos-count").textContent =
+              totalPhotosCount;
+            document.getElementById("drive-photo-count").textContent =
+              downloadedCount;
           } else {
             document.getElementById("all-count").textContent =
               downloadedCount + notDownloadedCount;

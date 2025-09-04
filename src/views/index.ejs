@@ -43,9 +43,9 @@
       <h1>Google Maps 360 Photo Downloader</h1>
       <% if (isLoggedIn) { %>
       <h2>
-        <%= totalPhotos %>
+        <span id="total-photos-count"><%= totalPhotos %></span>
         Street View Photos Found, and
-        <%= drivePhotoCount %>
+        <span id="drive-photo-count"><%= drivePhotoCount %></span>
         on Google Drive
       </h2>
       <% } else { %>
