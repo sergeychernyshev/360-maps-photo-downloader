@@ -26,6 +26,8 @@ async function downloadAllPhotos(
     updateState(globalProgress);
   };
 
+  let skippedCount = 0;
+
   try {
     const oAuth2Client = await getAuthenticatedClient(req);
     const drive = await getDriveClient(oAuth2Client);
@@ -72,6 +74,7 @@ async function downloadAllPhotos(
         updateState({
           message: `Skipping existing file: ${fileName}`,
         });
+        skippedCount++;
         downloadedPhoto = photo;
       } else {
         updateState({
@@ -116,12 +119,26 @@ async function downloadAllPhotos(
               100,
           ),
         });
+      } else {
+        skippedCount++;
+        updateState({
+          message: `Skipping photo ${photo.photoId.id} after multiple failed attempts.`,
+          totalProgress: Math.round(
+            ((downloadedPhotosCount + i + 1) /
+              (downloadedPhotosCount + missingPhotosCount)) *
+              100,
+          ),
+        });
       }
     }
 
     delete req.session.allPhotos;
+    let message = "All photos downloaded successfully to Google Drive!";
+    if (skippedCount > 0) {
+      message += ` ${skippedCount} photos were skipped.`;
+    }
     updateState({
-      message: "All photos downloaded successfully to Google Drive!",
+      message,
       complete: true,
       inProgress: false,
       downloadProgress: undefined,
