@@ -123,12 +123,13 @@ async function processPhoto(
     } catch (e) {
       if (e.message.includes("pack") && attempts < maxAttempts) {
         attempts++;
-        console.log(
-          `Caught piexifjs pack error, retrying the whole process... (${attempts}/${maxAttempts})`,
-        );
+        const message = `Caught piexifjs pack error, retrying... (${attempts}/${maxAttempts})`;
+        console.log(message);
+        progressCallback({ message, photoId: photo.photoId.id });
         if (attempts === maxAttempts) {
           throw e;
         }
+        await new Promise((resolve) => setTimeout(resolve, 1000 * attempts));
       } else {
         throw e;
       }
