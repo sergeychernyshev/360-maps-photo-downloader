@@ -132,7 +132,6 @@ async function processPhoto(
           progressCallback({
             message: finalMessage,
             photoId: photo.photoId.id,
-            error: true,
           });
           return null;
         }
