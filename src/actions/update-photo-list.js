@@ -1,4 +1,10 @@
 /**
+ * @fileoverview This file contains the logic for updating the list of photos from Google Street View.
+ * It fetches the list of photos from the Google Street View Publish API and saves it to a file in Google Drive.
+ * @module actions/update-photo-list
+ */
+
+/**
  * @property {function} getAuthenticatedClient - Function to get an authenticated OAuth2 client.
  */
 const { getAuthenticatedClient } = require("../oauth");

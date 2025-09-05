@@ -1,4 +1,10 @@
 /**
+ * @fileoverview This file contains the logic for filtering, sorting, and paginating the list of photos.
+ * It is used by the WebSocket handler to process filter requests from the client.
+ * @module actions/filter-photos
+ */
+
+/**
  * @property {function} getAuthenticatedClient - Function to get an authenticated OAuth2 client.
  */
 const { getAuthenticatedClient } = require("../oauth");
