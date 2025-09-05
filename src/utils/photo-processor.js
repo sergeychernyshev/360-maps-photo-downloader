@@ -1,3 +1,9 @@
+/**
+ * @fileoverview This file contains the logic for processing a single photo.
+ * It downloads the photo, adds EXIF metadata, and uploads it to Google Drive.
+ * @module utils/photo-processor
+ */
+
 const piexif = require("piexifjs");
 /**
  * @property {class} Readable - The Readable stream class.
