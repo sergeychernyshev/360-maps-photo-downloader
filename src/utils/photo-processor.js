@@ -14,11 +14,11 @@ async function processPhoto(
 ) {
   let attempts = 0;
   const maxAttempts = 3;
+  let jpegData;
+  let newJpeg;
 
   while (attempts < maxAttempts) {
     try {
-      const fileName = `${photo.photoId.id}.jpg`;
-
       progressCallback({
         photoId: photo.photoId.id,
         downloadProgress: 0,
@@ -40,7 +40,7 @@ async function processPhoto(
         return null;
       }
 
-      const jpegData = data.toString("binary");
+      jpegData = data.toString("binary");
       const exifObj = piexif.load(jpegData);
       const lat = photo.pose.latLngPair.latitude;
       const lng = photo.pose.latLngPair.longitude;
@@ -81,45 +81,8 @@ async function processPhoto(
 
       const exifbytes = piexif.dump(exifObj);
       const newData = piexif.insert(exifbytes, jpegData);
-      const newJpeg = Buffer.from(newData, "binary");
-      const stream = Readable.from(newJpeg);
-
-      const existingFile = await findFile(drive, fileName, folderId);
-      let file;
-      progressCallback({ uploadStarted: true, photoId: photo.photoId.id });
-      updateState({ status: "uploading" });
-      if (existingFile) {
-        file = await updateFile(
-          drive,
-          existingFile.id,
-          "image/jpeg",
-          stream,
-          newJpeg.length,
-          (percentage) => {
-            progressCallback({
-              uploadProgress: percentage,
-              photoId: photo.photoId.id,
-            });
-          },
-        );
-      } else {
-        file = await createFile(
-          drive,
-          fileName,
-          "image/jpeg",
-          stream,
-          folderId,
-          newJpeg.length,
-          (percentage) => {
-            progressCallback({
-              uploadProgress: percentage,
-              photoId: photo.photoId.id,
-            });
-          },
-        );
-      }
-
-      return { photo, file };
+      newJpeg = Buffer.from(newData, "binary");
+      break; // Success
     } catch (e) {
       if (e.message.includes("pack") && attempts < maxAttempts) {
         attempts++;
@@ -127,13 +90,12 @@ async function processPhoto(
         console.log(message);
         progressCallback({ message, photoId: photo.photoId.id });
         if (attempts === maxAttempts) {
-          const finalMessage = `All ${maxAttempts} attempts failed for photo ${photo.photoId.id}. Skipping file.`;
+          const finalMessage = `All ${maxAttempts} attempts failed for photo ${photo.photoId.id}. Uploading without EXIF.`;
           console.error(finalMessage, e);
           progressCallback({
             message: finalMessage,
             photoId: photo.photoId.id,
           });
-          return null;
         }
         await new Promise((resolve) => setTimeout(resolve, 1000 * attempts));
       } else {
@@ -141,6 +103,54 @@ async function processPhoto(
       }
     }
   }
+
+  if (!newJpeg) {
+    if (jpegData) {
+      newJpeg = Buffer.from(jpegData, "binary");
+    } else {
+      return null; // Should not happen if download was successful
+    }
+  }
+
+  const fileName = `${photo.photoId.id}.jpg`;
+  const stream = Readable.from(newJpeg);
+  const existingFile = await findFile(drive, fileName, folderId);
+  let file;
+  progressCallback({ uploadStarted: true, photoId: photo.photoId.id });
+  updateState({ status: "uploading" });
+
+  if (existingFile) {
+    file = await updateFile(
+      drive,
+      existingFile.id,
+      "image/jpeg",
+      stream,
+      newJpeg.length,
+      (percentage) => {
+        progressCallback({
+          uploadProgress: percentage,
+          photoId: photo.photoId.id,
+        });
+      },
+    );
+  } else {
+    file = await createFile(
+      drive,
+      fileName,
+      "image/jpeg",
+      stream,
+      folderId,
+      newJpeg.length,
+      (percentage) => {
+        progressCallback({
+          uploadProgress: percentage,
+          photoId: photo.photoId.id,
+        });
+      },
+    );
+  }
+
+  return { photo, file };
 }
 
 module.exports = { processPhoto };
