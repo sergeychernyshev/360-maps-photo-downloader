@@ -42,30 +42,82 @@ const { listAllPhotos } = require("../photo-manager");
  * @param {string} payload.order - The sort order ('asc', 'desc').
  */
 async function filterPhotos(req, ws, payload) {
+  /**
+   * The filtering, sorting, and pagination options.
+   * @type {object}
+   */
   const { search, status, poseFilters, page, sort, order } = payload;
   if (!req.session.allPhotos) {
+    /**
+     * The authenticated OAuth2 client.
+     * @type {import("google-auth-library").OAuth2Client}
+     */
     const oAuth2Client = await getAuthenticatedClient(req);
     req.session.allPhotos = await listAllPhotos(oAuth2Client, ws);
   }
+  /**
+   * The list of all photos for the user.
+   * @type {Array<object>}
+   */
   const { allPhotos } = req.session;
 
+  /**
+   * The authenticated OAuth2 client.
+   * @type {import("google-auth-library").OAuth2Client}
+   */
   const oAuth2Client = await getAuthenticatedClient(req);
+  /**
+   * The Google Drive API client.
+   * @type {import("googleapis").drive_v3.Drive}
+   */
   const drive = await getDriveClient(oAuth2Client);
+  /**
+   * The folder in Google Drive where the photos are stored.
+   * @type {object}
+   */
   const folder = await findOrCreateFolder(drive, FOLDER_NAME);
+  /**
+   * The list of files in the Google Drive folder.
+   * @type {Array<object>}
+   */
   const driveFiles = await listFiles(drive, folder.id);
+  /**
+   * A set of the names of the files in the Google Drive folder.
+   * @type {Set<string>}
+   */
   const downloadedFiles = new Set(driveFiles.map((f) => f.name));
+  /**
+   * A map of the names of the files in the Google Drive folder to their web view links.
+   * @type {Map<string, string>}
+   */
   const driveFileLinks = new Map(
     driveFiles.map((f) => [f.name, f.webViewLink]),
   );
 
   // Calculate unfiltered counts
+  /**
+   * The total number of photos.
+   * @type {number}
+   */
   const totalPhotosCount = allPhotos.length;
+  /**
+   * The number of downloaded photos.
+   * @type {number}
+   */
   const downloadedCount = allPhotos.filter((photo) =>
     downloadedFiles.has(`${photo.photoId.id}.jpg`),
   ).length;
+  /**
+   * The number of photos that have not been downloaded.
+   * @type {number}
+   */
   const notDownloadedCount = totalPhotosCount - downloadedCount;
 
   // 1. Filter by search term
+  /**
+   * The list of photos filtered by the search term.
+   * @type {Array<object>}
+   */
   const searchedPhotos = allPhotos.filter((photo) => {
     if (!search) return true;
     const lowerCaseSearch = search.toLowerCase();
@@ -79,6 +131,10 @@ async function filterPhotos(req, ws, payload) {
   });
 
   // 2. Filter by download status
+  /**
+   * The list of photos filtered by download status.
+   * @type {Array<object>}
+   */
   const statusFilteredPhotos = searchedPhotos.filter((photo) => {
     if (status === "all") return true;
     const isDownloaded = downloadedFiles.has(`${photo.photoId.id}.jpg`);
@@ -86,6 +142,10 @@ async function filterPhotos(req, ws, payload) {
   });
 
   // 3. Filter by pose
+  /**
+   * The list of photos filtered by pose.
+   * @type {Array<object>}
+   */
   const poseFilteredPhotos = statusFilteredPhotos.filter((photo) => {
     if (!poseFilters || poseFilters.length === 0) return true;
     return poseFilters.every((filter) => {
@@ -101,6 +161,10 @@ async function filterPhotos(req, ws, payload) {
   });
 
   // 4. Sort
+  /**
+   * The list of photos sorted by the specified criteria.
+   * @type {Array<object>}
+   */
   const sortedPhotos = poseFilteredPhotos.sort((a, b) => {
     let valA, valB;
 
@@ -123,31 +187,75 @@ async function filterPhotos(req, ws, payload) {
   });
 
   // 5. Paginate
+  /**
+   * The list of photos to paginate.
+   * @type {Array<object>}
+   */
   const photos = sortedPhotos;
+  /**
+   * The number of photos to display per page.
+   * @type {number}
+   */
   const pageSize = 50;
+  /**
+   * The total number of pages.
+   * @type {number}
+   */
   const totalPages = Math.ceil(photos.length / pageSize);
+  /**
+   * The current page number.
+   * @type {number}
+   */
   const currentPage = page || 1;
+  /**
+   * The index of the first photo to display on the current page.
+   * @type {number}
+   */
   const startIndex = (currentPage - 1) * pageSize;
+  /**
+   * The index of the last photo to display on the current page.
+   * @type {number}
+   */
   const endIndex = startIndex + pageSize;
+  /**
+   * The list of photos to display on the current page.
+   * @type {Array<object>}
+   */
   const paginatedPhotos = photos.slice(startIndex, endIndex);
 
+  /**
+   * The HTML for the photo list.
+   * @type {string}
+   */
   const photoListHtml = buildPhotoListHtml(
     paginatedPhotos,
     downloadedFiles,
     driveFileLinks,
   );
+  /**
+   * The HTML for the top pagination controls.
+   * @type {string}
+   */
   const paginationHtmlTop = buildPaginationHtml(
     totalPages,
     currentPage,
     "changePage",
     "top",
   );
+  /**
+   * The HTML for the bottom pagination controls.
+   * @type {string}
+   */
   const paginationHtmlBottom = buildPaginationHtml(
     totalPages,
     currentPage,
     "changePage",
     "bottom",
   );
+  /**
+   * The counts of photos with and without specific pose properties.
+   * @type {object}
+   */
   const poseCounts = calculatePoseCounts(allPhotos);
 
   ws.send(
