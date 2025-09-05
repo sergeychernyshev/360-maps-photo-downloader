@@ -2,8 +2,20 @@ const { google } = require("googleapis");
 const fs = require("fs").promises;
 const path = require("path");
 
+/**
+ * The path to the credentials file.
+ * @type {string}
+ */
 const CREDENTIALS_PATH = path.join(process.cwd(), "credentials.json");
+/**
+ * The path to the token file.
+ * @type {string}
+ */
 const TOKEN_PATH = path.join(process.cwd(), "token.json");
+/**
+ * The path to the config file.
+ * @type {string}
+ */
 const CONFIG_PATH = path.join(process.cwd(), "config.json");
 
 /**
