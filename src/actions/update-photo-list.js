@@ -34,12 +34,26 @@ const { updateState } = require("../download-state");
  */
 async function updatePhotoList(req, ws) {
   try {
-    // Get authenticated clients for Google Drive and Street View
+    /**
+     * The authenticated OAuth2 client.
+     * @type {import("google-auth-library").OAuth2Client}
+     */
     const oAuth2Client = await getAuthenticatedClient(req);
+    /**
+     * The Google Drive API client.
+     * @type {import("googleapis").drive_v3.Drive}
+     */
     const drive = await getDriveClient(oAuth2Client);
 
-    // Find or create the folder in Google Drive
+    /**
+     * The folder in Google Drive where the photos are stored.
+     * @type {object}
+     */
     const folder = await findOrCreateFolder(drive, FOLDER_NAME);
+    /**
+     * The ID of the folder in Google Drive where the photos are stored.
+     * @type {string}
+     */
     const folderId = folder.id;
 
     ws.send(
@@ -49,10 +63,16 @@ async function updatePhotoList(req, ws) {
       }),
     );
 
-    // Get the existing photo list file, if it exists
+    /**
+     * The file in Google Drive that stores the list of photos.
+     * @type {object}
+     */
     let photoListFile = await getPhotoListFile(drive, folderId);
 
-    // List all photos from Google Street View
+    /**
+     * The list of photos from Google Street View.
+     * @type {Array<object>}
+     */
     const photos = await listAllPhotos(oAuth2Client, ws);
 
     // If the photo list file exists, update it. Otherwise, create a new file.
