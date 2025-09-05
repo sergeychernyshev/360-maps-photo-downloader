@@ -1,4 +1,11 @@
+/**
+ * @property {function} getAuthenticatedClient - Function to get an authenticated OAuth2 client.
+ */
 const { getAuthenticatedClient } = require("../oauth");
+/**
+ * @property {function} getDriveClient - Function to get the Google Drive API client.
+ * @property {function} deleteFile - Function to delete a file from Google Drive.
+ */
 const { getDriveClient, deleteFile } = require("../drive-manager");
 
 /**

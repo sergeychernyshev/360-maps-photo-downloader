@@ -1,3 +1,6 @@
+/**
+ * @property {function} updateState - Function to update the download state.
+ */
 const { updateState } = require("../download-state");
 
 /**

@@ -1,8 +1,26 @@
 const piexif = require("piexifjs");
+/**
+ * @property {class} Readable - The Readable stream class.
+ */
 const { Readable } = require("stream");
+/**
+ * @property {function} downloadPhoto - Function to download a photo.
+ */
 const { downloadPhoto } = require("../photo-manager");
+/**
+ * @property {function} createFile - Function to create a file in Google Drive.
+ * @property {function} updateFile - Function to update a file in Google Drive.
+ * @property {function} findFile - Function to find a file in Google Drive.
+ */
 const { createFile, updateFile, findFile } = require("../drive-manager");
+/**
+ * @property {function} degToDmsRational - Function to convert degrees to degrees-minutes-seconds rational format.
+ */
 const { degToDmsRational } = require("./photo-utils");
+/**
+ * @property {function} getState - Function to get the current download state.
+ * @property {function} updateState - Function to update the download state.
+ */
 const { getState, updateState } = require("../download-state");
 
 /**
