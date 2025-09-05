@@ -705,9 +705,6 @@ document.addEventListener("DOMContentLoaded", () => {
   updateSortIndicators(filters.sort, filters.order);
   toggleClearButton();
 
-  document.getElementById("download-all-btn").disabled =
-    missingPhotosCount === 0;
-
   if (filters.pose.length > 0) {
     const moreFiltersBtn = document.getElementById("more-filters-btn");
     const poseFiltersContainer = document.getElementById(

@@ -137,7 +137,13 @@
         </ul>
       </div>
       <% } %>
+      <% if (notDownloadedCount === 0) { %>
+      <button id="download-all-btn" disabled>
+        Download All Missing Photos
+      </button>
+      <% } else { %>
       <button id="download-all-btn">Download All Missing Photos</button>
+      <% } %>
       <button id="update-btn" class="update-btn">
         Update the List of Photos
       </button>
