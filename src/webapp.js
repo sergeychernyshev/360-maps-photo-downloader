@@ -13,9 +13,25 @@ const { handleMessage } = require("./ws-handler");
 const { setSocket } = require("./download-state");
 
 // --- CONFIGURATION ---
+/**
+ * The port the web server will run on.
+ * @type {number}
+ */
 const PORT = 3000;
+/**
+ * The path to the credentials file.
+ * @type {string}
+ */
 const CREDENTIALS_PATH = path.join(process.cwd(), "credentials.json");
+/**
+ * The path to the token file.
+ * @type {string}
+ */
 const TOKEN_PATH = path.join(process.cwd(), "token.json");
+/**
+ * The path to the config file.
+ * @type {string}
+ */
 const CONFIG_PATH = path.join(process.cwd(), "config.json");
 
 // --- WEB APP SETUP ---

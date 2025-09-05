@@ -1,6 +1,14 @@
 const { google } = require("googleapis");
 
+/**
+ * The name of the folder in Google Drive where the photos will be stored.
+ * @type {string}
+ */
 const FOLDER_NAME = "Google Street View Photos";
+/**
+ * The name of the file that stores the list of photos.
+ * @type {string}
+ */
 const PHOTO_LIST_FILE_NAME = "streetview_photos.json";
 
 /**
