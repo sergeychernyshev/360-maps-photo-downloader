@@ -295,6 +295,8 @@ function connectWebSocket() {
       document.getElementById("not-downloaded-count").textContent =
         notDownloadedCount;
       document.getElementById("all-count").textContent = totalPhotosCount;
+      document.getElementById("download-all-btn").disabled =
+        notDownloadedCount === 0;
       if (filteredTotal > 0) {
         document.getElementById("photo-counter").textContent =
           `Showing photos ${startIndex}-${endIndex} (page ${currentPage} of ${totalPages}) out of ${filteredTotal} filtered photos.`;
@@ -427,6 +429,8 @@ function connectWebSocket() {
             downloadedCount;
           document.getElementById("not-downloaded-count").textContent =
             notDownloadedCount;
+          document.getElementById("download-all-btn").disabled =
+            notDownloadedCount === 0;
           if (totalPhotosCount !== undefined) {
             document.getElementById("all-count").textContent = totalPhotosCount;
             document.getElementById("total-photos-count").textContent =
@@ -700,6 +704,9 @@ document.addEventListener("DOMContentLoaded", () => {
   updatePoseCounts(poseCounts);
   updateSortIndicators(filters.sort, filters.order);
   toggleClearButton();
+
+  document.getElementById("download-all-btn").disabled =
+    missingPhotosCount === 0;
 
   if (filters.pose.length > 0) {
     const moreFiltersBtn = document.getElementById("more-filters-btn");
