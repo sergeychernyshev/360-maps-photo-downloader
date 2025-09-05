@@ -1,4 +1,10 @@
 /**
+ * @fileoverview This file contains the logic for downloading a single photo.
+ * It is used by the WebSocket handler to process single photo download requests from the client.
+ * @module actions/download-single-photo
+ */
+
+/**
  * @property {function} getAuthenticatedClient - Function to get an authenticated OAuth2 client.
  */
 const { getAuthenticatedClient } = require("../oauth");
