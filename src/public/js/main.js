@@ -1,5 +1,17 @@
+/**
+ * The WebSocket connection object.
+ * @type {WebSocket}
+ */
 let ws;
+/**
+ * The Leaflet map object.
+ * @type {L.Map}
+ */
 let map;
+/**
+ * The Leaflet marker cluster group.
+ * @type {L.MarkerClusterGroup}
+ */
 let markers;
 
 function updateMap(photos) {
