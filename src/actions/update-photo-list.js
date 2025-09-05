@@ -13,6 +13,7 @@ const { updateState } = require("../download-state");
 /**
  * Updates the list of photos from Google Street View and saves it to Google Drive.
  * @param {object} req - The Express request object, containing the session.
+ * @param {object} ws - The WebSocket object for sending progress updates.
  */
 async function updatePhotoList(req, ws) {
   try {
