@@ -1,15 +1,32 @@
+/**
+ * @property {function} getAuthenticatedClient - Function to get an authenticated OAuth2 client.
+ */
 const { getAuthenticatedClient } = require("../oauth");
+/**
+ * @property {function} getDriveClient - Function to get the Google Drive API client.
+ * @property {function} listFiles - Function to list all files in a folder.
+ * @property {function} findOrCreateFolder - Function to find or create a folder in Google Drive.
+ * @property {string} FOLDER_NAME - The name of the folder in Google Drive where the photos will be stored.
+ */
 const {
   getDriveClient,
   listFiles,
   findOrCreateFolder,
   FOLDER_NAME,
 } = require("../drive-manager");
+/**
+ * @property {function} buildPhotoListHtml - Function to build the HTML for the photo list.
+ * @property {function} buildPaginationHtml - Function to build the HTML for the pagination controls.
+ * @property {function} calculatePoseCounts - Function to calculate the counts of photos with and without specific pose properties.
+ */
 const {
   buildPhotoListHtml,
   buildPaginationHtml,
   calculatePoseCounts,
 } = require("../utils/photo-utils");
+/**
+ * @property {function} listAllPhotos - Function to list all photos for the authenticated user.
+ */
 const { listAllPhotos } = require("../photo-manager");
 
 /**

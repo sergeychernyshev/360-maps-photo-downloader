@@ -1,11 +1,27 @@
+/**
+ * @property {function} getAuthenticatedClient - Function to get an authenticated OAuth2 client.
+ */
 const { getAuthenticatedClient } = require("../oauth");
+/**
+ * @property {function} getDriveClient - Function to get the Google Drive API client.
+ * @property {function} findOrCreateFolder - Function to find or create a folder in Google Drive.
+ * @property {function} listFiles - Function to list all files in a folder.
+ * @property {string} FOLDER_NAME - The name of the folder in Google Drive where the photos will be stored.
+ */
 const {
   getDriveClient,
   findOrCreateFolder,
   listFiles,
   FOLDER_NAME,
 } = require("../drive-manager");
+/**
+ * @property {function} updateState - Function to update the download state.
+ * @property {function} getState - Function to get the current download state.
+ */
 const { updateState, getState } = require("../download-state");
+/**
+ * @property {function} processPhoto - Function to download, process, and upload a photo.
+ */
 const { processPhoto } = require("../utils/photo-processor");
 
 /**
