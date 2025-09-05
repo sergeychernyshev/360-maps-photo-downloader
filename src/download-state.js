@@ -42,11 +42,19 @@ let state = {
   socket: null,
 };
 
+/**
+ * Gets the current download state.
+ * @returns {object} The current download state.
+ */
 function getState() {
   const { socket, ...rest } = state;
   return rest;
 }
 
+/**
+ * Updates the download state and sends the update to the client via WebSocket.
+ * @param {object} newState - The new state to merge with the existing state.
+ */
 function updateState(newState) {
   if (newState.photoId) {
     const { photoId, ...photoState } = newState;
@@ -84,6 +92,10 @@ function updateState(newState) {
   }
 }
 
+/**
+ * Sets the WebSocket connection object.
+ * @param {object} socket - The WebSocket connection object.
+ */
 function setSocket(socket) {
   state.socket = socket;
   if (
@@ -96,6 +108,9 @@ function setSocket(socket) {
   }
 }
 
+/**
+ * Resets the download state to its initial values.
+ */
 function resetState() {
   state.global = {
     inProgress: false,

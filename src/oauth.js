@@ -6,6 +6,10 @@ const CREDENTIALS_PATH = path.join(process.cwd(), "credentials.json");
 const TOKEN_PATH = path.join(process.cwd(), "token.json");
 const CONFIG_PATH = path.join(process.cwd(), "config.json");
 
+/**
+ * Creates a new OAuth2 client.
+ * @returns {Promise<object>} A promise that resolves with the OAuth2 client.
+ */
 async function getOAuthClient() {
   const credsContent = await fs.readFile(CREDENTIALS_PATH);
   const { client_secret, client_id, redirect_uris } =
@@ -13,6 +17,11 @@ async function getOAuthClient() {
   return new google.auth.OAuth2(client_id, client_secret, redirect_uris[0]);
 }
 
+/**
+ * Gets an authenticated OAuth2 client.
+ * @param {object} req - The Express request object, containing the session.
+ * @returns {Promise<object>} A promise that resolves with the authenticated OAuth2 client.
+ */
 async function getAuthenticatedClient(req) {
   const oAuth2Client = await getOAuthClient();
   let tokens = req.session.tokens;
@@ -47,10 +56,21 @@ async function getAuthenticatedClient(req) {
   return oAuth2Client;
 }
 
+/**
+ * Checks if the user is logged in.
+ * @param {object} req - The Express request object, containing the session.
+ * @returns {boolean} True if the user is logged in, false otherwise.
+ */
 function isLoggedIn(req) {
   return req.session && req.session.tokens;
 }
 
+/**
+ * Logs the user in by exchanging an authorization code for an access token.
+ * @param {object} req - The Express request object, containing the session.
+ * @param {string} code - The authorization code.
+ * @returns {Promise<void>}
+ */
 async function login(req, code) {
   const oAuth2Client = await getOAuthClient();
   const { tokens } = await oAuth2Client.getToken(code);
@@ -64,6 +84,11 @@ async function login(req, code) {
   }
 }
 
+/**
+ * Logs the user out by destroying the session and deleting the token file.
+ * @param {object} req - The Express request object, containing the session.
+ * @param {function} callback - A callback function to call after the user is logged out.
+ */
 function logout(req, callback) {
   req.session.destroy(async () => {
     await fs.unlink(TOKEN_PATH).catch((err) => {
@@ -76,6 +101,11 @@ function logout(req, callback) {
   });
 }
 
+/**
+ * Checks if an access token is valid.
+ * @param {object} token - The access token to check.
+ * @returns {Promise<boolean>} A promise that resolves with true if the token is valid, false otherwise.
+ */
 async function isTokenValid(token) {
   if (!token) {
     return false;

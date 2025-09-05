@@ -5,6 +5,15 @@ const { createFile, updateFile, findFile } = require("../drive-manager");
 const { degToDmsRational } = require("./photo-utils");
 const { getState, updateState } = require("../download-state");
 
+/**
+ * Downloads a photo, processes its EXIF data, and uploads it to Google Drive.
+ * @param {object} drive - The Google Drive API client.
+ * @param {object} oAuth2Client - The OAuth2 client for authentication.
+ * @param {object} photo - The photo object to process.
+ * @param {string} folderId - The ID of the Google Drive folder to upload the photo to.
+ * @param {function} progressCallback - A function to call with progress updates.
+ * @returns {Promise<object|null>} A promise that resolves with the photo and file objects, or null if the download was cancelled.
+ */
 async function processPhoto(
   drive,
   oAuth2Client,

@@ -1,3 +1,8 @@
+/**
+ * Converts degrees to degrees-minutes-seconds rational format.
+ * @param {number} deg - The degree value to convert.
+ * @returns {Array<Array<number>>} The DMS rational representation.
+ */
 function degToDmsRational(deg) {
   const d = Math.floor(deg);
   const minFloat = (deg - d) * 60;
@@ -11,6 +16,11 @@ function degToDmsRational(deg) {
   ];
 }
 
+/**
+ * Calculates the counts of photos with and without specific pose properties.
+ * @param {Array<object>} photos - The list of photos to process.
+ * @returns {object} An object containing the counts of pose properties.
+ */
 function calculatePoseCounts(photos) {
   const poseCounts = {
     heading: { exists: 0, missing: 0 },
@@ -50,6 +60,13 @@ function calculatePoseCounts(photos) {
   return poseCounts;
 }
 
+/**
+ * Builds the HTML for the photo list.
+ * @param {Array<object>} photos - The list of photos to display.
+ * @param {Set<string>} downloadedFiles - A set of downloaded file names.
+ * @param {Map<string, string>} driveFileLinks - A map of file names to their Google Drive links.
+ * @returns {string} The HTML string for the photo list.
+ */
 function buildPhotoListHtml(photos, downloadedFiles, driveFileLinks) {
   return photos
     .map((photo) => {
@@ -140,6 +157,14 @@ function buildPhotoListHtml(photos, downloadedFiles, driveFileLinks) {
     .join("");
 }
 
+/**
+ * Builds the HTML for the pagination controls.
+ * @param {number} totalPages - The total number of pages.
+ * @param {number} currentPage - The current page number.
+ * @param {string} action - The JavaScript function to call when a page is clicked.
+ * @param {string} location - The location of the pagination controls ('top' or 'bottom').
+ * @returns {string} The HTML string for the pagination controls.
+ */
 function buildPaginationHtml(totalPages, currentPage, action, location) {
   let paginationHtml = "";
   if (totalPages > 1) {

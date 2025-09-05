@@ -59,6 +59,9 @@ const sessionParser = session({
 app.set("view engine", "ejs");
 app.set("views", path.join(__dirname, "views"));
 
+/**
+ * Initializes the web application.
+ */
 async function initialize() {
   let config = {};
   try {
@@ -137,6 +140,10 @@ async function initialize() {
 
   /**
    * Global error handler for the Express app.
+   * @param {Error} err - The error object.
+   * @param {object} req - The Express request object.
+   * @param {object} res - The Express response object.
+   * @param {function} next - The next middleware function.
    */
   app.use((err, req, res, next) => {
     if (err.message === "User is not authenticated.") {

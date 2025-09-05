@@ -64,9 +64,11 @@ async function listAllPhotos(authClient, ws) {
 }
 
 /**
- * Downloads a single photo to the download directory.
- * @param {object} photo The photo metadata object from the API.
- * @param {(message: string) => void} log A function to log progress messages.
+ * Downloads a single photo.
+ * @param {string} photoUrl - The URL of the photo to download.
+ * @param {import('google-auth-library').OAuth2Client} authClient - An authorized OAuth2 client.
+ * @param {function} progressCallback - A function to call with download progress updates.
+ * @returns {Promise<{data: Buffer, size: number}>} A promise that resolves with the photo data and size.
  */
 async function downloadPhoto(
   photoUrl,
@@ -91,6 +93,16 @@ async function downloadPhoto(
   return { data: Buffer.from(response.data), size: response.data.length };
 }
 
+/**
+ * Filters a list of photos based on the provided criteria.
+ * @param {Array<object>} allPhotos - The list of photos to filter.
+ * @param {object} options - The filtering options.
+ * @param {string} options.search - The search term to filter by.
+ * @param {string} options.status - The download status to filter by ('all', 'downloaded', 'not-downloaded').
+ * @param {Array<object>} options.filters - The pose properties to filter by.
+ * @param {Set<string>} options.downloadedFiles - A set of downloaded file names.
+ * @returns {Array<object>} The filtered list of photos.
+ */
 function filterPhotos(allPhotos, { search, status, filters, downloadedFiles }) {
   const filteredBySearch = allPhotos.filter((photo) => {
     if (!search) {

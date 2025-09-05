@@ -12,6 +12,18 @@ const {
 } = require("../utils/photo-utils");
 const { listAllPhotos } = require("../photo-manager");
 
+/**
+ * Filters, sorts, and paginates the list of photos based on the provided criteria.
+ * @param {object} req - The Express request object, containing the session.
+ * @param {object} ws - The WebSocket object for sending progress updates.
+ * @param {object} payload - The filtering, sorting, and pagination options.
+ * @param {string} payload.search - The search term to filter by.
+ * @param {string} payload.status - The download status to filter by ('all', 'downloaded', 'not-downloaded').
+ * @param {Array<object>} payload.poseFilters - The pose properties to filter by.
+ * @param {number} payload.page - The page number for pagination.
+ * @param {string} payload.sort - The property to sort by ('date', 'views').
+ * @param {string} payload.order - The sort order ('asc', 'desc').
+ */
 async function filterPhotos(req, ws, payload) {
   const { search, status, poseFilters, page, sort, order } = payload;
   if (!req.session.allPhotos) {
