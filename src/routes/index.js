@@ -1,3 +1,9 @@
+/**
+ * @fileoverview This file contains the routes for the web application.
+ * It handles the main page, login, logout, and OAuth2 callback.
+ * @module routes/index
+ */
+
 const express = require("express");
 /**
  * @property {function} getOAuthClient - Function to create a new OAuth2 client.
