@@ -1,5 +1,5 @@
-import "leaflet";
-import "leaflet.markercluster";
+import '/modules/leaflet/leaflet.js';
+import '/modules/leaflet.markercluster/dist/leaflet.markercluster.js';
 
 declare const L: any;
 declare const isLoggedIn: boolean;
