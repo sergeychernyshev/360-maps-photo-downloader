@@ -124,7 +124,7 @@ async function initialize() {
   });
 
   // --- WEB INTERFACE & ROUTES ---
-  app.use(express.static(path.join(__dirname, "../src/public")));
+  app.use(express.static(path.join(__dirname, "../dist/public")));
   app.use(
     "/modules/leaflet",
     express.static(path.join(process.cwd(), "node_modules/leaflet/dist")),
