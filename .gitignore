@@ -2,3 +2,4 @@ credentials.json
 token.json
 config.json
 node_modules
+dist/
