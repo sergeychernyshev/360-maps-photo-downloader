@@ -56,7 +56,7 @@ wss.on("connection", (ws: WebSocket, req: http.IncomingMessage) => {
 
 // Set up EJS
 app.set("view engine", "ejs");
-app.set("views", path.join(__dirname, "views"));
+app.set("views", path.join(__dirname, "../src/views"));
 
 /**
  * Initializes the web application.
@@ -124,7 +124,7 @@ async function initialize() {
   });
 
   // --- WEB INTERFACE & ROUTES ---
-  app.use(express.static(path.join(__dirname, "public")));
+  app.use(express.static(path.join(__dirname, "../src/public")));
   app.use(
     "/modules/leaflet",
     express.static(path.join(process.cwd(), "node_modules/leaflet/dist")),

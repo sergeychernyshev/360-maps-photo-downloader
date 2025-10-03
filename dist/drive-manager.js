@@ -28,7 +28,7 @@ exports.PHOTO_LIST_FILE_NAME = "streetview_photos.json";
  * @returns {Promise<object>} A promise that resolves with the Google Drive API client.
  */
 async function getDriveClient(auth) {
-  return googleapis_1.google.drive({ version: "v3", auth });
+    return googleapis_1.google.drive({ version: "v3", auth });
 }
 /**
  * Finds a folder by name in Google Drive.
@@ -37,12 +37,12 @@ async function getDriveClient(auth) {
  * @returns {Promise<object|null>} A promise that resolves with the folder object, or null if not found.
  */
 async function findFolder(drive, folderName) {
-  const res = await drive.files.list({
-    q: `mimeType='application/vnd.google-apps.folder' and name='${folderName}' and trashed=false`,
-    fields: "files(id, name, webViewLink)",
-    spaces: "drive",
-  });
-  return res.data.files && res.data.files.length > 0 ? res.data.files[0] : null;
+    const res = await drive.files.list({
+        q: `mimeType='application/vnd.google-apps.folder' and name='${folderName}' and trashed=false`,
+        fields: "files(id, name, webViewLink)",
+        spaces: "drive",
+    });
+    return res.data.files && res.data.files.length > 0 ? res.data.files[0] : null;
 }
 /**
  * Creates a folder in Google Drive.
@@ -51,15 +51,15 @@ async function findFolder(drive, folderName) {
  * @returns {Promise<object>} A promise that resolves with the created folder object.
  */
 async function createFolder(drive, folderName) {
-  const fileMetadata = {
-    name: folderName,
-    mimeType: "application/vnd.google-apps.folder",
-  };
-  const res = await drive.files.create({
-    requestBody: fileMetadata,
-    fields: "id, webViewLink",
-  });
-  return res.data;
+    const fileMetadata = {
+        name: folderName,
+        mimeType: "application/vnd.google-apps.folder",
+    };
+    const res = await drive.files.create({
+        requestBody: fileMetadata,
+        fields: "id, webViewLink",
+    });
+    return res.data;
 }
 /**
  * Finds a folder by name in Google Drive, or creates it if it doesn't exist.
@@ -68,11 +68,11 @@ async function createFolder(drive, folderName) {
  * @returns {Promise<object>} A promise that resolves with the folder object.
  */
 async function findOrCreateFolder(drive, folderName) {
-  let folder = await findFolder(drive, folderName);
-  if (!folder) {
-    folder = await createFolder(drive, folderName);
-  }
-  return folder;
+    let folder = await findFolder(drive, folderName);
+    if (!folder) {
+        folder = await createFolder(drive, folderName);
+    }
+    return folder;
 }
 /**
  * Finds a file by name in a specific folder in Google Drive.
@@ -82,12 +82,12 @@ async function findOrCreateFolder(drive, folderName) {
  * @returns {Promise<object|null>} A promise that resolves with the file object, or null if not found.
  */
 async function findFileInFolder(drive, fileName, folderId) {
-  const res = await drive.files.list({
-    q: `name='${fileName}' and '${folderId}' in parents and trashed=false`,
-    fields: "files(id, name)",
-    spaces: "drive",
-  });
-  return res.data.files && res.data.files.length > 0 ? res.data.files[0] : null;
+    const res = await drive.files.list({
+        q: `name='${fileName}' and '${folderId}' in parents and trashed=false`,
+        fields: "files(id, name)",
+        spaces: "drive",
+    });
+    return res.data.files && res.data.files.length > 0 ? res.data.files[0] : null;
 }
 /**
  * Gets the photo list file from a specific folder in Google Drive.
@@ -96,7 +96,7 @@ async function findFileInFolder(drive, fileName, folderId) {
  * @returns {Promise<object|null>} A promise that resolves with the file object, or null if not found.
  */
 async function getPhotoListFile(drive, folderId) {
-  return findFileInFolder(drive, exports.PHOTO_LIST_FILE_NAME, folderId);
+    return findFileInFolder(drive, exports.PHOTO_LIST_FILE_NAME, folderId);
 }
 /**
  * Reads the content of a file from Google Drive.
@@ -105,9 +105,9 @@ async function getPhotoListFile(drive, folderId) {
  * @returns {Promise<object>} A promise that resolves with the file content.
  */
 async function readFileContent(drive, fileId) {
-  console.log(`Downloading file from Google Drive: ${fileId}`);
-  const res = await drive.files.get({ fileId, alt: "media" });
-  return res.data;
+    console.log(`Downloading file from Google Drive: ${fileId}`);
+    const res = await drive.files.get({ fileId, alt: "media" });
+    return res.data;
 }
 /**
  * Writes content to a file in Google Drive.
@@ -117,13 +117,13 @@ async function readFileContent(drive, fileId) {
  * @returns {Promise<void>}
  */
 async function writeFileContent(drive, fileId, content) {
-  await drive.files.update({
-    fileId,
-    media: {
-      mimeType: "application/json",
-      body: JSON.stringify(content, null, 2),
-    },
-  });
+    await drive.files.update({
+        fileId,
+        media: {
+            mimeType: "application/json",
+            body: JSON.stringify(content, null, 2),
+        },
+    });
 }
 /**
  * Creates a file in Google Drive.
@@ -136,39 +136,28 @@ async function writeFileContent(drive, fileId, content) {
  * @param {function} onUploadProgress - A function to call with upload progress updates.
  * @returns {Promise<object>} A promise that resolves with the created file object.
  */
-async function createFile(
-  drive,
-  fileName,
-  mimeType,
-  contentStream,
-  folderId,
-  size,
-  onUploadProgress,
-) {
-  const fileMetadata = {
-    name: fileName,
-    parents: [folderId],
-  };
-  const media = {
-    mimeType,
-    body: contentStream,
-  };
-  const res = await drive.files.create(
-    {
-      requestBody: fileMetadata,
-      media: media,
-      fields: "id, webViewLink",
-    },
-    {
-      onUploadProgress: (evt) => {
-        if (size) {
-          const progress = Math.round((evt.bytesRead / size) * 100);
-          onUploadProgress(progress);
-        }
-      },
-    },
-  );
-  return res.data;
+async function createFile(drive, fileName, mimeType, contentStream, folderId, size, onUploadProgress) {
+    const fileMetadata = {
+        name: fileName,
+        parents: [folderId],
+    };
+    const media = {
+        mimeType,
+        body: contentStream,
+    };
+    const res = await drive.files.create({
+        requestBody: fileMetadata,
+        media: media,
+        fields: "id, webViewLink",
+    }, {
+        onUploadProgress: (evt) => {
+            if (size) {
+                const progress = Math.round((evt.bytesRead / size) * 100);
+                onUploadProgress(progress);
+            }
+        },
+    });
+    return res.data;
 }
 /**
  * Lists all files in a specific folder in Google Drive.
@@ -177,24 +166,24 @@ async function createFile(
  * @returns {Promise<Array<object>>} A promise that resolves with a list of file objects.
  */
 async function listFiles(drive, folderId) {
-  const allFiles = [];
-  let pageToken = null;
-  do {
-    const res = await drive.files.list({
-      q: `'${folderId}' in parents and trashed=false and mimeType != 'application/vnd.google-apps.folder'`,
-      fields: "nextPageToken, files(id, name, mimeType, webViewLink)",
-      spaces: "drive",
-      pageToken: pageToken || undefined,
-      pageSize: 1000,
-    });
-    if (res.data.files) {
-      for (const file of res.data.files) {
-        allFiles.push(file);
-      }
-    }
-    pageToken = res.data.nextPageToken || null;
-  } while (pageToken);
-  return allFiles;
+    const allFiles = [];
+    let pageToken = null;
+    do {
+        const res = await drive.files.list({
+            q: `'${folderId}' in parents and trashed=false and mimeType != 'application/vnd.google-apps.folder'`,
+            fields: "nextPageToken, files(id, name, mimeType, webViewLink)",
+            spaces: "drive",
+            pageToken: pageToken || undefined,
+            pageSize: 1000,
+        });
+        if (res.data.files) {
+            for (const file of res.data.files) {
+                allFiles.push(file);
+            }
+        }
+        pageToken = res.data.nextPageToken || null;
+    } while (pageToken);
+    return allFiles;
 }
 /**
  * Finds a file by name in a specific folder in Google Drive.
@@ -204,12 +193,12 @@ async function listFiles(drive, folderId) {
  * @returns {Promise<object|null>} A promise that resolves with the file object, or null if not found.
  */
 async function findFile(drive, fileName, folderId) {
-  const res = await drive.files.list({
-    q: `name='${fileName}' and '${folderId}' in parents and trashed=false`,
-    fields: "files(id, name)",
-    spaces: "drive",
-  });
-  return res.data.files && res.data.files.length > 0 ? res.data.files[0] : null;
+    const res = await drive.files.list({
+        q: `name='${fileName}' and '${folderId}' in parents and trashed=false`,
+        fields: "files(id, name)",
+        spaces: "drive",
+    });
+    return res.data.files && res.data.files.length > 0 ? res.data.files[0] : null;
 }
 /**
  * Deletes a file from Google Drive.
@@ -218,9 +207,9 @@ async function findFile(drive, fileName, folderId) {
  * @returns {Promise<void>}
  */
 async function deleteFile(drive, fileId) {
-  await drive.files.delete({
-    fileId: fileId,
-  });
+    await drive.files.delete({
+        fileId: fileId,
+    });
 }
 /**
  * Updates a file in Google Drive.
@@ -232,33 +221,23 @@ async function deleteFile(drive, fileId) {
  * @param {function} onUploadProgress - A function to call with upload progress updates.
  * @returns {Promise<object>} A promise that resolves with the updated file object.
  */
-async function updateFile(
-  drive,
-  fileId,
-  mimeType,
-  contentStream,
-  size,
-  onUploadProgress,
-) {
-  const media = {
-    mimeType,
-    body: contentStream,
-  };
-  const res = await drive.files.update(
-    {
-      fileId: fileId,
-      media: media,
-      fields: "id, webViewLink",
-    },
-    {
-      onUploadProgress: (evt) => {
-        if (size) {
-          const progress = Math.round((evt.bytesRead / size) * 100);
-          onUploadProgress(progress);
-        }
-      },
-    },
-  );
-  return res.data;
+async function updateFile(drive, fileId, mimeType, contentStream, size, onUploadProgress) {
+    const media = {
+        mimeType,
+        body: contentStream,
+    };
+    const res = await drive.files.update({
+        fileId: fileId,
+        media: media,
+        fields: "id, webViewLink",
+    }, {
+        onUploadProgress: (evt) => {
+            if (size) {
+                const progress = Math.round((evt.bytesRead / size) * 100);
+                onUploadProgress(progress);
+            }
+        },
+    });
+    return res.data;
 }
 //# sourceMappingURL=drive-manager.js.map
