@@ -2,6 +2,7 @@
   "extends": "../../../tsconfig.json",
   "compilerOptions": {
     "outDir": "../../../dist/public/js",
+    "rootDir": ".",
     "lib": ["es2020", "dom"],
     "types": ["leaflet", "leaflet.markercluster"]
   },
