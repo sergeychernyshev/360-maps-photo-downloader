@@ -4,7 +4,7 @@
   "description": "A script to download 360 photos from Google Street View.",
   "main": "dist/webapp.js",
   "scripts": {
-    "build": "rm -rf dist && tsc && tsc -p src/public/js && cp -r src/views dist/views && cp -r src/public/css dist/public/css",
+    "build": "rm -rf dist && tsc && tsc -p src/public/js && cp -r src/views dist/views && cp -r src/public/css dist/public/css && mkdir -p dist/public/js/modules && cp -r node_modules/leaflet/dist dist/public/js/modules/leaflet && cp -r node_modules/leaflet.markercluster/dist dist/public/js/modules/leaflet.markercluster",
     "prestart": "npm run build",
     "start": "node dist/webapp.js",
     "dev": "nodemon",

@@ -1,7 +1,8 @@
-import '/modules/leaflet/leaflet.js';
-import '/modules/leaflet.markercluster/dist/leaflet.markercluster.js';
 
-declare const L: any;
+
+/// <reference types="leaflet" />
+/// <reference types="leaflet.markercluster" />
+
 declare const isLoggedIn: boolean;
 declare const poseCounts: any;
 
