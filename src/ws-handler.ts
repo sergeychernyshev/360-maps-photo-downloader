@@ -1,10 +1,12 @@
-const { downloadAllPhotos } = require("./actions/download-all-photos");
-const { downloadSinglePhoto } = require("./actions/download-single-photo");
-const { cancelDownload } = require("./actions/cancel-download");
-const { deleteDuplicates } = require("./actions/delete-duplicates");
-const { updatePhotoList } = require("./actions/update-photo-list");
-const { filterPhotos } = require("./actions/filter-photos");
-const { updateState, getState, resetState } = require("./download-state");
+import { Request } from "express";
+import { WebSocket } from "ws";
+import { downloadAllPhotos } from "./actions/download-all-photos";
+import { downloadSinglePhoto } from "./actions/download-single-photo";
+import { cancelDownload } from "./actions/cancel-download";
+import { deleteDuplicates } from "./actions/delete-duplicates";
+import { updatePhotoList } from "./actions/update-photo-list";
+import { filterPhotos } from "./actions/filter-photos";
+import { updateState, getState, resetState } from "./download-state";
 
 /**
  * Handles incoming WebSocket messages.
@@ -12,7 +14,11 @@ const { updateState, getState, resetState } = require("./download-state");
  * @param {object} ws - The WebSocket object.
  * @param {string} message - The incoming message.
  */
-async function handleMessage(req, ws, message) {
+export async function handleMessage(
+  req: Request,
+  ws: WebSocket,
+  message: string,
+) {
   const data = JSON.parse(message);
   const { type, payload } = data;
 
@@ -22,8 +28,8 @@ async function handleMessage(req, ws, message) {
       break;
     case "download":
       resetState();
-      const downloadedPhotos = req.session.downloadedPhotos || [];
-      const missingPhotos = req.session.missingPhotos || [];
+      const downloadedPhotos = (req.session as any).downloadedPhotos || [];
+      const missingPhotos = (req.session as any).missingPhotos || [];
       await downloadAllPhotos(
         req,
         missingPhotos,
@@ -38,10 +44,12 @@ async function handleMessage(req, ws, message) {
       await deleteDuplicates(req, payload.fileIds);
       break;
     case "download-photo":
-      const allPhotos = (req.session.downloadedPhotos || []).concat(
-        req.session.missingPhotos || [],
+      const allPhotos = ((req.session as any).downloadedPhotos || []).concat(
+        (req.session as any).missingPhotos || [],
       );
-      const photo = allPhotos.find((p) => p.photoId.id === payload.photoId);
+      const photo = allPhotos.find(
+        (p: any) => p.photoId.id === payload.photoId,
+      );
       if (photo) {
         await downloadSinglePhoto(req, photo);
       } else {
@@ -58,7 +66,7 @@ async function handleMessage(req, ws, message) {
       ws.send(
         JSON.stringify({
           type: "all-photos",
-          payload: req.session.allPhotos,
+          payload: (req.session as any).allPhotos,
         }),
       );
       break;
@@ -66,5 +74,3 @@ async function handleMessage(req, ws, message) {
       console.log(`Unknown message type: ${type}`);
   }
 }
-
-module.exports = { handleMessage };

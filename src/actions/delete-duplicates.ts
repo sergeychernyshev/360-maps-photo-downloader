@@ -1,19 +1,13 @@
-/**
- * @property {function} getAuthenticatedClient - Function to get an authenticated OAuth2 client.
- */
-const { getAuthenticatedClient } = require("../oauth");
-/**
- * @property {function} getDriveClient - Function to get the Google Drive API client.
- * @property {function} deleteFile - Function to delete a file from Google Drive.
- */
-const { getDriveClient, deleteFile } = require("../drive-manager");
+import { Request } from "express";
+import { getAuthenticatedClient } from "../oauth";
+import { getDriveClient, deleteFile } from "../drive-manager";
 
 /**
  * Deletes duplicate files from Google Drive.
  * @param {object} req - The Express request object, containing the session.
  * @param {Array<string>} fileIds - The list of file IDs to delete.
  */
-async function deleteDuplicates(req, fileIds) {
+export async function deleteDuplicates(req: Request, fileIds: string[]) {
   try {
     // Get authenticated client for Google Drive
     const oAuth2Client = await getAuthenticatedClient(req);
@@ -28,5 +22,3 @@ async function deleteDuplicates(req, fileIds) {
     console.error(error);
   }
 }
-
-module.exports = { deleteDuplicates };

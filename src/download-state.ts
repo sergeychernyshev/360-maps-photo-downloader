@@ -1,44 +1,48 @@
-let state = {
-  // Holds the state for a batch (multi-photo) download operation.
+import { WebSocket } from "ws";
+
+interface GlobalState {
+  inProgress: boolean;
+  total: number;
+  current: number;
+  message: string;
+  totalProgress: number;
+  complete: boolean;
+  cancelled: boolean;
+  error: string | null;
+  status: "idle" | "downloading" | "uploading";
+  folderLink?: string;
+}
+
+interface IndividualState {
+  downloadProgress?: number;
+  uploadProgress?: number;
+  uploadStarted?: boolean;
+  complete?: boolean;
+  error?: string | null;
+  driveLink?: string | null;
+}
+
+interface State {
+  global: GlobalState;
+  individual: {
+    [key: string]: IndividualState;
+  };
+  socket: WebSocket | null;
+}
+
+let state: State = {
   global: {
-    // Is a global download currently running?
     inProgress: false,
-    // The total number of photos in the current batch operation.
     total: 0,
-    // The index of the photo currently being processed in the batch.
     current: 0,
-    // A user-friendly message describing the current status.
     message: "",
-    // The overall percentage completion for the entire batch.
     totalProgress: 0,
-    // Has the batch operation finished successfully?
     complete: false,
-    // Was the batch operation cancelled by the user?
     cancelled: false,
-    // If an error occurred during the batch operation, this will hold the error message.
     error: null,
-    // The current phase of the global operation ('idle', 'downloading', 'uploading').
     status: "idle",
   },
-  // A map of photoId to the state of that individual photo's download/upload process.
-  individual: {
-    // Example structure for a photoId:
-    // "photoId123": {
-    //   // The download progress (0-100) for this specific photo.
-    //   downloadProgress: 0,
-    //   // The upload progress (0-100) for this specific photo.
-    //   uploadProgress: 0,
-    //   // Has the upload to Google Drive started for this photo?
-    //   uploadStarted: false,
-    //   // Has the processing for this specific photo finished?
-    //   complete: false,
-    //   // If an error occurred while processing this specific photo, this holds the message.
-    //   error: null,
-    //   // The URL to the photo on Google Drive after it has been successfully uploaded.
-    //   driveLink: null,
-    // }
-  },
-  // Holds the WebSocket connection object for sending updates to the client.
+  individual: {},
   socket: null,
 };
 
@@ -46,7 +50,7 @@ let state = {
  * Gets the current download state.
  * @returns {object} The current download state.
  */
-function getState() {
+export function getState() {
   const { socket, ...rest } = state;
   return rest;
 }
@@ -55,7 +59,17 @@ function getState() {
  * Updates the download state and sends the update to the client via WebSocket.
  * @param {object} newState - The new state to merge with the existing state.
  */
-function updateState(newState) {
+export function updateState(
+  newState: Partial<GlobalState> & {
+    photoId?: string;
+    fileComplete?: boolean;
+    downloadedCount?: number;
+    notDownloadedCount?: number;
+    totalPhotosCount?: number;
+    downloadProgress?: number;
+    uploadStarted?: boolean;
+  },
+) {
   if (newState.photoId) {
     const { photoId, ...photoState } = newState;
     if (!state.individual[photoId]) {
@@ -63,7 +77,6 @@ function updateState(newState) {
     }
     Object.assign(state.individual[photoId], photoState);
 
-    // Don't send the whole individual state object, just the update for the specific photo
     if (state.socket) {
       state.socket.send(
         JSON.stringify({
@@ -79,7 +92,6 @@ function updateState(newState) {
       }, 5000);
     }
   } else {
-    // Global progress update
     Object.assign(state.global, newState);
     if (state.socket) {
       state.socket.send(
@@ -96,7 +108,7 @@ function updateState(newState) {
  * Sets the WebSocket connection object.
  * @param {object} socket - The WebSocket connection object.
  */
-function setSocket(socket) {
+export function setSocket(socket: WebSocket | null) {
   state.socket = socket;
   if (
     state.socket &&
@@ -111,7 +123,7 @@ function setSocket(socket) {
 /**
  * Resets the download state to its initial values.
  */
-function resetState() {
+export function resetState() {
   state.global = {
     inProgress: false,
     total: 0,
@@ -125,10 +137,3 @@ function resetState() {
   };
   state.individual = {};
 }
-
-module.exports = {
-  getState,
-  updateState,
-  setSocket,
-  resetState,
-};

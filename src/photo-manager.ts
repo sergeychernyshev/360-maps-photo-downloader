@@ -1,25 +1,37 @@
-const { google } = require("googleapis");
-const axios = require("axios");
-const fs = require("fs").promises;
-const path = require("path");
+import { google } from "googleapis";
+import axios from "axios";
+import { promises as fs } from "fs";
+import path from "path";
+import { OAuth2Client } from "google-auth-library";
+import { WebSocket } from "ws";
+import { Photo } from "./types";
 
 const CREDENTIALS_PATH = path.join(process.cwd(), "credentials.json");
+
+interface FilterOptions {
+  search: string;
+  status: "all" | "downloaded" | "not-downloaded";
+  filters: { property: string; value: "any" | "exists" | "not-exists" }[];
+  downloadedFiles: Set<string>;
+}
 
 /**
  * Lists all photos for the authenticated user, handling pagination.
  * @param {import('google-auth-library').OAuth2Client} authClient An authorized OAuth2 client.
  * @param {(message: string) => void} [log=() => {}] An optional function to log progress messages.
  */
-async function listAllPhotos(authClient, ws) {
-  const credsContent = await fs.readFile(CREDENTIALS_PATH);
+export async function listAllPhotos(
+  authClient: OAuth2Client,
+  ws: WebSocket,
+): Promise<Photo[]> {
+  const credsContent = await fs.readFile(CREDENTIALS_PATH, "utf-8");
   const { api_key } = JSON.parse(credsContent).web;
   const streetviewpublish = google.streetviewpublish({
     version: "v1",
     auth: authClient,
-    key: api_key,
   });
-  const allPhotos = [];
-  let nextPageToken = null;
+  const allPhotos: Photo[] = [];
+  let nextPageToken: string | null = null;
 
   ws.send(
     JSON.stringify({
@@ -29,10 +41,10 @@ async function listAllPhotos(authClient, ws) {
   );
 
   do {
-    const res = await streetviewpublish.photos.list({
+    const res: any = await streetviewpublish.photos.list({
       view: "INCLUDE_DOWNLOAD_URL",
       pageSize: 100,
-      pageToken: nextPageToken,
+      pageToken: nextPageToken || undefined,
     });
 
     if (res.data.photos && res.data.photos.length > 0) {
@@ -70,11 +82,11 @@ async function listAllPhotos(authClient, ws) {
  * @param {function} progressCallback - A function to call with download progress updates.
  * @returns {Promise<{data: Buffer, size: number}>} A promise that resolves with the photo data and size.
  */
-async function downloadPhoto(
-  photoUrl,
-  authClient,
-  progressCallback = () => {},
-) {
+export async function downloadPhoto(
+  photoUrl: string,
+  authClient: OAuth2Client,
+  progressCallback: (percentage: number) => void = () => {},
+): Promise<{ data: Buffer; size: number }> {
   const response = await axios({
     method: "GET",
     url: photoUrl,
@@ -82,7 +94,7 @@ async function downloadPhoto(
     headers: {
       Authorization: `Bearer ${authClient.credentials.access_token}`,
     },
-    onDownloadProgress: (progressEvent) => {
+    onDownloadProgress: (progressEvent: any) => {
       const percentage = Math.round(
         (progressEvent.loaded * 100) / progressEvent.total,
       );
@@ -97,13 +109,12 @@ async function downloadPhoto(
  * Filters a list of photos based on the provided criteria.
  * @param {Array<object>} allPhotos - The list of photos to filter.
  * @param {object} options - The filtering options.
- * @param {string} options.search - The search term to filter by.
- * @param {string} options.status - The download status to filter by ('all', 'downloaded', 'not-downloaded').
- * @param {Array<object>} options.filters - The pose properties to filter by.
- * @param {Set<string>} options.downloadedFiles - A set of downloaded file names.
  * @returns {Array<object>} The filtered list of photos.
  */
-function filterPhotos(allPhotos, { search, status, filters, downloadedFiles }) {
+export function filterPhotos(
+  allPhotos: Photo[],
+  { search, status, filters, downloadedFiles }: FilterOptions,
+): Photo[] {
   const filteredBySearch = allPhotos.filter((photo) => {
     if (!search) {
       return true;
@@ -133,12 +144,11 @@ function filterPhotos(allPhotos, { search, status, filters, downloadedFiles }) {
       const exists =
         filter.property === "latLngPair"
           ? photo.pose && photo.pose.latLngPair !== undefined
-          : photo.pose && typeof photo.pose[filter.property] === "number";
+          : photo.pose &&
+            typeof (photo.pose as any)[filter.property] === "number";
       return filter.value === "exists" ? exists : !exists;
     });
   });
 
   return filteredByPose;
 }
-
-module.exports = { listAllPhotos, downloadPhoto, filterPhotos };

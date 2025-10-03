@@ -1,9 +1,13 @@
+import { Photo } from "../types";
+
 /**
  * Converts degrees to degrees-minutes-seconds rational format.
  * @param {number} deg - The degree value to convert.
  * @returns {Array<Array<number>>} The DMS rational representation.
  */
-function degToDmsRational(deg) {
+export function degToDmsRational(
+  deg: number,
+): [[number, number], [number, number], [number, number]] {
   const d = Math.floor(deg);
   const minFloat = (deg - d) * 60;
   const m = Math.floor(minFloat);
@@ -21,7 +25,7 @@ function degToDmsRational(deg) {
  * @param {Array<object>} photos - The list of photos to process.
  * @returns {object} An object containing the counts of pose properties.
  */
-function calculatePoseCounts(photos) {
+export function calculatePoseCounts(photos: Photo[]) {
   const poseCounts = {
     heading: { exists: 0, missing: 0 },
     pitch: { exists: 0, missing: 0 },
@@ -31,7 +35,7 @@ function calculatePoseCounts(photos) {
     place: { exists: 0, missing: 0 },
   };
 
-  photos.forEach((photo) => {
+  photos.forEach((photo: Photo) => {
     if (photo.pose) {
       if (typeof photo.pose.heading === "number") poseCounts.heading.exists++;
       else poseCounts.heading.missing++;
@@ -67,10 +71,14 @@ function calculatePoseCounts(photos) {
  * @param {Map<string, string>} driveFileLinks - A map of file names to their Google Drive links.
  * @returns {string} The HTML string for the photo list.
  */
-function buildPhotoListHtml(photos, downloadedFiles, driveFileLinks) {
+export function buildPhotoListHtml(
+  photos: Photo[],
+  downloadedFiles: Set<string>,
+  driveFileLinks: Map<string, string>,
+): string {
   return photos
-    .map((photo) => {
-      const poseParts = [];
+    .map((photo: Photo) => {
+      const poseParts: string[] = [];
       if (photo.pose) {
         if (typeof photo.pose.heading === "number")
           poseParts.push(
@@ -96,8 +104,8 @@ function buildPhotoListHtml(photos, downloadedFiles, driveFileLinks) {
         photo.places && photo.places.length > 0 && photo.places[0].name;
       const placeId =
         photo.places && photo.places.length > 0 && photo.places[0].placeId;
-      const lat = photo.pose.latLngPair.latitude;
-      const lon = photo.pose.latLngPair.longitude;
+      const lat = photo.pose ? photo.pose.latLngPair.latitude : 0;
+      const lon = photo.pose ? photo.pose.latLngPair.longitude : 0;
       const coordinates = `<small><span title="Latitude: ${lat.toFixed(
         4,
       )}, Longitude: ${lon.toFixed(4)}">${lat.toFixed(4)}, ${lon.toFixed(
@@ -165,10 +173,15 @@ function buildPhotoListHtml(photos, downloadedFiles, driveFileLinks) {
  * @param {string} location - The location of the pagination controls ('top' or 'bottom').
  * @returns {string} The HTML string for the pagination controls.
  */
-function buildPaginationHtml(totalPages, currentPage, action, location) {
+export function buildPaginationHtml(
+  totalPages: number,
+  currentPage: number,
+  action: string,
+  location: string,
+): string {
   let paginationHtml = "";
   if (totalPages > 1) {
-    const buildPageClick = (page) => {
+    const buildPageClick = (page: number) => {
       return `data-page="${page}"`;
     };
 
@@ -227,10 +240,3 @@ function buildPaginationHtml(totalPages, currentPage, action, location) {
   }
   return paginationHtml;
 }
-
-module.exports = {
-  calculatePoseCounts,
-  buildPhotoListHtml,
-  buildPaginationHtml,
-  degToDmsRational,
-};

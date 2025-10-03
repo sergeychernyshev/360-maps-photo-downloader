@@ -1,20 +1,16 @@
-/**
- * The WebSocket connection object.
- * @type {WebSocket}
- */
-let ws;
-/**
- * The Leaflet map object.
- * @type {L.Map}
- */
-let map;
-/**
- * The Leaflet marker cluster group.
- * @type {L.MarkerClusterGroup}
- */
-let markers;
 
-function updateMap(photos) {
+
+/// <reference types="leaflet" />
+/// <reference types="leaflet.markercluster" />
+
+declare const isLoggedIn: boolean;
+declare const poseCounts: any;
+
+let ws: WebSocket;
+let map: L.Map;
+let markers: any;
+
+function updateMap(photos: any[]) {
   if (!map) {
     map = L.map("map").setView([0, 0], 2);
     L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
@@ -47,9 +43,9 @@ function updateMap(photos) {
   }
 }
 
-function updateSortIndicators(sort, order) {
+function updateSortIndicators(sort: string, order: string) {
   document.querySelectorAll(".sort-link").forEach((link) => {
-    const sortBy = link.dataset.sortby;
+    const sortBy = (link as HTMLElement).dataset.sortby;
     // Clear existing arrows
     const arrow = link.querySelector(".sort-arrow");
     if (arrow) {
@@ -58,14 +54,14 @@ function updateSortIndicators(sort, order) {
 
     if (sortBy === sort) {
       link.classList.add("active");
-      link.dataset.order = order;
+      (link as HTMLElement).dataset.order = order;
       const arrowSpan = document.createElement("span");
       arrowSpan.className = "sort-arrow";
       arrowSpan.innerHTML = order === "asc" ? " &uarr;" : " &darr;";
       link.appendChild(arrowSpan);
     } else {
       link.classList.remove("active");
-      link.dataset.order = "desc"; // Default for non-active links
+      (link as HTMLElement).dataset.order = "desc"; // Default for non-active links
     }
   });
 }
@@ -83,15 +79,19 @@ function getFiltersFromQuery() {
 }
 
 function getCurrentFilters() {
-  const search = document.getElementById("search-input").value;
+  const search = (document.getElementById("search-input") as HTMLInputElement)
+    .value;
   const status = document
-    .querySelector(".status-filter a.active")
+    .querySelector(".status-filter a.active")!
     .id.replace("filter-", "");
   const poseFilters = Array.from(
     document.querySelectorAll('.pose-filter-group input[type="checkbox"]'),
   )
-    .filter((c) => c.dataset.state !== "any")
-    .map((c) => ({ property: c.name, value: c.dataset.state }));
+    .filter((c) => (c as HTMLElement).dataset.state !== "any")
+    .map((c) => ({
+      property: (c as HTMLInputElement).name,
+      value: (c as HTMLElement).dataset.state,
+    }));
   const page = parseInt(
     new URLSearchParams(window.location.search).get("page") || "1",
     10,
@@ -103,7 +103,7 @@ function getCurrentFilters() {
   return { search, status, poseFilters, page, sort, order };
 }
 
-function applyFilters(newFilters = {}) {
+function applyFilters(newFilters: any = {}) {
   const currentFilters = getCurrentFilters();
   const filters = { ...currentFilters, ...newFilters };
 
@@ -118,8 +118,10 @@ function applyFilters(newFilters = {}) {
     isPopState: newFilters.isPopState, // Flag for history handling
   };
 
-  document.getElementById("filter-progress-indicator").classList.add("visible");
-  document.querySelector("tbody").classList.add("filtering");
+  document
+    .getElementById("filter-progress-indicator")!
+    .classList.add("visible");
+  document.querySelector("tbody")!.classList.add("filtering");
 
   connectWebSocket();
   if (ws && ws.readyState === WebSocket.OPEN) {
@@ -131,7 +133,7 @@ function applyFilters(newFilters = {}) {
   }
 }
 
-function sortPhotos(sort) {
+function sortPhotos(sort: string) {
   const currentOrder =
     new URLSearchParams(window.location.search).get("order") || "desc";
   const currentSort =
@@ -143,20 +145,20 @@ function sortPhotos(sort) {
   applyFilters({ sort, order });
 }
 
-function changePage(page, location) {
+function changePage(page: number, location: string) {
   applyFilters({ page, location });
 }
 
 function searchPhotos() {
   applyFilters({
-    search: document.getElementById("search-input").value,
+    search: (document.getElementById("search-input") as HTMLInputElement).value,
     page: 1,
   });
 }
 
-function filterPhotos(status) {
-  document.querySelector(".status-filter a.active").classList.remove("active");
-  document.getElementById(`filter-${status}`).classList.add("active");
+function filterPhotos(status: string) {
+  document.querySelector(".status-filter a.active")!.classList.remove("active");
+  document.getElementById(`filter-${status}`)!.classList.add("active");
   applyFilters({ status, page: 1 });
 }
 
@@ -164,34 +166,39 @@ function filterByPose() {
   const poseFilters = Array.from(
     document.querySelectorAll('.pose-filter-group input[type="checkbox"]'),
   )
-    .filter((c) => c.dataset.state !== "any")
-    .map((c) => ({ property: c.name, value: c.dataset.state }));
+    .filter((c) => (c as HTMLElement).dataset.state !== "any")
+    .map((c) => ({
+      property: (c as HTMLInputElement).name,
+      value: (c as HTMLElement).dataset.state,
+    }));
   applyFilters({ poseFilters, page: 1 });
 }
 
 function clearSearch() {
-  document.getElementById("search-input").value = "";
+  (document.getElementById("search-input") as HTMLInputElement).value = "";
   toggleClearButton();
   searchPhotos();
 }
 
 function resetFilters() {
-  document.getElementById("search-input").value = "";
-  document.querySelector(".status-filter a.active").classList.remove("active");
-  document.getElementById("filter-all").classList.add("active");
+  (document.getElementById("search-input") as HTMLInputElement).value = "";
+  document.querySelector(".status-filter a.active")!.classList.remove("active");
+  document.getElementById("filter-all")!.classList.add("active");
   document
     .querySelectorAll('.pose-filter-group input[type="checkbox"]')
     .forEach((checkbox) => {
-      setCheckboxState(checkbox, "any", true);
+      setCheckboxState(checkbox as HTMLInputElement, "any", true);
     });
 
-  const moreFiltersBtn = document.getElementById("more-filters-btn");
+  const moreFiltersBtn = document.getElementById(
+    "more-filters-btn",
+  ) as HTMLButtonElement;
   const poseFiltersContainer = document.getElementById(
     "pose-filters-container",
-  );
+  ) as HTMLElement;
   moreFiltersBtn.classList.remove("active");
   moreFiltersBtn.textContent = "More filters";
-  poseFiltersContainer.style.maxHeight = null;
+  poseFiltersContainer.style.maxHeight = "";
 
   applyFilters({
     search: "",
@@ -206,7 +213,7 @@ function resetFilters() {
 function confirmDownload() {
   if (!isLoggedIn) return;
   const missingPhotosCount = parseInt(
-    document.getElementById("not-downloaded-count").textContent,
+    document.getElementById("not-downloaded-count")!.textContent!,
     10,
   );
   if (missingPhotosCount > 10) {
@@ -218,7 +225,8 @@ function confirmDownload() {
       return;
     }
   }
-  document.getElementById("download-fieldset").style.display = "block";
+  (document.getElementById("download-fieldset") as HTMLElement).style.display =
+    "block";
   connectWebSocket();
   if (ws && ws.readyState === WebSocket.OPEN) {
     ws.send(JSON.stringify({ type: "download" }));
@@ -231,7 +239,7 @@ function confirmDownload() {
 
 function updatePhotoList() {
   if (!isLoggedIn) return;
-  const updateBtn = document.getElementById("update-btn");
+  const updateBtn = document.getElementById("update-btn") as HTMLButtonElement;
   updateBtn.disabled = true;
   updateBtn.innerHTML =
     '<div class="spinner spinner-light"></div><span>Starting...</span>';
@@ -285,7 +293,9 @@ function connectWebSocket() {
       } = data.payload;
 
       // 1. Update DOM
-      const updateBtn = document.getElementById("update-btn");
+      const updateBtn = document.getElementById(
+        "update-btn",
+      ) as HTMLButtonElement;
       if (updateBtn && updateBtn.disabled) {
         updateBtn.disabled = false;
         updateBtn.innerHTML =
@@ -295,25 +305,27 @@ function connectWebSocket() {
       }
 
       document
-        .getElementById("filter-progress-indicator")
+        .getElementById("filter-progress-indicator")!
         .classList.remove("visible");
-      document.querySelector("tbody").classList.remove("filtering");
-      document.querySelector("tbody").innerHTML = photoListHtml;
+      document.querySelector("tbody")!.classList.remove("filtering");
+      document.querySelector("tbody")!.innerHTML = photoListHtml;
       document.querySelectorAll(".pagination").forEach((el, i) => {
         el.innerHTML = i === 0 ? paginationHtmlTop : paginationHtmlBottom;
       });
       updatePoseCounts(poseCounts);
-      document.getElementById("downloaded-count").textContent = downloadedCount;
-      document.getElementById("not-downloaded-count").textContent =
+      document.getElementById("downloaded-count")!.textContent =
+        downloadedCount;
+      document.getElementById("not-downloaded-count")!.textContent =
         notDownloadedCount;
-      document.getElementById("all-count").textContent = totalPhotosCount;
-      document.getElementById("download-all-btn").disabled =
-        notDownloadedCount === 0;
+      document.getElementById("all-count")!.textContent = totalPhotosCount;
+      (
+        document.getElementById("download-all-btn") as HTMLButtonElement
+      ).disabled = notDownloadedCount === 0;
       if (filteredTotal > 0) {
-        document.getElementById("photo-counter").textContent =
+        document.getElementById("photo-counter")!.textContent =
           `Showing photos ${startIndex}-${endIndex} (page ${currentPage} of ${totalPages}) out of ${filteredTotal} filtered photos.`;
       } else {
-        document.getElementById("photo-counter").textContent =
+        document.getElementById("photo-counter")!.textContent =
           "No photos match the current filters.";
       }
 
@@ -324,10 +336,11 @@ function connectWebSocket() {
         if (requestPayload.status !== "all")
           params.set("status", requestPayload.status);
         const poseQuery = requestPayload.poseFilters
-          .map((f) => `${f.property}:${f.value}`)
+          .map((f: any) => `${f.property}:${f.value}`)
           .join(",");
         if (poseQuery) params.set("pose", poseQuery);
-        if (requestPayload.page > 1) params.set("page", requestPayload.page);
+        if (requestPayload.page > 1)
+          params.set("page", requestPayload.page.toString());
         if (requestPayload.sort && requestPayload.sort !== "date")
           params.set("sort", requestPayload.sort);
         if (requestPayload.order && requestPayload.order !== "desc")
@@ -361,7 +374,9 @@ function connectWebSocket() {
 
     if (data.type === "update-progress") {
       const { message, count, complete, error } = data.payload;
-      const updateBtn = document.getElementById("update-btn");
+      const updateBtn = document.getElementById(
+        "update-btn",
+      ) as HTMLButtonElement;
       if (error) {
         updateBtn.innerHTML = `Error: ${error}`;
         updateBtn.disabled = false;
@@ -399,29 +414,38 @@ function connectWebSocket() {
         } = global;
 
         if (inProgress) {
-          document.getElementById("download-fieldset").style.display = "block";
+          (
+            document.getElementById("download-fieldset") as HTMLElement
+          ).style.display = "block";
         }
-        document.getElementById("cancel-btn").style.display = complete
-          ? "none"
-          : "block";
+        (document.getElementById("cancel-btn") as HTMLElement).style.display =
+          complete ? "none" : "block";
 
         if (message) {
-          document.getElementById("progress-text").textContent = message;
+          document.getElementById("progress-text")!.textContent = message;
         }
         if (totalProgress !== undefined) {
-          const progressBar = document.getElementById("total-progress-bar");
+          const progressBar = document.getElementById(
+            "total-progress-bar",
+          ) as HTMLElement;
           progressBar.style.width = `${totalProgress}%`;
           progressBar.textContent = `${totalProgress}%`;
         }
 
-        const downloadContainer = document.getElementById("download-container");
-        const uploadContainer = document.getElementById("upload-container");
+        const downloadContainer = document.getElementById(
+          "download-container",
+        ) as HTMLElement;
+        const uploadContainer = document.getElementById(
+          "upload-container",
+        ) as HTMLElement;
 
         if (status === "downloading") {
           downloadContainer.classList.remove("hidden");
           uploadContainer.classList.add("hidden");
           if (downloadProgress !== undefined) {
-            const downloadBar = document.getElementById("download-bar");
+            const downloadBar = document.getElementById(
+              "download-bar",
+            ) as HTMLElement;
             downloadBar.style.width = `${downloadProgress}%`;
             downloadBar.textContent = `${downloadProgress}%`;
           }
@@ -437,32 +461,39 @@ function connectWebSocket() {
           const { downloadedCount, notDownloadedCount, totalPhotosCount } =
             global;
 
-          document.getElementById("downloaded-count").textContent =
+          document.getElementById("downloaded-count")!.textContent =
             downloadedCount;
-          document.getElementById("not-downloaded-count").textContent =
+          document.getElementById("not-downloaded-count")!.textContent =
             notDownloadedCount;
-          document.getElementById("download-all-btn").disabled =
-            notDownloadedCount === 0;
+          (
+            document.getElementById("download-all-btn") as HTMLButtonElement
+          ).disabled = notDownloadedCount === 0;
           if (totalPhotosCount !== undefined) {
-            document.getElementById("all-count").textContent = totalPhotosCount;
-            document.getElementById("total-photos-count").textContent =
+            document.getElementById("all-count")!.textContent =
               totalPhotosCount;
-            document.getElementById("drive-photo-count").textContent =
+            document.getElementById("total-photos-count")!.textContent =
+              totalPhotosCount;
+            document.getElementById("drive-photo-count")!.textContent =
               downloadedCount;
           } else {
-            document.getElementById("all-count").textContent =
-              downloadedCount + notDownloadedCount;
+            document.getElementById("all-count")!.textContent = (
+              downloadedCount + notDownloadedCount
+            ).toString();
           }
         }
 
         if (complete || error) {
-          const cancelBtn = document.getElementById("cancel-btn");
+          const cancelBtn = document.getElementById(
+            "cancel-btn",
+          ) as HTMLButtonElement;
           cancelBtn.style.display = "none";
           cancelBtn.disabled = false;
           cancelBtn.innerHTML = "Cancel";
 
           setTimeout(() => {
-            const fieldset = document.getElementById("download-fieldset");
+            const fieldset = document.getElementById(
+              "download-fieldset",
+            ) as HTMLElement;
             fieldset.style.maxHeight = fieldset.scrollHeight + "px";
             requestAnimationFrame(() => {
               fieldset.classList.add("collapsing");
@@ -472,14 +503,14 @@ function connectWebSocket() {
               () => {
                 fieldset.style.display = "none";
                 fieldset.classList.remove("collapsing");
-                fieldset.style.maxHeight = null; // Reset for future use
+                fieldset.style.maxHeight = ""; // Reset for future use
               },
               { once: true },
             );
           }, 2000);
         }
         if (error) {
-          document.getElementById("progress-text").textContent =
+          document.getElementById("progress-text")!.textContent =
             `Error: ${error}`;
         }
       }
@@ -498,16 +529,22 @@ function connectWebSocket() {
 
           const row = document.querySelector(`tr[data-photo-id="${photoId}"]`);
           if (row) {
-            const statusCell = row.querySelector(".status-cell");
-            const actionsCell = row.querySelector(".actions-cell");
-            const progressCell = row.querySelector(".progress-cell");
+            const statusCell = row.querySelector(".status-cell") as HTMLElement;
+            const actionsCell = row.querySelector(
+              ".actions-cell",
+            ) as HTMLElement;
+            const progressCell = row.querySelector(
+              ".progress-cell",
+            ) as HTMLElement;
             const progressBarContainer = progressCell.querySelector(
               ".progress-bar-container",
-            );
-            const spinnerContainer =
-              progressCell.querySelector(".spinner-container");
-            const progressBar =
-              progressBarContainer.querySelector(".progress-bar");
+            ) as HTMLElement;
+            const spinnerContainer = progressCell.querySelector(
+              ".spinner-container",
+            ) as HTMLElement;
+            const progressBar = progressBarContainer.querySelector(
+              ".progress-bar",
+            ) as HTMLElement;
 
             if (progressCell.classList.contains("hidden")) {
               statusCell.classList.add("hidden");
@@ -556,25 +593,37 @@ function connectWebSocket() {
   };
 }
 
-function updatePoseCounts(poseCounts) {
+function updatePoseCounts(poseCounts: any) {
   for (const property in poseCounts) {
-    const checkbox = document.querySelector(`input[name="${property}"]`);
+    const checkbox = document.querySelector(
+      `input[name="${property}"]`,
+    ) as HTMLInputElement;
     if (checkbox) {
-      const group = checkbox.closest(".pose-filter-group");
-      const countSpan = group.querySelector(".pose-filter-count");
+      const group = checkbox.closest(".pose-filter-group") as HTMLElement;
+      const countSpan = group.querySelector(
+        ".pose-filter-count",
+      ) as HTMLElement;
       countSpan.textContent = `(${poseCounts[property].exists})`;
     }
   }
 }
 
 function toggleClearButton() {
-  const searchInput = document.getElementById("search-input");
-  const clearButton = document.getElementById("clear-search-btn");
+  const searchInput = document.getElementById(
+    "search-input",
+  ) as HTMLInputElement;
+  const clearButton = document.getElementById(
+    "clear-search-btn",
+  ) as HTMLElement;
   clearButton.style.display = searchInput.value ? "block" : "none";
 }
 
-function setCheckboxState(checkbox, state, silent = false) {
-  checkbox.dataset.state = state;
+function setCheckboxState(
+  checkbox: HTMLInputElement,
+  state: string,
+  silent = false,
+) {
+  (checkbox as any).dataset.state = state;
   if (state === "any") {
     checkbox.checked = false;
     checkbox.indeterminate = false;
@@ -585,8 +634,8 @@ function setCheckboxState(checkbox, state, silent = false) {
     checkbox.checked = false;
     checkbox.indeterminate = true;
   }
-  const label = checkbox.closest("label");
-  const valueSpan = label.querySelector(".pose-filter-value");
+  const label = checkbox.closest("label") as HTMLLabelElement;
+  const valueSpan = label.querySelector(".pose-filter-value") as HTMLElement;
   valueSpan.textContent =
     state === "any" ? "Any" : state === "exists" ? "Exists" : "Doesn't Exist";
   if (!silent) {
@@ -594,24 +643,28 @@ function setCheckboxState(checkbox, state, silent = false) {
   }
 }
 
-function cycleCheckboxState(checkbox, silent = false) {
+function cycleCheckboxState(checkbox: HTMLInputElement, silent = false) {
   const states = ["any", "exists", "missing"];
-  const currentState = checkbox.dataset.state;
+  const currentState = (checkbox as any).dataset.state;
   const nextStateIndex = (states.indexOf(currentState) + 1) % states.length;
   setCheckboxState(checkbox, states[nextStateIndex], silent);
 }
 
-function downloadSinglePhoto(photoId) {
+function downloadSinglePhoto(photoId: string) {
   if (!isLoggedIn) return;
 
-  const row = document.querySelector(`tr[data-photo-id="${photoId}"]`);
-  const statusCell = row.querySelector(".status-cell");
-  const actionsCell = row.querySelector(".actions-cell");
-  const progressCell = row.querySelector(".progress-cell");
+  const row = document.querySelector(
+    `tr[data-photo-id="${photoId}"]`,
+  ) as HTMLElement;
+  const statusCell = row.querySelector(".status-cell") as HTMLElement;
+  const actionsCell = row.querySelector(".actions-cell") as HTMLElement;
+  const progressCell = row.querySelector(".progress-cell") as HTMLElement;
   const progressBarContainer = progressCell.querySelector(
     ".progress-bar-container",
-  );
-  const spinnerContainer = progressCell.querySelector(".spinner-container");
+  ) as HTMLElement;
+  const spinnerContainer = progressCell.querySelector(
+    ".spinner-container",
+  ) as HTMLElement;
 
   statusCell.classList.add("hidden");
   actionsCell.classList.add("hidden");
@@ -632,14 +685,16 @@ function downloadSinglePhoto(photoId) {
 function cancelDownload() {
   if (ws && ws.readyState === WebSocket.OPEN) {
     ws.send(JSON.stringify({ type: "cancel-download" }));
-    const cancelBtn = document.getElementById("cancel-btn");
+    const cancelBtn = document.getElementById(
+      "cancel-btn",
+    ) as HTMLButtonElement;
     cancelBtn.disabled = true;
     cancelBtn.innerHTML =
       '<div class="spinner spinner-light"></div><span>Cancelling...</span>';
   }
 }
 
-function setTheme(theme) {
+function setTheme(theme: string) {
   const html = document.documentElement;
   if (theme === "auto") {
     const prefersDark = window.matchMedia(
@@ -653,7 +708,10 @@ function setTheme(theme) {
   }
 
   document.querySelectorAll(".theme-switcher button").forEach((btn) => {
-    btn.classList.toggle("active", btn.dataset.theme === theme);
+    btn.classList.toggle(
+      "active",
+      (btn as HTMLElement).dataset.theme === theme,
+    );
   });
 }
 
@@ -669,47 +727,56 @@ document.addEventListener("DOMContentLoaded", () => {
   window
     .matchMedia("(prefers-color-scheme: dark)")
     .addEventListener("change", (e) => {
-      if (localStorage.getItem("theme") === null || savedTheme === "auto") {
+      if (
+        localStorage.getItem("theme") === null ||
+        localStorage.getItem("theme") === "auto"
+      ) {
         setTheme("auto");
       }
     });
 
   document.querySelectorAll(".theme-switcher button").forEach((btn) => {
     btn.addEventListener("click", (e) => {
-      setTheme(e.target.dataset.theme);
+      setTheme((e.currentTarget as HTMLElement).dataset.theme!);
     });
   });
 
   window.addEventListener("popstate", (event) => {
     const filters = getFiltersFromQuery();
-    document.getElementById("search-input").value = filters.search;
+    (document.getElementById("search-input") as HTMLInputElement).value =
+      filters.search;
     document
-      .querySelector(".status-filter a.active")
+      .querySelector(".status-filter a.active")!
       .classList.remove("active");
-    document.getElementById(`filter-${filters.status}`).classList.add("active");
+    document
+      .getElementById(`filter-${filters.status}`)!
+      .classList.add("active");
     document
       .querySelectorAll('.pose-filter-group input[type="checkbox"]')
       .forEach((checkbox) => {
         const poseFilter = filters.pose.find((p) =>
-          p.startsWith(checkbox.name),
+          p.startsWith((checkbox as HTMLInputElement).name),
         );
         const newState = poseFilter ? poseFilter.split(":")[1] : "any";
-        setCheckboxState(checkbox, newState, true);
+        setCheckboxState(checkbox as HTMLInputElement, newState, true);
       });
     applyFilters({ ...filters, isPopState: true });
   });
 
   const filters = getFiltersFromQuery();
-  document.getElementById("search-input").value = filters.search;
-  document.querySelector(".status-filter a.active").classList.remove("active");
-  document.getElementById(`filter-${filters.status}`).classList.add("active");
+  (document.getElementById("search-input") as HTMLInputElement).value =
+    filters.search;
+  document.querySelector(".status-filter a.active")!.classList.remove("active");
+  document.getElementById(`filter-${filters.status}`)!.classList.add("active");
   document
     .querySelectorAll('.pose-filter-group input[type="checkbox"]')
     .forEach((checkbox) => {
-      const poseFilter = filters.pose.find((p) => p.startsWith(checkbox.name));
+      const poseFilter = filters.pose.find((p) =>
+        p.startsWith((checkbox as HTMLInputElement).name),
+      );
       if (poseFilter) {
         const [, value] = poseFilter.split(":");
-        setCheckboxState(checkbox, value, true);
+        setCheckboxState(checkbox as HTMLInputElement, value, true);
       }
     });
 
@@ -718,10 +785,12 @@ document.addEventListener("DOMContentLoaded", () => {
   toggleClearButton();
 
   if (filters.pose.length > 0) {
-    const moreFiltersBtn = document.getElementById("more-filters-btn");
+    const moreFiltersBtn = document.getElementById(
+      "more-filters-btn",
+    ) as HTMLButtonElement;
     const poseFiltersContainer = document.getElementById(
       "pose-filters-container",
-    );
+    ) as HTMLElement;
     moreFiltersBtn.classList.add("active");
     moreFiltersBtn.textContent = "Less filters";
     poseFiltersContainer.style.maxHeight =
@@ -729,60 +798,69 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   document.body.addEventListener("click", (event) => {
-    const sortLink = event.target.closest(".sort-link");
+    const sortLink = (event.target as HTMLElement).closest(".sort-link");
     if (sortLink) {
       event.preventDefault();
-      sortPhotos(sortLink.dataset.sortby);
+      sortPhotos((sortLink as HTMLElement).dataset.sortby!);
     }
 
-    const downloadBtn = event.target.closest(".download-single-btn");
+    const downloadBtn = (event.target as HTMLElement).closest(
+      ".download-single-btn",
+    );
     if (downloadBtn) {
       event.preventDefault();
-      downloadSinglePhoto(downloadBtn.dataset.photoId);
+      downloadSinglePhoto((downloadBtn as HTMLElement).dataset.photoId!);
     }
 
-    const pageBtn = event.target.closest(".pagination button[data-page]");
+    const pageBtn = (event.target as HTMLElement).closest(
+      ".pagination button[data-page]",
+    );
     if (pageBtn) {
       event.preventDefault();
-      const page = parseInt(pageBtn.dataset.page, 10);
-      const location = pageBtn.closest(".pagination").dataset.location;
+      const page = parseInt((pageBtn as HTMLElement).dataset.page!, 10);
+      const location = (pageBtn.closest(".pagination") as HTMLElement).dataset
+        .location!;
       changePage(page, location);
     }
   });
 
   document
-    .getElementById("download-all-btn")
+    .getElementById("download-all-btn")!
     .addEventListener("click", confirmDownload);
   document
-    .getElementById("update-btn")
+    .getElementById("update-btn")!
     .addEventListener("click", updatePhotoList);
   document
-    .getElementById("cancel-btn")
+    .getElementById("cancel-btn")!
     .addEventListener("click", cancelDownload);
   document
-    .getElementById("clear-search-btn")
+    .getElementById("clear-search-btn")!
     .addEventListener("click", clearSearch);
   document
-    .getElementById("reset-filters-btn")
+    .getElementById("reset-filters-btn")!
     .addEventListener("click", resetFilters);
 
   document.querySelectorAll(".pose-filter-group").forEach((group) => {
     group.addEventListener("click", (event) => {
-      if (event.target.tagName !== "INPUT") {
+      if ((event.target as HTMLElement).tagName !== "INPUT") {
         event.preventDefault();
       }
-      const checkbox = group.querySelector('input[type="checkbox"]');
+      const checkbox = group.querySelector(
+        'input[type="checkbox"]',
+      ) as HTMLInputElement;
       cycleCheckboxState(checkbox);
     });
   });
 
   document
-    .getElementById("more-filters-btn")
-    .addEventListener("click", function () {
+    .getElementById("more-filters-btn")!
+    .addEventListener("click", function (this: HTMLElement) {
       this.classList.toggle("active");
-      const content = document.getElementById("pose-filters-container");
+      const content = document.getElementById(
+        "pose-filters-container",
+      ) as HTMLElement;
       if (content.style.maxHeight) {
-        content.style.maxHeight = null;
+        content.style.maxHeight = "";
         this.textContent = "More filters";
       } else {
         content.style.maxHeight = content.scrollHeight + "px";

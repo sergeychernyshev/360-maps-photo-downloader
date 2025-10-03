@@ -1,37 +1,20 @@
-const express = require("express");
-const session = require("express-session");
-const path = require("path");
-const fs = require("fs").promises;
-const crypto = require("crypto");
-const http = require("http");
-const WebSocket = require("ws");
-
-const indexRouter = require("./routes/index");
-
-const { isTokenValid } = require("./oauth");
-const { handleMessage } = require("./ws-handler");
-const { setSocket } = require("./download-state");
+import express, { Request, Response, NextFunction } from "express";
+import session from "express-session";
+import path from "path";
+import { promises as fs } from "fs";
+import crypto from "crypto";
+import http from "http";
+import WebSocket from "ws";
+import indexRouter from "./routes/index";
+import { isTokenValid } from "./oauth";
+import { handleMessage } from "./ws-handler";
+import { setSocket } from "./download-state";
+import MemoryStore from "memorystore";
 
 // --- CONFIGURATION ---
-/**
- * The port the web server will run on.
- * @type {number}
- */
 const PORT = 3000;
-/**
- * The path to the credentials file.
- * @type {string}
- */
 const CREDENTIALS_PATH = path.join(process.cwd(), "credentials.json");
-/**
- * The path to the token file.
- * @type {string}
- */
 const TOKEN_PATH = path.join(process.cwd(), "token.json");
-/**
- * The path to the config file.
- * @type {string}
- */
 const CONFIG_PATH = path.join(process.cwd(), "config.json");
 
 // --- WEB APP SETUP ---
@@ -39,36 +22,36 @@ const app = express();
 const server = http.createServer(app);
 const wss = new WebSocket.Server({ noServer: true });
 
-server.on("upgrade", function upgrade(request, socket, head) {
-  sessionParser(request, {}, () => {
-    wss.handleUpgrade(request, socket, head, function done(ws) {
-      wss.emit("connection", ws, request);
-    });
-  });
-});
-
-wss.on("connection", (ws, req) => {
-  console.log("Client connected for progress updates");
-  setSocket(ws);
-  ws.on("message", (message) => {
-    handleMessage(req, ws, message);
-  });
-  ws.on("close", () => {
-    console.log("Client disconnected");
-    setSocket(null);
-  });
-});
-
-const MemoryStore = require("memorystore")(session);
-const store = new MemoryStore({
-  checkPeriod: 86400000, // prune expired entries every 24h
-});
-
 const sessionParser = session({
-  store: store,
+  store: new (MemoryStore(session))({
+    checkPeriod: 86400000, // prune expired entries every 24h
+  }),
   secret: crypto.randomBytes(32).toString("hex"),
   resave: false,
   saveUninitialized: false,
+});
+
+server.on(
+  "upgrade",
+  function upgrade(request: http.IncomingMessage, socket: any, head: Buffer) {
+    sessionParser(request as Request, {} as Response, () => {
+      wss.handleUpgrade(request, socket, head, function done(ws) {
+        wss.emit("connection", ws, request);
+      });
+    });
+  },
+);
+
+wss.on("connection", (ws: WebSocket, req: http.IncomingMessage) => {
+  console.log("Client connected for progress updates");
+  setSocket(ws);
+  ws.on("message", (message: string) => {
+    handleMessage(req as Request, ws, message);
+  });
+  ws.on("close", () => {
+    console.log("Client disconnected");
+    setSocket(null as any);
+  });
 });
 
 // Set up EJS
@@ -79,7 +62,7 @@ app.set("views", path.join(__dirname, "views"));
  * Initializes the web application.
  */
 async function initialize() {
-  let config = {};
+  let config: { save_token?: boolean } = {};
   try {
     const configData = await fs.readFile(CONFIG_PATH, "utf-8");
     config = JSON.parse(configData);
@@ -96,9 +79,9 @@ async function initialize() {
       if (await isTokenValid(token)) {
         console.log("Valid token found, logging user in.");
         // Manually create a session for the user
-        app.use((req, res, next) => {
-          if (!req.session.tokens) {
-            req.session.tokens = token;
+        app.use((req: Request, res: Response, next: NextFunction) => {
+          if (!(req.session as any).tokens) {
+            (req.session as any).tokens = token;
           }
           next();
         });
@@ -112,8 +95,8 @@ async function initialize() {
   }
 
   // Middleware to save the token to disk if the config option is set
-  app.use(async (req, res, next) => {
-    let config = {};
+  app.use(async (req: Request, res: Response, next: NextFunction) => {
+    let config: { save_token?: boolean } = {};
     try {
       const configData = await fs.readFile(CONFIG_PATH, "utf-8");
       config = JSON.parse(configData);
@@ -122,16 +105,16 @@ async function initialize() {
     }
 
     if (config.save_token) {
-      const oldTokens = req.session.tokens;
+      const oldTokens = (req.session as any).tokens;
       res.on("finish", async () => {
         if (
           req.session &&
-          req.session.tokens &&
-          req.session.tokens !== oldTokens
+          (req.session as any).tokens &&
+          (req.session as any).tokens !== oldTokens
         ) {
           await fs.writeFile(
             TOKEN_PATH,
-            JSON.stringify(req.session.tokens, null, 2),
+            JSON.stringify((req.session as any).tokens, null, 2),
           );
           console.log("Saved token to disk.");
         }
@@ -142,26 +125,12 @@ async function initialize() {
 
   // --- WEB INTERFACE & ROUTES ---
   app.use(express.static(path.join(__dirname, "public")));
-  app.use(
-    "/modules/leaflet",
-    express.static(path.join(process.cwd(), "node_modules/leaflet/dist")),
-  );
-  app.use(
-    "/modules/leaflet.markercluster",
-    express.static(
-      path.join(process.cwd(), "node_modules/leaflet.markercluster/dist"),
-    ),
-  );
   app.use("/", indexRouter);
 
   /**
    * Global error handler for the Express app.
-   * @param {Error} err - The error object.
-   * @param {object} req - The Express request object.
-   * @param {object} res - The Express response object.
-   * @param {function} next - The next middleware function.
    */
-  app.use((err, req, res, next) => {
+  app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
     if (err.message === "User is not authenticated.") {
       req.session.destroy(() => {
         res.redirect("/login");
@@ -195,3 +164,4 @@ async function initialize() {
 }
 
 initialize();
+export {};

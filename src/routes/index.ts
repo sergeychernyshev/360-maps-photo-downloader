@@ -1,75 +1,38 @@
-/**
- * @fileoverview This file contains the routes for the web application.
- * It handles the main page, login, logout, and OAuth2 callback.
- * @module routes/index
- */
-
-const express = require("express");
-/**
- * @property {function} getOAuthClient - Function to create a new OAuth2 client.
- * @property {function} getAuthenticatedClient - Function to get an authenticated OAuth2 client.
- * @property {function} isLoggedIn - Function to check if the user is logged in.
- * @property {function} login - Function to log the user in.
- * @property {function} logout - Function to log the user out.
- */
-const {
+import express, { Request, Response, NextFunction } from "express";
+import {
   getOAuthClient,
   getAuthenticatedClient,
   isLoggedIn,
   login,
   logout,
-} = require("../oauth");
-/**
- * @property {function} listAllPhotos - Function to list all photos for the authenticated user.
- */
-const { listAllPhotos } = require("../photo-manager");
-/**
- * @property {function} getDriveClient - Function to get the Google Drive API client.
- * @property {function} findOrCreateFolder - Function to find or create a folder in Google Drive.
- * @property {function} getPhotoListFile - Function to get the photo list file from Google Drive.
- * @property {function} readFileContent - Function to read the content of a file from Google Drive.
- * @property {function} writeFileContent - Function to write content to a file in Google Drive.
- * @property {function} listFiles - Function to list all files in a folder.
- * @property {string} FOLDER_NAME - The name of the folder in Google Drive where the photos will be stored.
- * @property {string} PHOTO_LIST_FILE_NAME - The name of the file that stores the list of photos.
- */
-const {
+} from "../oauth";
+import { listAllPhotos } from "../photo-manager";
+import {
   getDriveClient,
   findOrCreateFolder,
   getPhotoListFile,
   readFileContent,
-  writeFileContent,
   listFiles,
   FOLDER_NAME,
   PHOTO_LIST_FILE_NAME,
-} = require("../drive-manager");
-/**
- * @property {function} getState - Function to get the current download state.
- */
-const { getState } = require("../download-state");
-/**
- * @property {function} calculatePoseCounts - Function to calculate the counts of photos with and without specific pose properties.
- * @property {function} buildPhotoListHtml - Function to build the HTML for the photo list.
- * @property {function} buildPaginationHtml - Function to build the HTML for the pagination controls.
- */
-const {
+} from "../drive-manager";
+import { getState } from "../download-state";
+import {
   calculatePoseCounts,
   buildPhotoListHtml,
   buildPaginationHtml,
-} = require("../utils/photo-utils");
+} from "../utils/photo-utils";
+import { drive_v3 } from "googleapis";
+import { Photo } from "../types";
 
-/**
- * The Express router.
- * @type {import("express").Router}
- */
 const router = express.Router();
 
-router.get("/", async (req, res, next) => {
+router.get("/", async (req: Request, res: Response, next: NextFunction) => {
   const loggedIn = isLoggedIn(req);
 
   try {
-    let photos = [];
-    let drive;
+    let photos: Photo[] = [];
+    let drive: drive_v3.Drive | undefined;
     let folderLink;
     let folderId;
     let folderName = FOLDER_NAME;
@@ -78,23 +41,29 @@ router.get("/", async (req, res, next) => {
       const oAuth2Client = await getAuthenticatedClient(req);
       drive = await getDriveClient(oAuth2Client);
       const folder = await findOrCreateFolder(drive, FOLDER_NAME);
+      if (!folder) {
+        throw new Error("Could not find or create folder in Google Drive");
+      }
       folderLink = folder.webViewLink;
       folderId = folder.id;
-      folderName = folder.name;
+      folderName = folder.name || FOLDER_NAME;
 
-      if (req.session.allPhotos) {
-        photos = req.session.allPhotos;
+      if ((req.session as any).allPhotos) {
+        photos = (req.session as any).allPhotos;
       } else {
-        let photoListFile = await getPhotoListFile(drive, folderId);
+        let photoListFile = await getPhotoListFile(drive, folderId as string);
 
         if (photoListFile) {
-          photos = await readFileContent(drive, photoListFile.id);
+          photos = (await readFileContent(
+            drive,
+            photoListFile.id as string,
+          )) as Photo[];
         } else {
-          photos = await listAllPhotos(oAuth2Client);
-          const newFile = await drive.files.create({
-            resource: {
+          photos = await listAllPhotos(oAuth2Client, {} as any);
+          await drive.files.create({
+            requestBody: {
               name: PHOTO_LIST_FILE_NAME,
-              parents: [folderId],
+              parents: [folderId as string],
             },
             media: {
               mimeType: "application/json",
@@ -103,22 +72,22 @@ router.get("/", async (req, res, next) => {
             fields: "id",
           });
         }
-        req.session.allPhotos = photos;
+        (req.session as any).allPhotos = photos;
       }
     }
 
-    const search = req.query.search || "";
-    const status = req.query.status || "all";
-    const poseQuery = req.query.pose || "";
+    const search = (req.query.search as string) || "";
+    const status = (req.query.status as string) || "all";
+    const poseQuery = (req.query.pose as string) || "";
     const poseFilters = poseQuery
       .split(",")
       .filter(Boolean)
-      .map((p) => {
+      .map((p: string) => {
         const [property, value] = p.split(":");
         return { property, value };
       });
 
-    const searchedPhotos = photos.filter((photo) => {
+    const searchedPhotos = photos.filter((photo: Photo) => {
       if (!search) {
         return true;
       }
@@ -130,16 +99,17 @@ router.get("/", async (req, res, next) => {
       return false;
     });
 
-    const driveFiles = loggedIn ? await listFiles(drive, folderId) : [];
+    const driveFiles =
+      loggedIn && drive && folderId ? await listFiles(drive, folderId) : [];
     const drivePhotoCount = driveFiles.filter(
-      (f) => f.name !== PHOTO_LIST_FILE_NAME,
+      (f: any) => f.name !== PHOTO_LIST_FILE_NAME,
     ).length;
-    const downloadedFiles = new Set(driveFiles.map((f) => f.name));
+    const downloadedFiles = new Set(driveFiles.map((f: any) => f.name));
     const driveFileLinks = new Map(
-      driveFiles.map((f) => [f.name, f.webViewLink]),
+      driveFiles.map((f: any) => [f.name, f.webViewLink]),
     );
 
-    const statusFilteredPhotos = searchedPhotos.filter((photo) => {
+    const statusFilteredPhotos = searchedPhotos.filter((photo: Photo) => {
       if (status === "all") {
         return true;
       }
@@ -147,7 +117,7 @@ router.get("/", async (req, res, next) => {
       return status === "downloaded" ? isDownloaded : !isDownloaded;
     });
 
-    const poseFilteredPhotos = statusFilteredPhotos.filter((photo) => {
+    const poseFilteredPhotos = statusFilteredPhotos.filter((photo: Photo) => {
       if (!poseFilters || poseFilters.length === 0) {
         return true;
       }
@@ -158,15 +128,16 @@ router.get("/", async (req, res, next) => {
         const exists =
           filter.property === "latLngPair"
             ? photo.pose && photo.pose.latLngPair !== undefined
-            : photo.pose && typeof photo.pose[filter.property] === "number";
+            : photo.pose &&
+              typeof (photo.pose as any)[filter.property] === "number";
         return filter.value === "exists" ? exists : !exists;
       });
     });
 
-    const sort = req.query.sort || "date";
-    const order = req.query.order || "desc";
+    const sort = (req.query.sort as string) || "date";
+    const order = (req.query.order as string) || "desc";
 
-    const sortedPhotos = poseFilteredPhotos.sort((a, b) => {
+    const sortedPhotos = poseFilteredPhotos.sort((a: Photo, b: Photo) => {
       let valA, valB;
 
       if (sort === "date") {
@@ -181,16 +152,16 @@ router.get("/", async (req, res, next) => {
       }
 
       if (order === "asc") {
-        return valA - valB;
+        return valA.valueOf() - valB.valueOf();
       } else {
-        return valB - valA;
+        return valB.valueOf() - valA.valueOf();
       }
     });
 
     const filteredPhotos = sortedPhotos;
 
     const totalPhotosCount = photos.length;
-    const downloadedCount = photos.filter((p) =>
+    const downloadedCount = photos.filter((p: Photo) =>
       downloadedFiles.has(`${p.photoId.id}.jpg`),
     ).length;
     const notDownloadedCount = totalPhotosCount - downloadedCount;
@@ -198,54 +169,57 @@ router.get("/", async (req, res, next) => {
     const poseCounts = calculatePoseCounts(photos);
 
     const photoIdsFromStreetView = new Set(
-      filteredPhotos.map((p) => `${p.photoId.id}.jpg`),
+      filteredPhotos.map((p: Photo) => `${p.photoId.id}.jpg`),
     );
     const driveOnlyFiles = driveFiles.filter(
-      (f) =>
+      (f: any) =>
         f.name !== PHOTO_LIST_FILE_NAME && !photoIdsFromStreetView.has(f.name),
     );
     const driveOnlyCount = driveOnlyFiles.length;
 
-    const duplicates = driveFiles.reduce((acc, file) => {
+    const duplicates = driveFiles.reduce((acc: any, file: any) => {
       acc[file.name] = acc[file.name] || [];
       acc[file.name].push(file);
       return acc;
     }, {});
 
-    const duplicateFiles = Object.keys(duplicates).reduce((acc, key) => {
-      if (duplicates[key].length > 1) {
-        acc[key] = duplicates[key];
-      }
-      return acc;
-    }, {});
+    const duplicateFiles = Object.keys(duplicates).reduce(
+      (acc: any, key: string) => {
+        if (duplicates[key].length > 1) {
+          acc[key] = duplicates[key];
+        }
+        return acc;
+      },
+      {},
+    );
     const duplicateFilesCount = Object.keys(duplicateFiles).length;
 
-    const downloadedPhotos = filteredPhotos.filter((p) =>
+    const downloadedPhotos = filteredPhotos.filter((p: Photo) =>
       downloadedFiles.has(`${p.photoId.id}.jpg`),
     );
     const missingPhotos = filteredPhotos.filter(
-      (p) => !downloadedFiles.has(`${p.photoId.id}.jpg`),
+      (p: Photo) => !downloadedFiles.has(`${p.photoId.id}.jpg`),
     );
 
     if (loggedIn) {
-      const allDownloadedPhotos = photos.filter((p) =>
+      const allDownloadedPhotos = photos.filter((p: Photo) =>
         downloadedFiles.has(`${p.photoId.id}.jpg`),
       );
       const allMissingPhotos = photos.filter(
-        (p) => !downloadedFiles.has(`${p.photoId.id}.jpg`),
+        (p: Photo) => !downloadedFiles.has(`${p.photoId.id}.jpg`),
       );
-      req.session.downloadedPhotos = allDownloadedPhotos;
-      req.session.missingPhotos = allMissingPhotos;
+      (req.session as any).downloadedPhotos = allDownloadedPhotos;
+      (req.session as any).missingPhotos = allMissingPhotos;
     }
 
-    const page = parseInt(req.query.page, 10) || 1;
+    const page = parseInt(req.query.page as string, 10) || 1;
     const pageSize = 50;
     const totalPages = Math.ceil(filteredPhotos.length / pageSize);
     const startIndex = (page - 1) * pageSize;
     const endIndex = startIndex + pageSize;
     const paginatedPhotos = filteredPhotos.slice(startIndex, endIndex);
 
-    const buildSortLink = (sortBy, label) => {
+    const buildSortLink = (sortBy: string, label: string) => {
       return `<a class="sort-link" href="#" data-sortby="${sortBy}">${label}</a>`;
     };
 
@@ -300,41 +274,47 @@ router.get("/", async (req, res, next) => {
   }
 });
 
-router.get("/login", async (req, res, next) => {
-  try {
-    const oAuth2Client = await getOAuthClient();
-    const authUrl = oAuth2Client.generateAuthUrl({
-      access_type: "offline",
-      scope: [
-        "https://www.googleapis.com/auth/streetviewpublish",
-        "https://www.googleapis.com/auth/drive.file",
-      ],
-      prompt: "consent",
-    });
-    res.redirect(authUrl);
-  } catch (error) {
-    next(error);
-  }
-});
+router.get(
+  "/login",
+  async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const oAuth2Client = await getOAuthClient();
+      const authUrl = oAuth2Client.generateAuthUrl({
+        access_type: "offline",
+        scope: [
+          "https://www.googleapis.com/auth/streetviewpublish",
+          "https://www.googleapis.com/auth/drive.file",
+        ],
+        prompt: "consent",
+      });
+      res.redirect(authUrl);
+    } catch (error) {
+      next(error);
+    }
+  },
+);
 
-router.get("/oauth2callback", async (req, res, next) => {
-  const { code } = req.query;
-  if (!code) {
-    return res.status(400).send("Authorization code is missing.");
-  }
-  try {
-    await login(req, code);
-    res.redirect("/");
-  } catch (error) {
-    next(error);
-  }
-});
+router.get(
+  "/oauth2callback",
+  async (req: Request, res: Response, next: NextFunction) => {
+    const { code } = req.query;
+    if (!code) {
+      return res.status(400).send("Authorization code is missing.");
+    }
+    try {
+      await login(req, code as string);
+      res.redirect("/");
+    } catch (error) {
+      next(error);
+    }
+  },
+);
 
-router.get("/logout", (req, res) => {
+router.get("/logout", (req: Request, res: Response) => {
   logout(req, () => {
     res.clearCookie("connect.sid");
     res.redirect("/");
   });
 });
 
-module.exports = router;
+export default router;

@@ -1,28 +1,19 @@
-/**
- * @property {function} getAuthenticatedClient - Function to get an authenticated OAuth2 client.
- */
-const { getAuthenticatedClient } = require("../oauth");
-/**
- * @property {function} getDriveClient - Function to get the Google Drive API client.
- * @property {function} findOrCreateFolder - Function to find or create a folder in Google Drive.
- * @property {function} listFiles - Function to list all files in a folder.
- * @property {string} FOLDER_NAME - The name of the folder in Google Drive where the photos will be stored.
- */
-const {
+import { Request } from "express";
+import { getAuthenticatedClient } from "../oauth";
+import {
   getDriveClient,
   findOrCreateFolder,
   listFiles,
   FOLDER_NAME,
-} = require("../drive-manager");
-/**
- * @property {function} updateState - Function to update the download state.
- * @property {function} getState - Function to get the current download state.
- */
-const { updateState, getState } = require("../download-state");
-/**
- * @property {function} processPhoto - Function to download, process, and upload a photo.
- */
-const { processPhoto } = require("../utils/photo-processor");
+} from "../drive-manager";
+import { updateState, getState } from "../download-state";
+import { processPhoto } from "../utils/photo-processor";
+import { Photo } from "../types";
+
+interface Progress {
+  photoId: string;
+  [key: string]: any;
+}
 
 /**
  * Downloads all photos that are missing from Google Drive.
@@ -31,13 +22,13 @@ const { processPhoto } = require("../utils/photo-processor");
  * @param {number} downloadedPhotosCount - The number of photos already downloaded.
  * @param {number} missingPhotosCount - The number of photos to download.
  */
-async function downloadAllPhotos(
-  req,
-  photos,
-  downloadedPhotosCount,
-  missingPhotosCount,
+export async function downloadAllPhotos(
+  req: Request,
+  photos: Photo[],
+  downloadedPhotosCount: number,
+  missingPhotosCount: number,
 ) {
-  const progressCallback = (progress) => {
+  const progressCallback = (progress: Progress) => {
     const { photoId, ...globalProgress } = progress;
     updateState(globalProgress);
   };
@@ -48,14 +39,17 @@ async function downloadAllPhotos(
     const oAuth2Client = await getAuthenticatedClient(req);
     const drive = await getDriveClient(oAuth2Client);
     const folder = await findOrCreateFolder(drive, FOLDER_NAME);
+    if (!folder || !folder.id) {
+      throw new Error("Could not find or create folder in Google Drive");
+    }
     const folderId = folder.id;
 
     updateState({
-      folderLink: folder.webViewLink,
+      folderLink: folder.webViewLink || undefined,
     });
 
-    const driveFiles = await listFiles(drive, folderId);
-    const existingFileNames = new Set(driveFiles.map((f) => f.name));
+    const driveFiles = await listFiles(drive, folderId as string);
+    const existingFileNames = new Set(driveFiles.map((f: any) => f.name));
 
     const totalPhotos = photos.length;
     const totalPhotoCount = downloadedPhotosCount + missingPhotosCount;
@@ -105,30 +99,35 @@ async function downloadAllPhotos(
         downloadedPhoto = await processPhoto(
           drive,
           oAuth2Client,
-          photo,
-          folderId,
+          photo as any,
+          folderId as string,
           progressCallback,
         );
       }
 
       if (downloadedPhoto) {
-        if (req.session.missingPhotos && req.session.downloadedPhotos) {
-          const downloadedPhotoIndex = req.session.missingPhotos.findIndex(
-            (p) => p.photoId.id === photo.photoId.id,
+        if (
+          (req.session as any).missingPhotos &&
+          (req.session as any).downloadedPhotos
+        ) {
+          const downloadedPhotoIndex = (
+            req.session as any
+          ).missingPhotos.findIndex(
+            (p: any) => p.photoId.id === photo.photoId.id,
           );
           if (downloadedPhotoIndex > -1) {
-            const [splicedPhoto] = req.session.missingPhotos.splice(
+            const [splicedPhoto] = (req.session as any).missingPhotos.splice(
               downloadedPhotoIndex,
               1,
             );
-            req.session.downloadedPhotos.push(splicedPhoto);
+            (req.session as any).downloadedPhotos.push(splicedPhoto);
           }
         }
 
         updateState({
           fileComplete: true,
-          downloadedCount: req.session.downloadedPhotos.length,
-          notDownloadedCount: req.session.missingPhotos.length,
+          downloadedCount: (req.session as any).downloadedPhotos.length,
+          notDownloadedCount: (req.session as any).missingPhotos.length,
           totalPhotosCount: totalPhotoCount,
           totalProgress: Math.round(
             ((downloadedPhotosCount + i + 1) /
@@ -138,18 +137,20 @@ async function downloadAllPhotos(
         });
       } else {
         skippedCount++;
-        if (req.session.missingPhotos) {
-          const skippedPhotoIndex = req.session.missingPhotos.findIndex(
-            (p) => p.photoId.id === photo.photoId.id,
+        if ((req.session as any).missingPhotos) {
+          const skippedPhotoIndex = (
+            req.session as any
+          ).missingPhotos.findIndex(
+            (p: any) => p.photoId.id === photo.photoId.id,
           );
           if (skippedPhotoIndex > -1) {
-            req.session.missingPhotos.splice(skippedPhotoIndex, 1);
+            (req.session as any).missingPhotos.splice(skippedPhotoIndex, 1);
           }
         }
         updateState({
           fileComplete: true,
-          downloadedCount: req.session.downloadedPhotos.length,
-          notDownloadedCount: req.session.missingPhotos.length,
+          downloadedCount: (req.session as any).downloadedPhotos.length,
+          notDownloadedCount: (req.session as any).missingPhotos.length,
           totalPhotosCount: totalPhotoCount,
           message: `Skipping photo ${photo.photoId.id} after multiple failed attempts.`,
           totalProgress: Math.round(
@@ -161,7 +162,7 @@ async function downloadAllPhotos(
       }
     }
 
-    delete req.session.allPhotos;
+    delete (req.session as any).allPhotos;
     let message = "All photos downloaded successfully to Google Drive!";
     if (skippedCount > 0) {
       message += ` ${skippedCount} photos were skipped.`;
@@ -173,7 +174,7 @@ async function downloadAllPhotos(
       downloadProgress: undefined,
       uploadStarted: false,
     });
-  } catch (error) {
+  } catch (error: any) {
     updateState({
       error: `An error occurred: ${error.message}`,
       complete: true,
@@ -183,5 +184,3 @@ async function downloadAllPhotos(
     console.error(error);
   }
 }
-
-module.exports = { downloadAllPhotos };

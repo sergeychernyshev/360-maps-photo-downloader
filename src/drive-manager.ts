@@ -1,22 +1,27 @@
-const { google } = require("googleapis");
+import { google, drive_v3 } from "googleapis";
+import { OAuth2Client } from "google-auth-library";
+import { Readable } from "stream";
+import { GaxiosResponse } from "gaxios";
 
 /**
  * The name of the folder in Google Drive where the photos will be stored.
  * @type {string}
  */
-const FOLDER_NAME = "Google Street View Photos";
+export const FOLDER_NAME = "Google Street View Photos";
 /**
  * The name of the file that stores the list of photos.
  * @type {string}
  */
-const PHOTO_LIST_FILE_NAME = "streetview_photos.json";
+export const PHOTO_LIST_FILE_NAME = "streetview_photos.json";
 
 /**
  * Gets the Google Drive API client.
  * @param {object} auth - The OAuth2 client for authentication.
  * @returns {Promise<object>} A promise that resolves with the Google Drive API client.
  */
-async function getDriveClient(auth) {
+export async function getDriveClient(
+  auth: OAuth2Client,
+): Promise<drive_v3.Drive> {
   return google.drive({ version: "v3", auth });
 }
 
@@ -26,13 +31,13 @@ async function getDriveClient(auth) {
  * @param {string} folderName - The name of the folder to find.
  * @returns {Promise<object|null>} A promise that resolves with the folder object, or null if not found.
  */
-async function findFolder(drive, folderName) {
+async function findFolder(drive: drive_v3.Drive, folderName: string) {
   const res = await drive.files.list({
     q: `mimeType='application/vnd.google-apps.folder' and name='${folderName}' and trashed=false`,
     fields: "files(id, name, webViewLink)",
     spaces: "drive",
   });
-  return res.data.files.length > 0 ? res.data.files[0] : null;
+  return res.data.files && res.data.files.length > 0 ? res.data.files[0] : null;
 }
 
 /**
@@ -41,13 +46,13 @@ async function findFolder(drive, folderName) {
  * @param {string} folderName - The name of the folder to create.
  * @returns {Promise<object>} A promise that resolves with the created folder object.
  */
-async function createFolder(drive, folderName) {
+async function createFolder(drive: drive_v3.Drive, folderName: string) {
   const fileMetadata = {
     name: folderName,
     mimeType: "application/vnd.google-apps.folder",
   };
   const res = await drive.files.create({
-    resource: fileMetadata,
+    requestBody: fileMetadata,
     fields: "id, webViewLink",
   });
   return res.data;
@@ -59,7 +64,10 @@ async function createFolder(drive, folderName) {
  * @param {string} folderName - The name of the folder to find or create.
  * @returns {Promise<object>} A promise that resolves with the folder object.
  */
-async function findOrCreateFolder(drive, folderName) {
+export async function findOrCreateFolder(
+  drive: drive_v3.Drive,
+  folderName: string,
+) {
   let folder = await findFolder(drive, folderName);
   if (!folder) {
     folder = await createFolder(drive, folderName);
@@ -74,13 +82,17 @@ async function findOrCreateFolder(drive, folderName) {
  * @param {string} folderId - The ID of the folder to search in.
  * @returns {Promise<object|null>} A promise that resolves with the file object, or null if not found.
  */
-async function findFileInFolder(drive, fileName, folderId) {
+async function findFileInFolder(
+  drive: drive_v3.Drive,
+  fileName: string,
+  folderId: string,
+) {
   const res = await drive.files.list({
     q: `name='${fileName}' and '${folderId}' in parents and trashed=false`,
     fields: "files(id, name)",
     spaces: "drive",
   });
-  return res.data.files.length > 0 ? res.data.files[0] : null;
+  return res.data.files && res.data.files.length > 0 ? res.data.files[0] : null;
 }
 
 /**
@@ -89,7 +101,10 @@ async function findFileInFolder(drive, fileName, folderId) {
  * @param {string} folderId - The ID of the folder to search in.
  * @returns {Promise<object|null>} A promise that resolves with the file object, or null if not found.
  */
-async function getPhotoListFile(drive, folderId) {
+export async function getPhotoListFile(
+  drive: drive_v3.Drive,
+  folderId: string,
+) {
   return findFileInFolder(drive, PHOTO_LIST_FILE_NAME, folderId);
 }
 
@@ -99,7 +114,7 @@ async function getPhotoListFile(drive, folderId) {
  * @param {string} fileId - The ID of the file to read.
  * @returns {Promise<object>} A promise that resolves with the file content.
  */
-async function readFileContent(drive, fileId) {
+export async function readFileContent(drive: drive_v3.Drive, fileId: string) {
   console.log(`Downloading file from Google Drive: ${fileId}`);
   const res = await drive.files.get({ fileId, alt: "media" });
   return res.data;
@@ -112,7 +127,11 @@ async function readFileContent(drive, fileId) {
  * @param {object} content - The content to write to the file.
  * @returns {Promise<void>}
  */
-async function writeFileContent(drive, fileId, content) {
+export async function writeFileContent(
+  drive: drive_v3.Drive,
+  fileId: string,
+  content: any,
+) {
   await drive.files.update({
     fileId,
     media: {
@@ -133,14 +152,14 @@ async function writeFileContent(drive, fileId, content) {
  * @param {function} onUploadProgress - A function to call with upload progress updates.
  * @returns {Promise<object>} A promise that resolves with the created file object.
  */
-async function createFile(
-  drive,
-  fileName,
-  mimeType,
-  contentStream,
-  folderId,
-  size,
-  onUploadProgress,
+export async function createFile(
+  drive: drive_v3.Drive,
+  fileName: string,
+  mimeType: string,
+  contentStream: Readable,
+  folderId: string,
+  size: number,
+  onUploadProgress: (progress: number) => void,
 ) {
   const fileMetadata = {
     name: fileName,
@@ -154,7 +173,7 @@ async function createFile(
 
   const res = await drive.files.create(
     {
-      resource: fileMetadata,
+      requestBody: fileMetadata,
       media: media,
       fields: "id, webViewLink",
     },
@@ -176,22 +195,25 @@ async function createFile(
  * @param {string} folderId - The ID of the folder to list files from.
  * @returns {Promise<Array<object>>} A promise that resolves with a list of file objects.
  */
-async function listFiles(drive, folderId) {
-  const allFiles = [];
-  let pageToken = null;
+export async function listFiles(drive: drive_v3.Drive, folderId: string) {
+  const allFiles: drive_v3.Schema$File[] = [];
+  let pageToken: string | null = null;
   do {
-    const res = await drive.files.list({
-      q: `'${folderId}' in parents and trashed=false and mimeType != 'application/vnd.google-apps.folder'`,
-      fields: "nextPageToken, files(id, name, mimeType, webViewLink)",
-      spaces: "drive",
-      pageToken: pageToken,
-      pageSize: 1000,
-    });
+    const res: GaxiosResponse<drive_v3.Schema$FileList> =
+      await drive.files.list({
+        q: `'${folderId}' in parents and trashed=false and mimeType != 'application/vnd.google-apps.folder'`,
+        fields: "nextPageToken, files(id, name, mimeType, webViewLink)",
+        spaces: "drive",
+        pageToken: pageToken || undefined,
+        pageSize: 1000,
+      });
 
-    for (const file of res.data.files) {
-      allFiles.push(file);
+    if (res.data.files) {
+      for (const file of res.data.files) {
+        allFiles.push(file);
+      }
     }
-    pageToken = res.data.nextPageToken;
+    pageToken = res.data.nextPageToken || null;
   } while (pageToken);
   return allFiles;
 }
@@ -203,13 +225,17 @@ async function listFiles(drive, folderId) {
  * @param {string} folderId - The ID of the folder to search in.
  * @returns {Promise<object|null>} A promise that resolves with the file object, or null if not found.
  */
-async function findFile(drive, fileName, folderId) {
+export async function findFile(
+  drive: drive_v3.Drive,
+  fileName: string,
+  folderId: string,
+) {
   const res = await drive.files.list({
     q: `name='${fileName}' and '${folderId}' in parents and trashed=false`,
     fields: "files(id, name)",
     spaces: "drive",
   });
-  return res.data.files.length > 0 ? res.data.files[0] : null;
+  return res.data.files && res.data.files.length > 0 ? res.data.files[0] : null;
 }
 
 /**
@@ -218,7 +244,7 @@ async function findFile(drive, fileName, folderId) {
  * @param {string} fileId - The ID of the file to delete.
  * @returns {Promise<void>}
  */
-async function deleteFile(drive, fileId) {
+export async function deleteFile(drive: drive_v3.Drive, fileId: string) {
   await drive.files.delete({
     fileId: fileId,
   });
@@ -234,13 +260,13 @@ async function deleteFile(drive, fileId) {
  * @param {function} onUploadProgress - A function to call with upload progress updates.
  * @returns {Promise<object>} A promise that resolves with the updated file object.
  */
-async function updateFile(
-  drive,
-  fileId,
-  mimeType,
-  contentStream,
-  size,
-  onUploadProgress,
+export async function updateFile(
+  drive: drive_v3.Drive,
+  fileId: string,
+  mimeType: string,
+  contentStream: Readable,
+  size: number,
+  onUploadProgress: (progress: number) => void,
 ) {
   const media = {
     mimeType,
@@ -264,18 +290,3 @@ async function updateFile(
   );
   return res.data;
 }
-
-module.exports = {
-  getDriveClient,
-  findOrCreateFolder,
-  getPhotoListFile,
-  readFileContent,
-  writeFileContent,
-  createFile,
-  listFiles,
-  deleteFile,
-  findFile,
-  updateFile,
-  FOLDER_NAME,
-  PHOTO_LIST_FILE_NAME,
-};

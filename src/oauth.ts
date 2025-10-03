@@ -1,6 +1,8 @@
-const { google } = require("googleapis");
-const fs = require("fs").promises;
-const path = require("path");
+import { google } from "googleapis";
+import { promises as fs } from "fs";
+import path from "path";
+import { Request } from "express";
+import { Credentials, OAuth2Client } from "google-auth-library";
 
 /**
  * The path to the credentials file.
@@ -22,8 +24,8 @@ const CONFIG_PATH = path.join(process.cwd(), "config.json");
  * Creates a new OAuth2 client.
  * @returns {Promise<object>} A promise that resolves with the OAuth2 client.
  */
-async function getOAuthClient() {
-  const credsContent = await fs.readFile(CREDENTIALS_PATH);
+export async function getOAuthClient(): Promise<OAuth2Client> {
+  const credsContent = await fs.readFile(CREDENTIALS_PATH, "utf-8");
   const { client_secret, client_id, redirect_uris } =
     JSON.parse(credsContent).web;
   return new google.auth.OAuth2(client_id, client_secret, redirect_uris[0]);
@@ -34,12 +36,14 @@ async function getOAuthClient() {
  * @param {object} req - The Express request object, containing the session.
  * @returns {Promise<object>} A promise that resolves with the authenticated OAuth2 client.
  */
-async function getAuthenticatedClient(req) {
+export async function getAuthenticatedClient(
+  req: Request,
+): Promise<OAuth2Client> {
   const oAuth2Client = await getOAuthClient();
-  let tokens = req.session.tokens;
+  let tokens = (req.session as any).tokens;
 
   if (!tokens) {
-    let config = {};
+    let config: { save_token?: boolean } = {};
     try {
       const configData = await fs.readFile(CONFIG_PATH, "utf-8");
       config = JSON.parse(configData);
@@ -51,7 +55,7 @@ async function getAuthenticatedClient(req) {
       try {
         const tokenData = await fs.readFile(TOKEN_PATH, "utf-8");
         tokens = JSON.parse(tokenData);
-        req.session.tokens = tokens;
+        (req.session as any).tokens = tokens;
         console.log("Loaded token from disk into session.");
       } catch (error) {
         /* ignore */
@@ -73,8 +77,8 @@ async function getAuthenticatedClient(req) {
  * @param {object} req - The Express request object, containing the session.
  * @returns {boolean} True if the user is logged in, false otherwise.
  */
-function isLoggedIn(req) {
-  return req.session && req.session.tokens;
+export function isLoggedIn(req: Request): boolean {
+  return req.session && (req.session as any).tokens;
 }
 
 /**
@@ -83,10 +87,10 @@ function isLoggedIn(req) {
  * @param {string} code - The authorization code.
  * @returns {Promise<void>}
  */
-async function login(req, code) {
+export async function login(req: Request, code: string): Promise<void> {
   const oAuth2Client = await getOAuthClient();
   const { tokens } = await oAuth2Client.getToken(code);
-  req.session.tokens = tokens;
+  (req.session as any).tokens = tokens;
 
   const configData = await fs.readFile(CONFIG_PATH, "utf-8").catch(() => "{}");
   const config = JSON.parse(configData);
@@ -101,9 +105,9 @@ async function login(req, code) {
  * @param {object} req - The Express request object, containing the session.
  * @param {function} callback - A callback function to call after the user is logged out.
  */
-function logout(req, callback) {
-  req.session.destroy(async () => {
-    await fs.unlink(TOKEN_PATH).catch((err) => {
+export function logout(req: Request, callback: () => void): void {
+  req.session.destroy(async (err: any) => {
+    await fs.unlink(TOKEN_PATH).catch((err: any) => {
       if (err.code !== "ENOENT") {
         console.error("Error deleting token file:", err);
       }
@@ -118,7 +122,7 @@ function logout(req, callback) {
  * @param {object} token - The access token to check.
  * @returns {Promise<boolean>} A promise that resolves with true if the token is valid, false otherwise.
  */
-async function isTokenValid(token) {
+export async function isTokenValid(token: Credentials): Promise<boolean> {
   if (!token) {
     return false;
   }
@@ -126,18 +130,10 @@ async function isTokenValid(token) {
     const oAuth2Client = await getOAuthClient();
     oAuth2Client.setCredentials(token);
     // Make a simple API call to check if the token is valid.
+    if (!token.access_token) return false;
     const tokenInfo = await oAuth2Client.getTokenInfo(token.access_token);
     return !!tokenInfo;
   } catch (error) {
     return false;
   }
 }
-
-module.exports = {
-  getOAuthClient,
-  getAuthenticatedClient,
-  isLoggedIn,
-  isTokenValid,
-  login,
-  logout,
-};

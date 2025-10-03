@@ -1,6 +1,6 @@
 {
   "watch": ["src/"],
-  "ext": "js,json",
+  "ext": "ts,json",
   "ignore": ["src/views/", "*.md"],
-  "exec": "node src/webapp.js"
+  "exec": "npm start"
 }

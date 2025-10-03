@@ -1,33 +1,20 @@
-/**
- * @fileoverview This file contains the logic for processing a single photo.
- * It downloads the photo, adds EXIF metadata, and uploads it to Google Drive.
- * @module utils/photo-processor
- */
+import piexif from "piexifjs";
+import { Readable } from "stream";
+import { downloadPhoto } from "../photo-manager";
+import { createFile, updateFile, findFile } from "../drive-manager";
+import { degToDmsRational } from "./photo-utils";
+import { getState, updateState } from "../download-state";
+import { drive_v3 } from "googleapis";
+import { OAuth2Client } from "google-auth-library";
+import { Photo } from "../types";
 
-const piexif = require("piexifjs");
-/**
- * @property {class} Readable - The Readable stream class.
- */
-const { Readable } = require("stream");
-/**
- * @property {function} downloadPhoto - Function to download a photo.
- */
-const { downloadPhoto } = require("../photo-manager");
-/**
- * @property {function} createFile - Function to create a file in Google Drive.
- * @property {function} updateFile - Function to update a file in Google Drive.
- * @property {function} findFile - Function to find a file in Google Drive.
- */
-const { createFile, updateFile, findFile } = require("../drive-manager");
-/**
- * @property {function} degToDmsRational - Function to convert degrees to degrees-minutes-seconds rational format.
- */
-const { degToDmsRational } = require("./photo-utils");
-/**
- * @property {function} getState - Function to get the current download state.
- * @property {function} updateState - Function to update the download state.
- */
-const { getState, updateState } = require("../download-state");
+interface Progress {
+  photoId: string;
+  downloadProgress?: number;
+  uploadProgress?: number;
+  uploadStarted?: boolean;
+  message?: string;
+}
 
 /**
  * Downloads a photo, processes its EXIF data, and uploads it to Google Drive.
@@ -38,13 +25,13 @@ const { getState, updateState } = require("../download-state");
  * @param {function} progressCallback - A function to call with progress updates.
  * @returns {Promise<object|null>} A promise that resolves with the photo and file objects, or null if the download was cancelled.
  */
-async function processPhoto(
-  drive,
-  oAuth2Client,
-  photo,
-  folderId,
-  progressCallback,
-) {
+export async function processPhoto(
+  drive: drive_v3.Drive,
+  oAuth2Client: OAuth2Client,
+  photo: Photo,
+  folderId: string,
+  progressCallback: (progress: Progress) => void,
+): Promise<{ photo: Photo; file: any } | null> {
   let attempts = 0;
   const maxAttempts = 3;
   let jpegData;
@@ -68,55 +55,60 @@ async function processPhoto(
         },
       );
 
-      if (getState().cancelled) {
-        progressCallback({ message: "Download cancelled." });
+      if (getState().global.cancelled) {
+        progressCallback({
+          message: "Download cancelled.",
+          photoId: photo.photoId.id,
+        });
         return null;
       }
 
       jpegData = data.toString("binary");
       const exifObj = piexif.load(jpegData);
-      const lat = photo.pose.latLngPair.latitude;
-      const lng = photo.pose.latLngPair.longitude;
-      const gpsData = {
-        [piexif.GPSIFD.GPSLatitudeRef]: lat < 0 ? "S" : "N",
-        [piexif.GPSIFD.GPSLatitude]: degToDmsRational(Math.abs(lat)),
-        [piexif.GPSIFD.GPSLongitudeRef]: lng < 0 ? "W" : "E",
-        [piexif.GPSIFD.GPSLongitude]: degToDmsRational(Math.abs(lng)),
-      };
+      if (photo.pose) {
+        const lat = photo.pose.latLngPair.latitude;
+        const lng = photo.pose.latLngPair.longitude;
+        const gpsData: any = {
+          [piexif.GPSIFD.GPSLatitudeRef]: lat < 0 ? "S" : "N",
+          [piexif.GPSIFD.GPSLatitude]: degToDmsRational(Math.abs(lat)),
+          [piexif.GPSIFD.GPSLongitudeRef]: lng < 0 ? "W" : "E",
+          [piexif.GPSIFD.GPSLongitude]: degToDmsRational(Math.abs(lng)),
+        };
 
-      if (typeof photo.pose.altitude === "number") {
-        gpsData[piexif.GPSIFD.GPSAltitude] = [
-          Math.round(photo.pose.altitude * 100),
-          100,
-        ];
-        gpsData[piexif.GPSIFD.GPSAltitudeRef] = 0;
-      }
+        if (typeof photo.pose.altitude === "number") {
+          gpsData[piexif.GPSIFD.GPSAltitude] = [
+            Math.round(photo.pose.altitude * 100),
+            100,
+          ];
+          gpsData[piexif.GPSIFD.GPSAltitudeRef] = 0;
+        }
 
-      if (typeof photo.pose.heading === "number") {
-        gpsData[piexif.GPSIFD.GPSImgDirection] = [
-          Math.round(photo.pose.heading * 100),
-          100,
-        ];
-        gpsData[piexif.GPSIFD.GPSImgDirectionRef] = "T";
-      }
+        if (typeof photo.pose.heading === "number") {
+          gpsData[piexif.GPSIFD.GPSImgDirection] = [
+            Math.round(photo.pose.heading * 100),
+            100,
+          ];
+          gpsData[piexif.GPSIFD.GPSImgDirectionRef] = "T";
+        }
 
-      exifObj.GPS = gpsData;
+        exifObj.GPS = gpsData;
 
-      if (
-        typeof photo.pose.pitch === "number" ||
-        typeof photo.pose.roll === "number"
-      ) {
-        exifObj["0th"][piexif.ImageIFD.HostComputer] =
-          `PosePitchDegrees=${photo.pose.pitch || 0}, PoseRollDegrees=${
-            photo.pose.roll || 0
-          }`;
+        if (
+          typeof photo.pose.pitch === "number" ||
+          typeof photo.pose.roll === "number"
+        ) {
+          exifObj["0th"][piexif.ImageIFD.HostComputer] =
+            `PosePitchDegrees=${photo.pose.pitch || 0}, PoseRollDegrees=${
+              photo.pose.roll || 0
+            }`;
+        }
       }
 
       const exifbytes = piexif.dump(exifObj);
       const newData = piexif.insert(exifbytes, jpegData);
       newJpeg = Buffer.from(newData, "binary");
       break; // Success
-    } catch (e) {
+    } catch (e: any) {
       if (e.message.includes("pack") && attempts < maxAttempts) {
         attempts++;
         const message = `Caught piexifjs pack error, retrying... (${attempts}/${maxAttempts})`;
@@ -155,7 +147,7 @@ async function processPhoto(
   if (existingFile) {
     file = await updateFile(
       drive,
-      existingFile.id,
+      existingFile.id as string,
       "image/jpeg",
       stream,
       newJpeg.length,
@@ -185,5 +177,3 @@ async function processPhoto(
 
   return { photo, file };
 }
-
-module.exports = { processPhoto };

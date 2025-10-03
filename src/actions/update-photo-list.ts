@@ -1,44 +1,23 @@
-/**
- * @fileoverview This file contains the logic for updating the list of photos from Google Street View.
- * It fetches the list of photos from the Google Street View Publish API and saves it to a file in Google Drive.
- * @module actions/update-photo-list
- */
-
-/**
- * @property {function} getAuthenticatedClient - Function to get an authenticated OAuth2 client.
- */
-const { getAuthenticatedClient } = require("../oauth");
-/**
- * @property {function} listAllPhotos - Function to list all photos for the authenticated user.
- */
-const { listAllPhotos } = require("../photo-manager");
-/**
- * @property {function} getDriveClient - Function to get the Google Drive API client.
- * @property {function} findOrCreateFolder - Function to find or create a folder in Google Drive.
- * @property {function} getPhotoListFile - Function to get the photo list file from Google Drive.
- * @property {function} writeFileContent - Function to write content to a file in Google Drive.
- * @property {string} FOLDER_NAME - The name of the folder in Google Drive where the photos will be stored.
- * @property {string} PHOTO_LIST_FILE_NAME - The name of the file that stores the list of photos.
- */
-const {
+import { Request } from "express";
+import { WebSocket } from "ws";
+import { getAuthenticatedClient } from "../oauth";
+import { listAllPhotos } from "../photo-manager";
+import {
   getDriveClient,
   findOrCreateFolder,
   getPhotoListFile,
   writeFileContent,
   FOLDER_NAME,
   PHOTO_LIST_FILE_NAME,
-} = require("../drive-manager");
-/**
- * @property {function} updateState - Function to update the download state.
- */
-const { updateState } = require("../download-state");
+} from "../drive-manager";
+import { updateState } from "../download-state";
 
 /**
  * Updates the list of photos from Google Street View and saves it to Google Drive.
  * @param {object} req - The Express request object, containing the session.
  * @param {object} ws - The WebSocket object for sending progress updates.
  */
-async function updatePhotoList(req, ws) {
+export async function updatePhotoList(req: Request, ws: WebSocket) {
   try {
     /**
      * The authenticated OAuth2 client.
@@ -73,7 +52,7 @@ async function updatePhotoList(req, ws) {
      * The file in Google Drive that stores the list of photos.
      * @type {object}
      */
-    let photoListFile = await getPhotoListFile(drive, folderId);
+    let photoListFile = await getPhotoListFile(drive, folderId as string);
 
     /**
      * The list of photos from Google Street View.
@@ -83,12 +62,12 @@ async function updatePhotoList(req, ws) {
 
     // If the photo list file exists, update it. Otherwise, create a new file.
     if (photoListFile) {
-      await writeFileContent(drive, photoListFile.id, photos);
+      await writeFileContent(drive, photoListFile.id as string, photos);
     } else {
       await drive.files.create({
-        resource: {
+        requestBody: {
           name: PHOTO_LIST_FILE_NAME,
-          parents: [folderId],
+          parents: [folderId as string],
         },
         media: {
           mimeType: "application/json",
@@ -97,7 +76,7 @@ async function updatePhotoList(req, ws) {
         fields: "id",
       });
     }
-  } catch (error) {
+  } catch (error: any) {
     // Handle errors
     ws.send(
       JSON.stringify({
@@ -112,5 +91,3 @@ async function updatePhotoList(req, ws) {
     console.error(error);
   }
 }
-
-module.exports = { updatePhotoList };
