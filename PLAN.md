@@ -6,6 +6,92 @@ The current project (`src/webapp.ts`, Express/Node on `localhost:3000`) is a **d
 
 Crucially, the project ships as a **single-user, self-hostable app**. Anyone can fork the repo, run `wrangler deploy` against **their own** Cloudflare account, and get their own 360 hosting site on their own domain, paying their own storage bill. That changes the architecture: no multi-tenancy, no wildcard subdomain routing, no tenant isolation design. The deployer's Google account is the only allowed login, enforced by a config value they set during setup. The existing Express app is deleted at cutover.
 
+## Implementation Stages
+
+Work is sequenced so each stage ends with `wrangler deploy` succeeding against a real Cloudflare account and the listed verification passing. Each stage ships something a self-hoster can use; later stages assume everything before them is live. Detailed architecture for every component below is in "Target Architecture"; file paths are in "Files Changed / Created"; verification scripts are the numbered items under "Verification".
+
+### Stage 1 — Workers skeleton + auth
+
+**Ships:** an authenticated empty dashboard on the custom domain. Deploying a fork already gates access to the configured email.
+
+- `worker/wrangler.toml` with bindings: `META` (DO+SQLite), `PHOTOS` (R2), secrets.
+- `worker/src/index.ts` router shell (`/`, `/auth/*`, `/api/me`, 404 elsewhere).
+- `worker/src/meta-store/do.ts` + `meta-store/migrations.ts` — schema bootstrapped in `blockConcurrencyWhile(initSchema)` on first activation. Only tables needed now: `integrations`.
+- `worker/src/oauth.ts` + `worker/src/session.ts` — Google OAuth over `fetch`, `ALLOWED_GOOGLE_EMAIL` gate, JWT cookies (Web Crypto HMAC).
+- `worker/src/meta-store/client.ts` with just `getIntegration` / `upsertIntegrationTokens`.
+
+**Verifies:** Verification #1 (login with allowed email → `/api/me` returns profile; other account → 403).
+
+### Stage 2 — Upload + viewer
+
+**Ships:** self-hoster uploads a 360 JPG from desktop or phone and views it in the browser. No sync, no publishing.
+
+- Extend `MetaStore` schema: `photos`, `galleries`, `gallery_photos`.
+- `worker/src/r2.ts` (S3-compat presigned PUT + head/get/delete).
+- Routes: `POST /api/photos/presign`, `POST /api/photos/{id}/complete`, gallery CRUD.
+- `worker/workflows/photo-ingest.ts` — `verify-r2`, `extract-metadata`, `thumbnail`, `mark-ready`. Skip the `fan-out-sync` step for now.
+- `worker/src/metadata.ts` (EXIF/XMP via `piexifjs`/`xmp-js`).
+- `app/src/main.ts` (dashboard shell), `app/src/uploader.ts` (presign → PUT), `app/src/viewer.ts` (Three.js, gyro).
+
+**Verifies:** Verification #1 (upload + viewer portion).
+
+### Stage 3 — Publishing
+
+**Ships:** `host.com/{slug}` serves a public, auth-less 360 gallery backed by R2.
+
+- Extend `MetaStore` schema: `publish_log`.
+- `worker/src/publish.ts` + `app/src/gallery-template.ts`.
+- `worker/workflows/publish-gallery.ts` — render manifest/index, copy photos into `public/{slug}/v{N}/`, flip `current`, insert `publish_log`.
+- `GET /{slug}` + `GET /{slug}/*` read-through with immutable cache TTLs; unpublish deletes the prefix.
+
+**Verifies:** Verification #2 (publish, serve from edge, resume on mid-publish kill, no duplicate `publish_log`).
+
+### Stage 4 — Live progress
+
+**Ships:** dashboard streams per-step progress for uploads, ingests, and publishes. Reconnects replay missed events.
+
+- `worker/src/progress-hub-do.ts` — `ProgressHub` DO with `state.acceptWebSocket`, ring buffer (~1 000 events) in DO storage.
+- `app/src/progress.ts` — auto-reconnect, `since=lastSeq` replay.
+- `progress(env, {...})` helper; wrap existing `PhotoIngestWorkflow` and `PublishGalleryWorkflow` steps with start/end events.
+
+**Verifies:** Verification #5 (WS opens; laptop-sleep replay; kill+resume doesn't double-count).
+
+### Stage 5 — Street View sync (+ Google plumbing)
+
+**Ships:** optional two-way Street View Publish mirroring. Brings the rate-limiter and Google `fetch` wrapper in with it — both are reused by Drive in Stage 6.
+
+- Extend `MetaStore` schema: `sync_links`, `sync_jobs`.
+- `worker/src/rate-limiter-do.ts` — `GoogleRateLimiter` per-host token bucket.
+- `worker/src/google-client.ts` — token refresh, `acquire`, `429`/`503` + `Retry-After`, batch helper.
+- Incremental scope grant (`/auth/upgrade?scope=streetviewpublish`); scopes stored in `integrations.scopes`.
+- `worker/src/streetview.ts` (ports `src/photo-manager.ts:23-106`).
+- `worker/workflows/streetview-pull.ts` (+ `StreetViewPullOneWorkflow`), `streetview-push.ts`.
+- Cron Trigger kicks SV pull when scope present; `PhotoIngestWorkflow.fan-out-sync` now starts SV push.
+
+**Verifies:** Verification #3 + #6 (simulated throttling).
+
+### Stage 6 — Drive sync + cross-source dedup
+
+**Ships:** optional two-way Google Drive mirroring; identical bytes arriving from Drive and Street View collapse to one `photos` row with two `sync_links`.
+
+- `worker/src/drive.ts` (ports `src/drive-manager.ts`).
+- `worker/workflows/drive-pull.ts` (+ `DrivePullOneWorkflow`), `drive-push.ts`.
+- `content_hash` dedup path in `DrivePullOneWorkflow.dedup-or-insert`; `PhotoIngestWorkflow.fan-out-sync` gains Drive branch.
+- Cron Trigger extended to fire Drive pull when scope present.
+
+**Verifies:** Verification #4 (Drive pull imports; dedup suppresses re-import from a different source).
+
+### Stage 7 — Cutover & self-host polish
+
+**Ships:** repo is a clean fork-and-deploy. The Express app is gone.
+
+- Delete `src/webapp.ts`, `src/routes/`, `src/views/`, `src/public/`, `src/actions/`, `src/download-state.ts`.
+- Drop root deps: `express`, `express-session`, `memorystore`, `ws`, `ejs`, `googleapis`, `leaflet`, `leaflet.markercluster`, `axios`, `nodemon`, related `@types/*`, `prettier-plugin-ejs`.
+- Finalize `SETUP.md`.
+- Rewrite `README.md` (hosting-first pitch; keep the downloader lineage in a "History" section).
+
+**Verifies:** Verification #7 (clean-account setup run end-to-end) + #8 (logout 401, unpublish 404).
+
 ## Target Architecture
 
 ### Single-user, one deploy = one site
