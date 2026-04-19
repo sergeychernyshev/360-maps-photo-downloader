@@ -89,7 +89,7 @@ erDiagram
     photos ||--o{ sync_jobs : "subject of"
     galleries ||--o{ sync_jobs : "subject of"
     galleries ||--o{ publish_log : "published as"
-    integrations ||..|| photos : "source of (scope-gated)"
+    integrations ||..o{ photos : "source of (scope-gated)"
 
     photos {
       TEXT id PK
@@ -126,8 +126,8 @@ erDiagram
     }
 
     gallery_photos {
-      TEXT gallery_id PK_FK
-      TEXT photo_id PK_FK
+      TEXT gallery_id PK, FK
+      TEXT photo_id PK, FK
       INT sort_order
       TEXT caption
     }
@@ -143,7 +143,7 @@ erDiagram
     }
 
     sync_links {
-      TEXT photo_id PK_FK
+      TEXT photo_id PK, FK
       TEXT target PK "drive|streetview"
       TEXT remote_id
       TEXT status "active|missing|error"
